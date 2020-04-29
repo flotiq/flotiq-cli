@@ -1,0 +1,24 @@
+{
+  "name": "flotiq-cli",
+  "version": "0.0.1",
+  "description": "Flotiq CLI",
+  "main": "index.js",
+  "bin": {
+    "flotiq-cli": "bin/flotiq-cli"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "openapi",
+    "swagger",
+    "oas3"
+  ],
+  "author": "Andrzej WP",
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^3.13.1",
+    "openapi-snippet": "andrzejwp/swagger-snippet#patch-2",
+    "yargs": "^15.3.1"
+  }
+}
