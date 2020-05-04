@@ -2,9 +2,15 @@
 description
 
 ### Setup
-``giy clone git@git.cdwv.pl:cdwv/flotiq-cli.git``
+clone ths repository
+
+``git clone git@git.cdwv.pl:cdwv/flotiq-cli.git``
+
+enter directory
 
 `` cd flotiq-cli``
+
+install dependencies
 
 `` npm install``
 
