@@ -15,9 +15,10 @@ require('yargs')
                 type: 'string',
             })
             .positional('url', {
-                describe: 'Url to Gatbsy starter',
+                describe: 'Url to git repository with Gatbsy starter',
                 type: 'string',
-            })
+            });
+        checkCommands(yargs, 4)
     }, (argv) => {
 
         gatsbySetup.setup(argv.directory, argv.url).then(async () => {
@@ -35,15 +36,25 @@ require('yargs')
             .positional('directory', {
                 describe: 'Directory to create project',
                 type: 'string',
-            })
+            });
+        checkCommands(yargs, 3)
     }, async (argv) => {
+
         let examplesPath = getObjectDataPath(argv.directory);
-        await importer.importer(argv.apiKey, examplesPath)
+        await importer.importer(argv.apiKey, examplesPath);
     })
     .help('$0 start|import [apiKey] [directory] [url]')
-    // .demandCommand(3, 3)
     .argv
 
 function getObjectDataPath(projectDirectory){
      return __dirname + '/../../' + projectDirectory + '/example';
+}
+
+function checkCommands ( yargs, numRequired) {
+    if (yargs.argv._.length < numRequired) {
+        yargs.showHelp();
+        process.exit(1);
+    } else {
+        // check for unknown command
+    }
 }
