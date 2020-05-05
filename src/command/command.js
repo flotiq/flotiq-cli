@@ -2,8 +2,9 @@
 
 const importer = require('../importer/importer');
 const gatsbySetup = require('../gatsby/gatsbySetup');
+const yargs = require('yargs');
 
-require('yargs')
+yargs
     .command('start [apiKey] [directory] [url]', 'Start the project', (yargs) => {
         yargs
             .positional('apiKey', {
@@ -46,11 +47,13 @@ require('yargs')
     .help('$0 start|import [apiKey] [directory] [url]')
     .argv
 
-function getObjectDataPath(projectDirectory){
-     return __dirname + '/../../' + projectDirectory + '/example';
+checkCommands(yargs, 1);
+
+function getObjectDataPath(projectDirectory) {
+    return __dirname + '/../../' + projectDirectory + '/example';
 }
 
-function checkCommands ( yargs, numRequired) {
+function checkCommands(yargs, numRequired) {
     if (yargs.argv._.length < numRequired) {
         yargs.showHelp();
         process.exit(1);
