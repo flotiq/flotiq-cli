@@ -15,7 +15,7 @@ exports.importer = async (apiKey, directoryPath) => {
 
     let contentTypeName = await importContentTypedDefinitions(directoryPath, headers);
     let imageImportData = await importImages(directoryImagePath, headers);
-    await importObjects(directoryPath, imageImportData, headers, contentTypeName);
+    await importContentObjects(directoryPath, imageImportData, headers, contentTypeName);
 
     async function importContentTypedDefinitions(directoryPath, headers) {
         let contentDefinition = require(directoryPath + '/ContentTypeDefinition.json')
@@ -67,7 +67,7 @@ exports.importer = async (apiKey, directoryPath) => {
         return {imageToReplace, imageForReplacing};
     }
 
-    async function importObjects(directoryPath, imageImportData, headers, contentTypeName) {
+    async function importContentObjects(directoryPath, imageImportData, headers, contentTypeName) {
         let files = fs.readdirSync(directoryPath)
         await Promise.all(files.map(async function (file) {
             if (file.indexOf('contentObject') === 0) {
