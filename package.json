@@ -2,7 +2,7 @@
   "name": "flotiq-cli",
   "version": "0.0.1",
   "description": "Flotiq CLI",
-  "main": "index.js",
+  "main": "src/command/command.js",
   "bin": {
     "flotiq-cli": "bin/flotiq-cli"
   },
