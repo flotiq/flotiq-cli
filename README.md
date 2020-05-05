@@ -1,7 +1,7 @@
 ### Flotiqu CLI starter
 CLI application who allowed fast starting Gatsby project with Flotiq integration.
 The application imports Flotiq contentTypes and objects from Gatsby starter to yur Flotiq account using apy key.
-Gatsby starter bust include directory examples with  ContentTypeDefinition.json file, and contentObject[0-1].json files.
+Gatsby starter bust include directory examples with  ContentTypeDefinition.json file, and contentObject[0-9].json files.
 Number of end file, define file import order.
 Directory example/images stored images required by contentObject.
 
