@@ -22,10 +22,10 @@ install dependencies
 ### Usage
 Run:
 
-``` node index.json start [apiKey] [projectName] [flotiqSterterUrl]```
+``` node bin/flotiq-cli start [apiKey] [projectName] [flotiqSterterUrl]```
 
 Or for load examples:
  
-``` node index.json import [apiKey] [projectName]```
+``` node bin/flotiq-cli import [apiKey] [projectName]```
 
 ### Gatsby 
