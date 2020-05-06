@@ -19,7 +19,7 @@ exports.setup = async (projectDirectory, starterUrl) => {
                 }
                 resolve(stdout ? stdout : stderr);
             });
-
+            // live output from gatsby
             commandProcess.stdout.on('data', function (data) {
                 console.log('\x1b[36m%s\x1b[0m', data);
 
