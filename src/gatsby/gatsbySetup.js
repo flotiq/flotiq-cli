@@ -6,7 +6,15 @@ exports.setup = async (projectDirectory, starterUrl) => {
     await runGatsbyProcess(projectDirectory, starterUrl);
 
     function runGatsbyProcess(projectDirectory) {
-        let cmd = config.gatsbyCli + ' new ' + projectDirectory + ' ' + starterUrl;
+        console.log(process.platform);
+        let p = config.gatsbyCli;
+        if (process.platform === 'win32') {
+            console.log('replac');
+            p = p.replace("/.//gi", "");
+            p = p.replace("///gi", "\\");
+        }
+        console.log(p);
+        let cmd = p + ' new ' + projectDirectory + ' ' + starterUrl;
         return execShellCommand(cmd);
     }
 
