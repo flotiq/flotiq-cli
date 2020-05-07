@@ -8,7 +8,7 @@ exports.setup = async (projectDirectory, starterUrl) => {
 
     function runGatsbyProcess(projectDirectory) {
 
-        let cmd = config.gatsbyCli;
+        let cmd = __dirname +'/../../'+ config.gatsbyCli;
         if (process.platform === 'win32') {
 
             cmd = cmd.replace("/.//gi", "");
