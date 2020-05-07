@@ -2,19 +2,19 @@ const exec = require('child_process').exec;
 const config = require('../configuration/config');
 
 exports.setup = async (projectDirectory, starterUrl) => {
-    console.log('gatsby setup');
+    console.log('Gatsby setup');
     await runGatsbyProcess(projectDirectory, starterUrl);
 
     function runGatsbyProcess(projectDirectory) {
-        console.log(process.platform);
-        let p = config.gatsbyCli;
+
+        let cmd = config.gatsbyCli;
         if (process.platform === 'win32') {
-            console.log('replac');
-            p = p.replace("/.//gi", "");
-            p = p.replace("///gi", "\\");
+
+            cmd = cmd.replace("/.//gi", "");
+            cmd = cmd.replace("///gi", "\\");
         }
-        console.log(p);
-        let cmd = p + ' new ' + projectDirectory + ' ' + starterUrl;
+
+        cmd = cmd + ' new ' + projectDirectory + ' ' + starterUrl;
         return execShellCommand(cmd);
     }
 
@@ -30,7 +30,6 @@ exports.setup = async (projectDirectory, starterUrl) => {
             // live output from gatsby
             commandProcess.stdout.on('data', function (data) {
                 console.log('\x1b[36m%s\x1b[0m', data);
-
             });
         });
     }
