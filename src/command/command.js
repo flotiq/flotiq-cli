@@ -26,10 +26,12 @@ yargs
             let examplesPath = getObjectDataPath(argv.directory);
             await importer.importer(argv.apiKey, examplesPath);
             await gatsbySetup.init(argv.directory, argv.apiKey);
+            await gatsbySetup.init(argv.directory, argv.apiKey);
+            await gatsbySetup.develop(argv.directory);
         });
 
     })
-    .command('import [apiKey] [directory]', 'Import objects from directory to flotiq', (yargs) => {
+    .command('import [apiKey] [directory]', 'Import objects from directory to Flotiq', (yargs) => {
         yargs
             .positional('apiKey', {
                 describe: 'Flotiq RO api key',
@@ -48,7 +50,7 @@ yargs
         await gatsbySetup.develop(argv.directory);
     })
     .help('$0 start|import [apiKey] [directory] [url]')
-    .argv
+    .argv;
 
 checkCommands(yargs, 1);
 
