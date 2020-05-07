@@ -50,7 +50,7 @@ yargs
 checkCommands(yargs, 1);
 
 function getObjectDataPath(projectDirectory) {
-    return __dirname + '/../../' + projectDirectory + '/example';
+    return __dirname + '/../../' + projectDirectory + '/.flotiq';
 }
 
 function checkCommands(yargs, numRequired) {

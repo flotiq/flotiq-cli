@@ -12,11 +12,18 @@ exports.importer = async (apiKey, directoryPath) => {
     console.log('Importing contents to Flotiq');
     const directoryImagePath = path.join(directoryPath, 'images');
     headers['X-AUTH-TOKEN'] = apiKey;
-
-    let contentTypeName = await importContentTypedDefinitions(directoryPath, headers);
     let imageImportData = await importImages(directoryImagePath, headers);
     console.log(imageImportData);
-    await importContentObjects(directoryPath, imageImportData, contentTypeName, headers, );
+
+    let directories = fs.readdirSync(directoryPath)
+    for (let i = 0; i < directories.length; i++) {
+        const directory = directories[i];
+        if(directory.indexOf(`ContentType`) === 0) {
+            let contentTypeName = await importContentTypedDefinitions(path.join(directoryPath,directory), headers);
+
+            await importContentObjects(path.join(directoryPath, directory), imageImportData, contentTypeName, headers);
+        }
+    }
 
     async function importContentTypedDefinitions(directoryPath, headers) {
         let contentDefinition = require(directoryPath + '/ContentTypeDefinition.json');
@@ -35,15 +42,16 @@ exports.importer = async (apiKey, directoryPath) => {
      */
     async function importImages(directoryImagePath, headers) {
         let imageToReplace = [];
-        let imageForReplacing = [];
+        let imageForReplacing = {};
         if (fs.existsSync(directoryImagePath)) {
             let files = fs.readdirSync(directoryImagePath);
             await Promise.all(files.map(async function (file) {
-                imageToReplace.push(file.replace('.jpg', ''));
+                const fileId = file.replace('.jpg', '');
+                imageToReplace.push(fileId);
                 let image = await fetch(config.apiUrl + '/api/v1/content/_media?filters={"fileName":{"filter":"' + file + '","type":"contains"}}', {headers: headers});
                 image = await image.json();
                 if (image.count) {
-                    imageForReplacing.push(image.data[0].id)
+                    imageForReplacing[fileId] = image.data[0].id
                 } else {
                     const form = new FormData();
                     form.append('file', fs.createReadStream(directoryImagePath + '/' + file), file);
@@ -59,8 +67,8 @@ exports.importer = async (apiKey, directoryPath) => {
                         headers: {...headers, 'Content-Type': 'application/json'},
                     });
 
-                    resultNotify(result, 'Image', contentObject.name);
-                    imageForReplacing.push(contentObject.fileName);
+                    resultNotify(result, 'Image', contentObject.id);
+                    imageForReplacing[fileId] = contentObject.id
                 }
             }))
         }
@@ -87,8 +95,10 @@ exports.importer = async (apiKey, directoryPath) => {
                     url += '/' + contentObject.id
                 }
                 let contentObjectString = JSON.stringify(contentObject);
-                imageImportData.imageToReplace.forEach((image, index) => {
-                    contentObjectString = contentObjectString.replace(image, imageImportData.imageForReplacing[index])
+                imageImportData.imageToReplace.forEach((image) => {
+                    //ensure that every occurrence of image is replaced, as the same image can be used in main image and gallery for example
+                    const regex = new RegExp(image, 'g')
+                    contentObjectString = contentObjectString.replace(regex, imageImportData.imageForReplacing[image])
                 });
 console.log(method);
                 let result = await fetch(url, {
