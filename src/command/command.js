@@ -24,7 +24,8 @@ yargs
 
         gatsbySetup.setup(argv.directory, argv.url).then(async () => {
             let examplesPath = getObjectDataPath(argv.directory);
-            await importer.importer(argv.apiKey, examplesPath)
+            await importer.importer(argv.apiKey, examplesPath);
+            await gatsbySetup.init(argv.directory, argv.apiKey);
         });
 
     })
@@ -43,6 +44,7 @@ yargs
 
         let examplesPath = getObjectDataPath(argv.directory);
         await importer.importer(argv.apiKey, examplesPath);
+        await gatsbySetup.init(argv.directory, argv.apiKey);
     })
     .help('$0 start|import [apiKey] [directory] [url]')
     .argv

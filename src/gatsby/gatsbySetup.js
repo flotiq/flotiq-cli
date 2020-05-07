@@ -1,5 +1,6 @@
 const exec = require('child_process').exec;
 const config = require('../configuration/config');
+const fs = require('fs');
 
 exports.setup = async (projectDirectory, starterUrl) => {
     console.log('Gatsby setup');
@@ -33,4 +34,14 @@ exports.setup = async (projectDirectory, starterUrl) => {
             });
         });
     }
+}
+
+exports.init = async (projectDirectory, apiKey) => {
+    let fileContent = 'GATSBY_FLOTIQ_BASE_URL='+ config.apiUrl+'\n' +
+        'FLOTIQ_API_KEY=' + apiKey+ '\n' +
+        'SNIPCART_API_KEY=YOUR SNIPCART PUBLIC API KEY'
+    fs.writeFile(projectDirectory + '/.env', fileContent, (err) => {
+        if (err) throw err;
+        console.log('Configuration is created successfully: '  + projectDirectory + '/.env')
+    });
 }
