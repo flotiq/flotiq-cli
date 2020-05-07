@@ -13,7 +13,6 @@ exports.importer = async (apiKey, directoryPath) => {
     const directoryImagePath = path.join(directoryPath, 'images');
     headers['X-AUTH-TOKEN'] = apiKey;
     let imageImportData = await importImages(directoryImagePath, headers);
-    console.log(imageImportData);
 
     let directories = fs.readdirSync(directoryPath)
     for (let i = 0; i < directories.length; i++) {
@@ -77,7 +76,6 @@ exports.importer = async (apiKey, directoryPath) => {
     }
 
     async function importContentObjects(directoryPath, imageImportData, contentTypeName, headers) {
-        console.log('ctdn:', contentTypeName);
         let files = fs.readdirSync(directoryPath);
         await Promise.all(files.map(async function (file) {
             if (file.indexOf('contentObject') === 0) {
@@ -100,7 +98,7 @@ exports.importer = async (apiKey, directoryPath) => {
                     const regex = new RegExp(image, 'g')
                     contentObjectString = contentObjectString.replace(regex, imageImportData.imageForReplacing[image])
                 });
-console.log(method);
+
                 let result = await fetch(url, {
                     method: method,
                     body: contentObjectString,
@@ -117,11 +115,11 @@ console.log(method);
             console.log(response.json().then((data) => {
                 console.log(data);
             }));
-            console.log('\x1b[43m' + context + ' : "' + name + '" existing, trying use it.');
+            console.log(context + ' : "' + name + '" existing, trying use it.');
         } else if (response.status === 200) {
-            console.log('\x1b[42m' + context + ' : "' + name + '" added');
+            console.log(context + ' : "' + name + '" added');
         } else {
-            console.log('\x1b[41m' + context + ' : "' + name + '" has not been added: ' + response.statusText);
+            console.log(context + ' : "' + name + '" has not been added: ' + response.statusText);
             process.exit(1);
         }
     }
