@@ -2,6 +2,7 @@
 
 const importer = require('../importer/importer');
 const gatsbySetup = require('../gatsby/gatsbySetup');
+const inquirer = require("inquirer");
 const yargs = require('yargs');
 
 yargs
@@ -21,14 +22,7 @@ yargs
             });
         checkCommands(yargs, 4)
     }, (argv) => {
-
-        gatsbySetup.setup(argv.directory, argv.url).then(async () => {
-            let examplesPath = getObjectDataPath(argv.directory);
-            await importer.importer(argv.apiKey, examplesPath);
-            await gatsbySetup.init(argv.directory, argv.apiKey);
-            await gatsbySetup.develop(argv.directory);
-        });
-
+        start(argv.apiKey, argv.directory, argv.url);
     })
     .command('import [apiKey] [directory]', 'Import objects from directory to Flotiq', (yargs) => {
         yargs
@@ -45,8 +39,6 @@ yargs
 
         let examplesPath = getObjectDataPath(argv.directory);
         await importer.importer(argv.apiKey, examplesPath);
-        await gatsbySetup.init(argv.directory, argv.apiKey);
-        await gatsbySetup.develop(argv.directory);
     })
     .help('$0 start|import [apiKey] [directory] [url]')
     .argv;
@@ -57,11 +49,55 @@ function getObjectDataPath(projectDirectory) {
     return projectDirectory + '/.flotiq';
 }
 
-function checkCommands(yargs, numRequired) {
-    if (yargs.argv._.length < numRequired) {
+async function checkCommands(yargs, numRequired) {
+    if (yargs.argv._.length < numRequired && yargs.argv._.length > 1) {
+        yargs.showHelp();
+        console.log('tu');
+        process.exit(1);
+    } else if(yargs.argv._.length === 0) {
+
+        const answers = await askQuestions();
+        const { apiKey, projectDirectory, url } = answers;
+
+        start(apiKey, projectDirectory, url)
+
+    } else if(yargs.argv._.length === 4) {
+        // ok
+    }
+    else {
+        console.log('ee');
         yargs.showHelp();
         process.exit(1);
-    } else {
-        // check for unknown command
     }
+}
+
+async function askQuestions() {
+    const questions = [
+        {
+            name: "apiKey",
+            type: "input",
+            message: "Flotiq api key:"
+        },
+        {
+            name: "projectDirectory",
+            type: "input",
+            message: "Project directory path:"
+        },
+        {
+            name: "url",
+            type: "input",
+            message: "Gatsby starter repository url:"
+        },
+
+    ];
+    return inquirer.prompt(questions);
+}
+
+function start(apiKey, directory, url) {
+    gatsbySetup.setup(directory, url).then(async () => {
+        let path = getObjectDataPath(directory);
+        await importer.importer(apiKey, path);
+        await gatsbySetup.init(directory, apiKey);
+        await gatsbySetup.develop(directory);
+    });
 }
