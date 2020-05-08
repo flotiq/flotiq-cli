@@ -52,7 +52,6 @@ function getObjectDataPath(projectDirectory) {
 async function checkCommands(yargs, numRequired) {
     if (yargs.argv._.length < numRequired && yargs.argv._.length > 1) {
         yargs.showHelp();
-        console.log('tu');
         process.exit(1);
     } else if(yargs.argv._.length === 0) {
 
@@ -61,11 +60,9 @@ async function checkCommands(yargs, numRequired) {
 
         start(apiKey, projectDirectory, url)
 
-    } else if(yargs.argv._.length === 4) {
+    } else if(yargs.argv._.length === 4 || yargs.argv._.length === 3) {
         // ok
-    }
-    else {
-        console.log('ee');
+    } else {
         yargs.showHelp();
         process.exit(1);
     }
