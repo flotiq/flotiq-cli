@@ -9,7 +9,7 @@ let headers = {
 };
 
 exports.importer = async (apiKey, directoryPath) => {
-    directoryPath = path.normalize(directoryPath);
+    directoryPath = path.resolve(directoryPath);
     console.log('Importing contents to Flotiq');
     const directoryImagePath = path.join(directoryPath, 'images');
     headers['X-AUTH-TOKEN'] = apiKey;
