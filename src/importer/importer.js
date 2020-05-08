@@ -19,15 +19,15 @@ exports.importer = async (apiKey, directoryPath) => {
 
     for (let i = 0; i < directories.length; i++) {
         const directory = directories[i];
-        if(directory.indexOf(`ContentType`) === 0) {
-            let contentTypeName = await importContentTypedDefinitions(path.join(directoryPath,directory), headers);
+        if (directory.indexOf(`ContentType`) === 0) {
+            let contentTypeName = await importContentTypedDefinitions(path.join(directoryPath, directory), headers);
 
             await importContentObjects(path.join(directoryPath, directory), imageImportData, contentTypeName, headers);
         }
     }
 
     async function importContentTypedDefinitions(directoryPath, headers) {
-        let contentDefinition = require(directoryPath + '/ContentTypeDefinition.json');
+        let contentDefinition = require(path.resolve(directoryPath, 'ContentTypeDefinition.json'));
         let result = await fetch(config.apiUrl + '/api/v1/internal/contenttype', {
             method: 'POST',
             body: JSON.stringify(contentDefinition),
@@ -55,7 +55,7 @@ exports.importer = async (apiKey, directoryPath) => {
                     imageForReplacing[fileId] = image.data[0].id
                 } else {
                     const form = new FormData();
-                    form.append('file', fs.createReadStream(directoryImagePath + '/' + file), file);
+                    form.append('file', fs.createReadStream(path.resolve(directoryImagePath, file)), file);
                     form.append('type', 'image');
                     let contentObject = await fetch(config.apiUrl + '/api/media', {
                         method: 'POST',
@@ -81,7 +81,7 @@ exports.importer = async (apiKey, directoryPath) => {
         let files = fs.readdirSync(directoryPath);
         await Promise.all(files.map(async function (file) {
             if (file.indexOf('contentObject') === 0) {
-                let contentObject = require(directoryPath + '/' + file);
+                let contentObject = require(path.resolve(directoryPath, file));
                 let response = await fetch(
                     config.apiUrl + '/api/v1/content/' + contentTypeName + '/' + contentObject.id,
                     {method: 'HEAD', headers: headers}
