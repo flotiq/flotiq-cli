@@ -4,6 +4,6 @@ let settings = {
 }
 // let settings = {
 //     apiUrl: 'http://localhost:8069',
-//     gatsbyCli: 'node node_modules/.bin/gatsby'
+//     gatsbyCli: './node_modules/.bin/gatsby'
 // }
 module.exports = settings;

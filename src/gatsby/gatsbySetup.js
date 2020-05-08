@@ -9,12 +9,22 @@ exports.setup = async (projectDirectory, starterUrl) => {
 }
 
 exports.init = async (projectDirectory, apiKey) => {
-    let fileContent = 'GATSBY_FLOTIQ_BASE_URL=' + config.apiUrl + '\n' +
-        'FLOTIQ_API_KEY=' + apiKey + '\n';
-    fs.writeFile(projectDirectory + '/.env', fileContent, (err) => {
-        if (err) throw err;
-        console.log('Configuration is created successfully: ' + projectDirectory + '/.env')
-    });
+    try {
+        let configPath =  projectDirectory + '/.env';
+        fs.copyFileSync(projectDirectory + '/.flotiq/.env.dist', configPath);
+        let file = fs.readFileSync(configPath);
+        file.replace('GATSBY_FLOTIQ_BASE_URL=', 'GATSBY_FLOTIQ_BASE_URL=' + config.apiUrl);
+        file.replace('FLOTIQ_API_KEY=', 'FLOTIQ_API_KEY=' + apiKey);
+        fs.writeFileSync(configPath, file);
+    } catch (e) {
+        let fileContent = 'GATSBY_FLOTIQ_BASE_URL=' + config.apiUrl + '\n' +
+            'FLOTIQ_API_KEY=' + apiKey + '\n';
+        fs.writeFile(projectDirectory + '/.env', fileContent, (err) => {
+            if (err) throw err;
+
+        });
+    }
+    console.log('Configuration is created successfully: ' + projectDirectory + '/.env');
 }
 
 exports.develop = async (projectDirectory) => {
