@@ -23,9 +23,9 @@ yargs
     }, async (argv) => {
         if (yargs.argv._.length < 4) {
             const answers = await askStartQuestions();
-            const { apiKey, projectDirectory, url } = answers;
+            const {apiKey, projectDirectory, url} = answers;
             start(apiKey, projectDirectory, url)
-        } else if(yargs.argv._.length  === 4) {
+        } else if (yargs.argv._.length === 4) {
             start(argv.apiKey, argv.directory, argv.url)
         } else {
             yargs.showHelp();
@@ -46,7 +46,7 @@ yargs
 
         if (yargs.argv._.length < 3) {
             const answers = await askImportQuestions();
-            const { apiKey, projectDirectory } = answers;
+            const {apiKey, projectDirectory} = answers;
 
             let directory = getObjectDataPath(projectDirectory);
             await importer.importer(apiKey, directory);
@@ -95,6 +95,7 @@ async function askStartQuestions() {
     ];
     return inquirer.prompt(questions);
 }
+
 async function askImportQuestions() {
     const questions = [
         {

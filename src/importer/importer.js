@@ -19,8 +19,8 @@ exports.importer = async (apiKey, directoryPath) => {
 
     for (let i = 0; i < directories.length; i++) {
         const directory = directories[i];
-        if(directory.indexOf(`ContentType`) === 0) {
-            let contentTypeName = await importContentTypedDefinitions(path.join(directoryPath,directory), headers);
+        if (directory.indexOf(`ContentType`) === 0) {
+            let contentTypeName = await importContentTypedDefinitions(path.join(directoryPath, directory), headers);
 
             await importContentObjects(path.join(directoryPath, directory), imageImportData, contentTypeName, headers);
         }
