@@ -1,6 +1,6 @@
 {
   "name": "flotiq-cli",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "description": "Flotiq CLI",
   "main": "src/command/command.js",
   "bin": {
@@ -13,7 +13,7 @@
     "flotiq",
     "gatsby"
   ],
-  "author": "Codewave",
+  "author": "Flotiq team <hello@flotiq.com>",
   "license": "MIT",
   "dependencies": {
     "form-data": "^3.0.0",
