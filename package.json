@@ -1,10 +1,10 @@
 {
   "name": "flotiq-cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Flotiq CLI",
   "main": "src/command/command.js",
   "bin": {
-    "flotiq-cli": "bin/flotiq-cli"
+    "flotiq": "bin/flotiq"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,8 +17,8 @@
   "license": "MIT",
   "dependencies": {
     "form-data": "^3.0.0",
-    "gatsby-cli": "^2.12.5",
-    "inquirer": "^7.1.0",
+    "gatsby-cli": "^2.12.45",
+    "inquirer": "^7.2.0",
     "node-fetch": "^2.6.0",
     "yargs": "^15.3.1"
   }
