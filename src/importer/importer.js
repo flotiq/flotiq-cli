@@ -47,7 +47,8 @@ exports.importer = async (apiKey, directoryPath) => {
         if (fs.existsSync(directoryImagePath)) {
             let files = fs.readdirSync(directoryImagePath);
             await Promise.all(files.map(async function (file) {
-                const fileId = file.replace('.jpg', '');
+                let fileId = file.replace('.jpg', '');
+                fileId = fileId.replace('.png', '');
                 imageToReplace.push(fileId);
                 let image = await fetch(config.apiUrl + '/api/v1/content/_media?filters={"fileName":{"filter":"' + file + '","type":"contains"}}', {headers: headers});
                 image = await image.json();
