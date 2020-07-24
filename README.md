@@ -51,7 +51,7 @@ or in development:
 
 `apiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
-`flotiqStartUrl` - full link to GatsbyJs starter, the list below
+`flotiqStarterUrl` - full link to GatsbyJs starter, the list below
 
 ## Gatsby Starters
 
