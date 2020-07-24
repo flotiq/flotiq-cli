@@ -18,7 +18,7 @@ The number at the end of the directory or file name, define file import order. `
 
 Clone this repository:
 
-`git clone git@git.cdwv.pl:cdwv/flotiq-cli.git`
+`git clone https://github.com/flotiq/flotiq-cli.git`
 
 Enter the directory:
 
