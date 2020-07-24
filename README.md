@@ -47,12 +47,16 @@ or in development:
 
 ` node bin/flotiq import [apiKey] [projectName]`
 
+### Import data from Wordpress to Flotiq
+
+`flotiq wordpress-import [apiKey] [wordpressUrl]`
+
 ### Parameters
 
 `apiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
 `flotiqStarterUrl` - full link to GatsbyJs starter, the list below
-
+`wordpressUrl` - full link to WordPress site from which you wish to migrate content to Flotiq
 ## Gatsby Starters
 
 You can choose one of our starters:

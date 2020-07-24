@@ -65,7 +65,7 @@ yargs
             process.exit(1);
         }
     })
-    .command('wordpress-import [apiKey] [wordpressUrl]', 'Import wordpress to Flotiq', (yargs) => {
+    .command('wordpress-import [apiKey] [wordpressUrl]', 'Import WordPress to Flotiq', (yargs) => {
         yargs
             .positional('apiKey', {
                 describe: 'Flotiq Full access API key',
