@@ -4,12 +4,19 @@ const importer = require('../importer/importer');
 const gatsbySetup = require('../gatsby/gatsbySetup');
 const inquirer = require("inquirer");
 const yargs = require('yargs');
+const content_type_definitions = require('../wordpress-importer/content-type-definitions');
+const author = require('../wordpress-importer/author');
+const category = require('../wordpress-importer/category');
+const tag = require('../wordpress-importer/tag');
+const post = require('../wordpress-importer/post');
+const page = require('../wordpress-importer/page');
+const media = require('../wordpress-importer/media');
 
 yargs
     .command('start [apiKey] [directory] [url]', 'Start the project', (yargs) => {
         yargs
             .positional('apiKey', {
-                describe: 'Flotiq RO api key',
+                describe: 'Flotiq Read only api key',
                 type: 'string',
             })
             .positional('directory', {
@@ -35,7 +42,7 @@ yargs
     .command('import [apiKey] [directory]', 'Import objects from directory to Flotiq', (yargs) => {
         yargs
             .positional('apiKey', {
-                describe: 'Flotiq RO api key',
+                describe: 'Flotiq Full access api key',
                 type: 'string',
             })
             .positional('directory', {
@@ -61,7 +68,7 @@ yargs
     .command('wordpress-import [apiKey] [wordpressUrl]', 'Import wordpress to Flotiq', (yargs) => {
         yargs
             .positional('apiKey', {
-                describe: 'Flotiq RW API key',
+                describe: 'Flotiq Full access API key',
                 type: 'string',
             })
             .positional('wordpressUrl', {
@@ -164,7 +171,7 @@ function wordpressStart(apiKey, wordpressUrl) {
                     media.importer(apiKey, wordpressUrl).then(async (mediaArray) => {
                         await post.importer(apiKey, wordpressUrl, mediaArray);
                         await page.importer(apiKey, wordpressUrl, mediaArray);
-                        console.log('Finished');
+                        console.log('Finished importing data from Wordpress to Flotiq');
                     })
                 })
             })
@@ -175,8 +182,12 @@ function wordpressStart(apiKey, wordpressUrl) {
 function start(apiKey, directory, url) {
     gatsbySetup.setup(directory, url).then(async () => {
         let path = getObjectDataPath(directory);
+        console.log('Importing example Content Objects')
         await importer.importer(apiKey, path);
+        console.log('Initializing flotiq project')
         await gatsbySetup.init(directory, apiKey);
+        console.log('Developing Gatsby-Flotiq project')
         await gatsbySetup.develop(directory);
+
     });
 }

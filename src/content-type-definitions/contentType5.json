@@ -1,0 +1,137 @@
+{
+  "name": "wp_page",
+  "label": "WP Page",
+  "schemaDefinition": {
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/components/schemas/AbstractContentTypeSchemaDefinition"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "author": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataSource"
+            },
+            "minItems": 0
+          },
+          "status": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "created": {
+            "type": "string"
+          },
+          "modified": {
+            "type": "string"
+          },
+          "parentPage": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataSource"
+            },
+            "minItems": 0
+          },
+          "featuredMedia": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataSource"
+            },
+            "minItems": 0
+          }
+        }
+      }
+    ],
+    "required": [
+      "title",
+      "slug"
+    ],
+    "additionalProperties": false
+  },
+  "metaDefinition": {
+    "order": [
+      "title",
+      "slug",
+      "status",
+      "content",
+      "created",
+      "modified",
+      "author",
+      "parentPage",
+      "featuredMedia"
+    ],
+    "propertiesConfig": {
+      "slug": {
+        "unique": true,
+        "helpText": "",
+        "inputType": "text"
+      },
+      "title": {
+        "unique": false,
+        "helpText": "",
+        "inputType": "text",
+        "isTitlePart": true
+      },
+      "author": {
+        "unique": false,
+        "helpText": "",
+        "inputType": "datasource",
+        "validation": {
+          "relationContenttype": "wp_author"
+        }
+      },
+      "status": {
+        "unique": false,
+        "options": [
+          "draft",
+          "publish"
+        ],
+        "helpText": "",
+        "inputType": "select"
+      },
+      "content": {
+        "unique": false,
+        "helpText": "",
+        "inputType": "richtext"
+      },
+      "created": {
+        "unique": false,
+        "helpText": "",
+        "inputType": "text"
+      },
+      "modified": {
+        "unique": false,
+        "helpText": "",
+        "inputType": "text"
+      },
+      "parentPage": {
+        "unique": false,
+        "helpText": "",
+        "inputType": "datasource",
+        "validation": {
+          "relationContenttype": "wp_page"
+        }
+      },
+      "featuredMedia": {
+        "unique": false,
+        "helpText": "",
+        "inputType": "datasource",
+        "validation": {
+          "relationContenttype": "_media"
+        }
+      }
+    }
+  }
+}
