@@ -58,7 +58,29 @@ yargs
             process.exit(1);
         }
     })
-    .help('$0 start|import [apiKey] [directory] [url]')
+    .command('wordpress-import [apiKey] [wordpressUrl]', 'Import wordpress to Flotiq', (yargs) => {
+        yargs
+            .positional('apiKey', {
+                describe: 'Flotiq RW API key',
+                type: 'string',
+            })
+            .positional('wordpressUrl', {
+                describe: 'Url to wordpress project',
+                type: 'string',
+            });
+    }, async (argv) => {
+        if (yargs.argv._.length < 3) {
+            const answers = await askWordpressImportQuestions();
+            const {apiKey, wordpressUrl} = answers;
+            wordpressStart(apiKey, wordpressUrl)
+        } else if (yargs.argv._.length === 3) {
+            wordpressStart(argv.apiKey, argv.wordpressUrl)
+        } else {
+            yargs.showHelp();
+            process.exit(1);
+        }
+    })
+    .help('start|import [apiKey] [directory] [url]')
     .argv;
 
 checkCommand(yargs, 0);
@@ -111,6 +133,43 @@ async function askImportQuestions() {
 
     ];
     return inquirer.prompt(questions);
+}
+
+async function askWordpressImportQuestions() {
+    const questions = [
+        {
+            name: "apiKey",
+            type: "input",
+            message: "Flotiq api key:"
+        },
+        {
+            name: "wordpressUrl",
+            type: "input",
+            message: "Url to wordpress project:"
+        },
+
+    ];
+    return inquirer.prompt(questions);
+}
+
+
+function wordpressStart(apiKey, wordpressUrl) {
+    if(wordpressUrl.charAt(wordpressUrl.length-1) !== '/') {
+        wordpressUrl+='/';
+    }
+    content_type_definitions.importer(apiKey).then(async () => {
+        author.importer(apiKey, wordpressUrl).then(async () => {
+            tag.importer(apiKey, wordpressUrl).then(async () => {
+                category.importer(apiKey, wordpressUrl).then(async () => {
+                    media.importer(apiKey, wordpressUrl).then(async (mediaArray) => {
+                        await post.importer(apiKey, wordpressUrl, mediaArray);
+                        await page.importer(apiKey, wordpressUrl, mediaArray);
+                        console.log('Finished');
+                    })
+                })
+            })
+        })
+    });
 }
 
 function start(apiKey, directory, url) {
