@@ -33,11 +33,11 @@ Install dependencies:
 
 ### Start project
 
-`flotiq start [apiKey] [projectName] [flotiqSterterUrl]`
+`flotiq start [apiKey] [projectName] [flotiqStarterUrl]`
 
 or in development:
 
-` node bin/flotiq start [apiKey] [projectName] [flotiqSterterUrl]`
+` node bin/flotiq start [apiKey] [projectName] [flotiqStarterUrl]`
 
 ### Load examples
 
