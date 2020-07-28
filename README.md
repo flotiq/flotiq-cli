@@ -37,7 +37,7 @@ Install dependencies:
 
 or in development:
 
-` node bin/flotiq start [flotiqApiKey] [projectName] [flotiqStarterUrl]`
+`node bin/flotiq start [flotiqApiKey] [projectName] [flotiqStarterUrl]`
 
 
 ### Load examples
@@ -46,11 +46,15 @@ or in development:
 
 or in development:
 
-` node bin/flotiq import [flotiqApiKey] [projectName]`
+`node bin/flotiq import [flotiqApiKey] [projectName]`
 
 ### Import data from Wordpress to Flotiq
 
 `flotiq wordpress-import [flotiqApiKey] [wordpressUrl]`
+
+or in development:
+
+`node bin/flotiq wordpress-import [flotiqApiKey] [wordpressUrl]`
 
 ### Parameters
 
