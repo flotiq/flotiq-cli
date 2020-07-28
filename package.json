@@ -1,14 +1,13 @@
 {
   "name": "flotiq-cli",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Flotiq CLI",
   "main": "src/command/command.js",
   "bin": {
     "flotiq": "bin/flotiq"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "wordpress-import": "flotiq-wordpress-import import"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "flotiq",

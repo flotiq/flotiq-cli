@@ -4,7 +4,7 @@ const importer = require('../importer/importer');
 const gatsbySetup = require('../gatsby/gatsbySetup');
 const inquirer = require("inquirer");
 const yargs = require('yargs');
-
+const wordpressStart = require('flotiq-wordpress-import').start
 yargs
     .command('start [flotiqApiKey] [directory] [url]', 'Start the project', (yargs) => {
         yargs
@@ -151,23 +151,6 @@ async function askWordPressImportQuestions() {
 
     ];
     return inquirer.prompt(questions);
-}
-
-function wordpressStart(flotiqApiKey, wordpressUrl) {
-    if (wordpressUrl.charAt(wordpressUrl.length - 1) !== '/') {
-        wordpressUrl += '/';
-    }
-
-const exec = require("child_process").exec;
-const wordpressImport = 
-exec(`flotiq-wordpress-import import ${flotiqApiKey} ${wordpressUrl}`, (error) => {
-    if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-    }
-});
-    wordpressImport.stdout.pipe(process.stdout);
-
 }
 
 function start(flotiqApiKey, directory, url) {
