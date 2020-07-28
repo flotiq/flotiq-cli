@@ -16,7 +16,7 @@
   "author": "Flotiq team <hello@flotiq.com>",
   "license": "MIT",
   "dependencies": {
-    "flotiq-wordpress-import": "git+https://github.com/DominikIlski/flotiq-wordpress-import.git",
+    "flotiq-wordpress-import": "^1.0.0",
     "form-data": "^3.0.0",
     "gatsby-cli": "^2.12.45",
     "inquirer": "^7.2.0",
