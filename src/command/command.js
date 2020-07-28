@@ -4,7 +4,7 @@ const importer = require('../importer/importer');
 const gatsbySetup = require('../gatsby/gatsbySetup');
 const inquirer = require("inquirer");
 const yargs = require('yargs');
-const wordpressStart = require('flotiq-wordpress-import').start
+
 yargs
     .command('start [flotiqApiKey] [directory] [url]', 'Start the project', (yargs) => {
         yargs
@@ -69,6 +69,7 @@ yargs
                 type: 'string',
             });
     }, async (argv) => {
+        const wordpressStart = require('flotiq-wordpress-import').start;
         if (yargs.argv._.length < 3) {
             const answers = await askWordPressImportQuestions();
             const { flotiqApiKey, wordpressUrl } = answers;
@@ -81,7 +82,6 @@ yargs
         }
     })
     .help('$0 start|import [flotiqApiKey] [directory] [url]')
-
     .argv;
 
 checkCommand(yargs, 0);
