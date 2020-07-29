@@ -5,10 +5,8 @@
 Flotiq CLI
 ==================
 
-CLI application for starting Gatsby project with Flotiq integration fast.
-It imports Content Types and Content Objects from Gatsby starter to your Flotiq account using the API key.
-Gatsby starter must include directory `.flotiq` with `ContentType[0-9]` folders, each of them containing ContentTypeDefinition.json file, and contentObject[0-9].json files.
-The number at the end of the directory or file name, define file import order. `.flotiq/images` directory stores images required by content objects.
+CLI application for starting your next project with Flotiq fast. 
+Currently supports importing data from Wordpress into Flotiq and seeding example data from our Gatsby starters.
 
 ## Setup for usage
 
@@ -31,8 +29,14 @@ Install dependencies:
 
 ## Usage
 
-### Start project
+### Launch a Gatsby starter project
 
+This command will:
+- clone the Flotiq Gatsby starter,
+- setup your Flotiq account to include the required Content Type Definitions,
+- import example content into your account (e.g. images, blog posts, product descriptions),
+- run `gatsby develop` for you.
+Execute:
 `flotiq start [flotiqApiKey] [projectName] [flotiqStarterUrl]`
 
 or in development:
@@ -40,8 +44,15 @@ or in development:
 `node bin/flotiq start [flotiqApiKey] [projectName] [flotiqStarterUrl]`
 
 
-### Load examples
+### Import example data for a Gatsby starter
 
+This command imports Content Types and Content Objects from Gatsby starter to your Flotiq account using the API key.
+Gatsby starter must include directory `.flotiq` with `ContentType[0-9]` folders, each of them containing ContentTypeDefinition.json file, and contentObject[0-9].json files.
+
+The number at the end of the directory or file name defines the file import order. 
+The `.flotiq/images` directory in a particular starter stores images that will be imported into your Media Library.
+
+Execute:
 `flotiq import [flotiqApiKey] [projectName]`
 
 or in development:
@@ -50,6 +61,11 @@ or in development:
 
 ### Import data from Wordpress to Flotiq
 
+The `wordpress-import` command will:
+- setup your Flotiq account to include required Content Type Definitions,
+- automatically pull tags, categories, media, posts and pages from the provided Wordpress URL into your Flotiq account.
+
+Execute:
 `flotiq wordpress-import [flotiqApiKey] [wordpressUrl]`
 
 or in development:
@@ -62,6 +78,7 @@ or in development:
 `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
 `flotiqStarterUrl` - full link to GatsbyJs starter, the list below
 `wordpressUrl` - full link to WordPress site from which you wish to migrate content to Flotiq
+
 ## Gatsby Starters
 
 You can choose one of our starters:
