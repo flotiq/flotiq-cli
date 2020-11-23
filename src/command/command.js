@@ -21,6 +21,10 @@ yargs
                 type: 'string',
             });
     }, async (argv) => {
+        if (yargs.argv.help) {
+            yargs.showHelp();
+            process.exit(1);
+        }
         if (yargs.argv._.length < 4) {
             const answers = await askStartQuestions();
             const { flotiqApiKey, projectDirectory, url } = answers;
@@ -43,7 +47,10 @@ yargs
                 type: 'string',
             });
     }, async (argv) => {
-
+        if (yargs.argv.help) {
+            yargs.showHelp();
+            process.exit(1);
+        }
         if (yargs.argv._.length < 3) {
             const answers = await askImportQuestions();
             const { flotiqApiKey, projectDirectory } = answers;
@@ -81,10 +88,10 @@ yargs
             process.exit(1);
         }
     })
-    .help('$0 start|import [flotiqApiKey] [directory] [url]')
+    .help().usage('$0 start|import [flotiqApiKey] [directory] [url]')
     .argv;
 
-checkCommand(yargs, 0);
+checkCommand(yargs, 1);
 
 function getObjectDataPath(projectDirectory) {
     return projectDirectory + '/.flotiq';
