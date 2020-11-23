@@ -91,7 +91,7 @@ yargs
     .help().usage('$0 start|import [flotiqApiKey] [directory] [url]')
     .argv;
 
-checkCommand(yargs, 0);
+checkCommand(yargs, 1);
 
 function getObjectDataPath(projectDirectory) {
     return projectDirectory + '/.flotiq';
