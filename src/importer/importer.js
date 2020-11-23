@@ -57,16 +57,16 @@ exports.importer = async (apiKey, directoryPath) => {
                     const form = new FormData();
                     form.append('file', fs.createReadStream(path.resolve(directoryImagePath, file)), file);
                     form.append('type', 'image');
-                    let contentObject = await fetch(config.apiUrl + '/api/media', {
+                    form.append('save', '1');
+                    let result = await fetch(config.apiUrl + '/api/media', {
                         method: 'POST',
                         body: form,
                         headers: headers,
-                    }).then(res => res.json());
-                    let result = await fetch(config.apiUrl + '/api/v1/content/_media', {
-                        method: 'POST',
-                        body: JSON.stringify(contentObject),
-                        headers: {...headers, 'Content-Type': 'application/json'},
-                    });
+                    })
+                    let contentObject = {};
+                    if (result.status === 200) {
+                        contentObject = await result.json();
+                    }
 
                     resultNotify(result, 'Image', contentObject.id);
                     imageForReplacing[fileId] = contentObject.id
