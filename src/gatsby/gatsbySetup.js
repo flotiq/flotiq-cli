@@ -13,12 +13,10 @@ exports.init = async (projectDirectory, apiKey) => {
         let configPath =  projectDirectory + '/.env';
         fs.copyFileSync(projectDirectory + '/.flotiq/.env.dist', configPath);
         let file = fs.readFileSync(configPath);
-        file = file.replace('GATSBY_FLOTIQ_BASE_URL=', 'GATSBY_FLOTIQ_BASE_URL=' + config.apiUrl);
         file = file.replace('GATSBY_FLOTIQ_API_KEY=', 'GATSBY_FLOTIQ_API_KEY=' + apiKey);
         fs.writeFileSync(configPath, file);
     } catch (e) {
-        let fileContent = 'GATSBY_FLOTIQ_BASE_URL=' + config.apiUrl + '\n' +
-            'GATSBY_FLOTIQ_API_KEY=' + apiKey + '\n';
+        let fileContent = 'GATSBY_FLOTIQ_API_KEY=' + apiKey + '\n';
         fs.writeFile(projectDirectory + '/.env', fileContent, (err) => {
             if (err) throw err;
 
