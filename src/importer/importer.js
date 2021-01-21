@@ -15,7 +15,13 @@ exports.importer = async (apiKey, directoryPath) => {
     headers['X-AUTH-TOKEN'] = apiKey;
     let imageImportData = await importImages(directoryImagePath, headers);
 
-    let directories = fs.readdirSync(directoryPath);
+    let directories = [];
+    try {
+        directories = fs.readdirSync(directoryPath);
+    } catch(e) {
+        console.error('Incorrect import directory, cannot find .flotiq directory inside!');
+        process.exit(1);
+    }
 
     for (let i = 0; i < directories.length; i++) {
         const directory = directories[i];

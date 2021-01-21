@@ -43,7 +43,7 @@ yargs
                 type: 'string',
             })
             .positional('directory', {
-                describe: 'Directory to create project',
+                describe: 'Directory to create project (directory cannot be empty, if you wish to run command in current directory, insert . (dot))',
                 type: 'string',
             });
     }, async (argv) => {
@@ -53,8 +53,12 @@ yargs
         }
         if (yargs.argv._.length < 3) {
             const answers = await askImportQuestions();
-            const { flotiqApiKey, projectDirectory } = answers;
-
+            let { flotiqApiKey, projectDirectory } = answers;
+            while(!projectDirectory.length) {
+                yargs.showHelp();
+                const answers = await askImportQuestions();
+                projectDirectory = answers.projectDirectory;
+            }
             let directory = getObjectDataPath(projectDirectory);
             await importer.importer(flotiqApiKey, directory);
         } else if (yargs.argv._.length === 3) {
