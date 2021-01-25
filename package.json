@@ -18,7 +18,7 @@
   "dependencies": {
     "flotiq-wordpress-import": "^1.0.3",
     "form-data": "^3.0.0",
-    "gatsby-cli": "^2.15.1",
+    "gatsby-cli": "^2.18.0",
     "inquirer": "^7.2.0",
     "node-fetch": "^2.6.1",
     "yargs": "^15.3.1"
