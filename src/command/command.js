@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+const questionsText = require('./questions');
 const importer = require('../importer/importer');
 const gatsbySetup = require('../gatsby/gatsbySetup');
 const inquirer = require("inquirer");
@@ -9,15 +9,15 @@ yargs
     .command('start [flotiqApiKey] [directory] [url]', 'Start the project', (yargs) => {
         yargs
             .positional('flotiqApiKey', {
-                describe: 'Flotiq RO api key',
+                describe: 'Flotiq Read and write API KEY.',
                 type: 'string',
             })
             .positional('directory', {
-                describe: 'Directory to create project',
+                describe: 'Directory to create project in.',
                 type: 'string',
             })
             .positional('url', {
-                describe: 'Url to git repository with Gatbsy starter',
+                describe: 'Url to git repository with Gatbsy starter.',
                 type: 'string',
             });
     }, async (argv) => {
@@ -26,9 +26,10 @@ yargs
             process.exit(1);
         }
         if (yargs.argv._.length < 4) {
-            const answers = await askStartQuestions();
-            const { flotiqApiKey, projectDirectory, url } = answers;
+            let answers = await askQuestions(questionsText.START_QUESTIONS);
+            let {flotiqApiKey, projectDirectory, url} = answers;
             start(flotiqApiKey, projectDirectory, url)
+
         } else if (yargs.argv._.length === 4) {
             start(argv.flotiqApiKey, argv.directory, argv.url)
         } else {
@@ -39,59 +40,50 @@ yargs
     .command('import [flotiqApiKey] [directory]', 'Import objects from directory to Flotiq', (yargs) => {
         yargs
             .positional('flotiqApiKey', {
-                describe: 'Flotiq RO api key',
+                describe: 'Flotiq Read and write API KEY.',
                 type: 'string',
             })
             .positional('directory', {
-                describe: 'Directory to create project',
+                describe: 'Directory path with Flotiq sample data (directory cannot be empty, if you wish to run command in current directory, insert . (dot)).',
                 type: 'string',
             });
     }, async (argv) => {
-        if (yargs.argv.help) {
-            yargs.showHelp();
-            process.exit(1);
-        }
-        if (yargs.argv._.length < 3) {
-            const answers = await askImportQuestions();
-            const { flotiqApiKey, projectDirectory } = answers;
 
+        if (yargs.argv._.length < 3) {
+            const answers = await askQuestions(questionsText.IMPORT_QUESTIONS);
+            let {flotiqApiKey, projectDirectory} = answers;
             let directory = getObjectDataPath(projectDirectory);
             await importer.importer(flotiqApiKey, directory);
         } else if (yargs.argv._.length === 3) {
             let directory = getObjectDataPath(argv.directory);
             await importer.importer(argv.flotiqApiKey, directory);
-        } else {
-            yargs.showHelp();
-            process.exit(1);
         }
     })
     .command('wordpress-import [flotiqApiKey] [wordpressUrl]', 'Import wordpress to Flotiq', (yargs) => {
         yargs
             .positional('flotiqApiKey', {
-                describe: 'Flotiq RW API key',
+                describe: 'Flotiq Read and write API KEY',
                 type: 'string',
             })
             .positional('wordpressUrl', {
-                describe: 'Url to wordpress project',
+                describe: 'Url to wordpress blog project',
                 type: 'string',
             });
     }, async (argv) => {
         const wordpressStart = require('flotiq-wordpress-import').start;
         if (yargs.argv._.length < 3) {
-            const answers = await askWordPressImportQuestions();
-            const { flotiqApiKey, wordpressUrl } = answers;
+            const answers = await askQuestions(questionsText.WORDPRESS_IMPORT_QUESTIONS);
+            const {flotiqApiKey, wordpressUrl} = answers;
+
             wordpressStart(flotiqApiKey, wordpressUrl)
         } else if (yargs.argv._.length === 3) {
             wordpressStart(argv.flotiqApiKey, argv.wordpressUrl)
-        } else {
-            yargs.showHelp();
-            process.exit(1);
         }
     })
-    .help().usage('$0 start|import [flotiqApiKey] [directory] [url]')
+    .help()
     .argv;
 
-checkCommand(yargs, 1);
+checkCommand(yargs, 0);
 
 function getObjectDataPath(projectDirectory) {
     return projectDirectory + '/.flotiq';
@@ -104,60 +96,24 @@ function checkCommand(yargs, numRequired) {
     }
 }
 
-async function askStartQuestions() {
-    const questions = [
-        {
-            name: "flotiqApiKey",
-            type: "input",
-            message: "Flotiq api key:"
-        },
-        {
-            name: "projectDirectory",
-            type: "input",
-            message: "Project directory path:"
-        },
-        {
-            name: "url",
-            type: "input",
-            message: "Gatsby starter repository url:"
-        },
-
-    ];
-    return inquirer.prompt(questions);
+async function askQuestions(questions) {
+    let answers = await inquirer.prompt(questions);
+    return await checkAllParameters(answers, questions);
 }
 
-async function askImportQuestions() {
-    const questions = [
-        {
-            name: "flotiqApiKey",
-            type: "input",
-            message: "Flotiq api key:"
-        },
-        {
-            name: "projectDirectory",
-            type: "input",
-            message: "Project directory path:"
-        },
+async function checkAllParameters(answer, questions) {
+    let newAnswer = answer;
+    for (let i = 0; i < questions.length; i++) {
+        let paramName = questions[i].name;
+        while (!newAnswer[paramName].length) {
+            yargs.showHelp();
+            const param = await inquirer.prompt(questions[i]);
+            newAnswer[paramName] = param[paramName];
+            console.log(newAnswer[paramName]);
 
-    ];
-    return inquirer.prompt(questions);
-}
-
-async function askWordPressImportQuestions() {
-    const questions = [
-        {
-            name: "flotiqApiKey",
-            type: "input",
-            message: "Flotiq api key:"
-        },
-        {
-            name: "wordpressUrl",
-            type: "input",
-            message: "Url to wordpress project:"
-        },
-
-    ];
-    return inquirer.prompt(questions);
+        }
+    }
+    return newAnswer;
 }
 
 function start(flotiqApiKey, directory, url) {
@@ -168,3 +124,5 @@ function start(flotiqApiKey, directory, url) {
         await gatsbySetup.develop(directory);
     });
 }
+
+
