@@ -3,11 +3,7 @@ const FLOTIQ_RW_API_KEY = {
     type: "input",
     message: "Flotiq RW api key:"
 };
-const FLOTIQ_RO_API_KEY = {
-    name: "flotiqApiKey",
-    type: "input",
-    message: "Flotiq RO api key:"
-};
+
 const PROJECT_DIRECTORY = {
     name: "projectDirectory",
     type: "input",
@@ -25,11 +21,31 @@ const WORDPRESS_PAGE_URL = {
 };
 
 
-module.exports = {
-    FLOTIQ_RO_API_KEY,
+//--------------------------Questions-Sections--------------------------------
+
+const START_QUESTIONS = [
     FLOTIQ_RW_API_KEY,
     PROJECT_DIRECTORY,
     GATSBY_STARTER_URL,
-    WORDPRESS_PAGE_URL
+]
+
+const IMPORT_QUESTIONS = [
+    FLOTIQ_RW_API_KEY,
+    PROJECT_DIRECTORY,
+]
+
+const WORDPRESS_IMPORT_QUESTIONS = [
+    FLOTIQ_RW_API_KEY,
+    WORDPRESS_PAGE_URL,
+]
+
+module.exports = {
+    FLOTIQ_RW_API_KEY,
+    PROJECT_DIRECTORY,
+    GATSBY_STARTER_URL,
+    WORDPRESS_PAGE_URL,
+    START_QUESTIONS,
+    IMPORT_QUESTIONS,
+    WORDPRESS_IMPORT_QUESTIONS
 
 }
