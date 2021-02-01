@@ -119,7 +119,7 @@ async function checkAllParameters(answer, questions) {
 function start(flotiqApiKey, directory, url) {
     gatsbySetup.setup(directory, url).then(async () => {
         let path = getObjectDataPath(directory);
-        await importer.importer(flotiqApiKey, path);
+        await importer.importer(flotiqApiKey, path, false);
         await gatsbySetup.init(directory, flotiqApiKey);
         await gatsbySetup.develop(directory);
     });
