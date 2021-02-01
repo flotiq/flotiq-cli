@@ -21,7 +21,7 @@ const WORDPRESS_PAGE_URL = {
 };
 
 
-//--------------------------Questions-Sections--------------------------------
+
 
 const START_QUESTIONS = [
     FLOTIQ_RW_API_KEY,

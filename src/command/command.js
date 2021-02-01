@@ -5,26 +5,6 @@ const gatsbySetup = require('../gatsby/gatsbySetup');
 const inquirer = require("inquirer");
 const yargs = require('yargs');
 
-const askQuestions = async (questions) => {
-    let answers = await inquirer.prompt(questions);
-    return await checkAllParameters(answers, questions);
-}
-
-const checkAllParameters = async (answer, questions) => {
-    let newAnswer = answer;
-    for(let i = 0; i < questions.length; i++){
-        let paramName = questions[i].name;
-        while(!newAnswer[paramName].length) {
-            yargs.showHelp();
-            const param = await inquirer.prompt(questions[i]);
-            newAnswer[paramName] = param[paramName];
-            console.log(newAnswer[paramName]);
-
-        }
-    }
-    return newAnswer;
-}
-
 yargs
     .command('start [flotiqApiKey] [directory] [url]', 'Start the project', (yargs) => {
         yargs
@@ -116,7 +96,25 @@ function checkCommand(yargs, numRequired) {
     }
 }
 
+async function askQuestions(questions) {
+    let answers = await inquirer.prompt(questions);
+    return await checkAllParameters(answers, questions);
+}
 
+async function checkAllParameters(answer, questions) {
+    let newAnswer = answer;
+    for (let i = 0; i < questions.length; i++) {
+        let paramName = questions[i].name;
+        while (!newAnswer[paramName].length) {
+            yargs.showHelp();
+            const param = await inquirer.prompt(questions[i]);
+            newAnswer[paramName] = param[paramName];
+            console.log(newAnswer[paramName]);
+
+        }
+    }
+    return newAnswer;
+}
 
 function start(flotiqApiKey, directory, url) {
     gatsbySetup.setup(directory, url).then(async () => {
