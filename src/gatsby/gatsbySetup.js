@@ -3,6 +3,8 @@ const config = require('../configuration/config');
 const fs = require('fs');
 const path = require('path');
 
+const ERROR_COLOR  ='\x1b[31m%s\x1b[0m';
+
 exports.setup = async (projectDirectory, starterUrl) => {
     console.log('Starting Gatsby setup');
     await runGatsbyProcess('new', projectDirectory, starterUrl);
@@ -46,7 +48,6 @@ function execShellCommand(cmd) {
     return new Promise((resolve, reject) => {
         let commandProcess = exec(cmd, (error, stdout, stderr) => {
             if (error) {
-
                 console.errorCode(200);
                 process.exit(1);
             }
@@ -56,11 +57,11 @@ function execShellCommand(cmd) {
         });
         // live output from command
         commandProcess.stderr.on('data', function (data) {
-            console.error('\x1b[31m%s\x1b[0m', data);
+            console.error(ERROR_COLOR, data);
         });
 
         commandProcess.stdout.on('data', function (data) {
-            console.log('\x1b[31m%s\x1b[0m', data);
+            console.log(ERROR_COLOR, data);
         });
 
 

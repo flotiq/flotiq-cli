@@ -14,7 +14,7 @@ const oldConsole = console;
 yargs
     .boolean('json-output')
     .alias('json-output', ['j'])
-    .describe('json-output', ' Whether to return results as JSON')
+    .describe('json-output', ' Whether to save results as JSON')
     .command('start [flotiqApiKey] [directory] [url]', 'Start the project', (yargs) => {
         yargs
             .positional('flotiqApiKey', {

@@ -1,16 +1,16 @@
+const ERROR_COLOR  ='\x1b[31m%s\x1b[0m';
+
 let console = ((oldConsole, isJson, errors, stdOut, errorObject, fs) => {
 
     process.on('exit', () => {
         if (isJson) {
             {
-                /*const stringsToRemove = ["", '\n', '  \n']
-                errors = errors.filter((item) => !stringsToRemove.includes(item))*/
                 const json = {
                     errorCode: errorObject.code,
                     errors: errors,
                     stdOut: stdOut
                 }
-                fs.writeFileSync('./error.json', JSON.stringify(json));
+                fs.writeFileSync('./output.json', JSON.stringify(json));
             }
         }
     })
@@ -31,13 +31,14 @@ let console = ((oldConsole, isJson, errors, stdOut, errorObject, fs) => {
 
         },
         error: (colorOrText, text = '') => {
-            oldConsole.error(colorOrText, text)
+            oldConsole.error(colorOrText , text)
             if (isJson) {
                 errors.push(removeColorsAndBrakeLines(text || colorOrText));
             }
         },
         errorCode: (code) => {
             errorObject.code = code;
+            oldConsole.log(ERROR_COLOR, `Error code: ${code}`)
         }
     }
 });
