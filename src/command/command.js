@@ -2,10 +2,19 @@
 const questionsText = require('./questions');
 const importer = require('../importer/importer');
 const gatsbySetup = require('../gatsby/gatsbySetup');
+const custom = require('../console/console');
 const inquirer = require("inquirer");
 const yargs = require('yargs');
+const fs = require('fs');
+const errors = [];
+const stdOut = [];
+let errorObject = {errorCode: 0};
+const oldConsole = console;
 
 yargs
+    .boolean('json-output')
+    .alias('json-output', ['j'])
+    .describe('json-output', ' Whether to return results as JSON')
     .command('start [flotiqApiKey] [directory] [url]', 'Start the project', (yargs) => {
         yargs
             .positional('flotiqApiKey', {
@@ -21,6 +30,7 @@ yargs
                 type: 'string',
             });
     }, async (argv) => {
+        console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
         if (yargs.argv.help) {
             yargs.showHelp();
             process.exit(1);
@@ -28,16 +38,17 @@ yargs
         if (yargs.argv._.length < 4) {
             let answers = await askQuestions(questionsText.START_QUESTIONS);
             let {flotiqApiKey, projectDirectory, url} = answers;
-            start(flotiqApiKey, projectDirectory, url)
+            start(flotiqApiKey, projectDirectory, url, yargs.argv['json-output'])
 
         } else if (yargs.argv._.length === 4) {
-            start(argv.flotiqApiKey, argv.directory, argv.url)
+            start(argv.flotiqApiKey, argv.directory, argv.url, yargs.argv['json-output'])
         } else {
             yargs.showHelp();
             process.exit(1);
         }
     })
     .command('import [flotiqApiKey] [directory]', 'Import objects from directory to Flotiq', (yargs) => {
+
         yargs
             .positional('flotiqApiKey', {
                 describe: 'Flotiq Read and write API KEY.',
@@ -48,15 +59,15 @@ yargs
                 type: 'string',
             });
     }, async (argv) => {
-
+        console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
         if (yargs.argv._.length < 3) {
             const answers = await askQuestions(questionsText.IMPORT_QUESTIONS);
             let {flotiqApiKey, projectDirectory} = answers;
             let directory = getObjectDataPath(projectDirectory);
-            await importer.importer(flotiqApiKey, directory);
+            await importer.importer(flotiqApiKey, directory, true, yargs.argv['json-output']);
         } else if (yargs.argv._.length === 3) {
             let directory = getObjectDataPath(argv.directory);
-            await importer.importer(argv.flotiqApiKey, directory);
+            await importer.importer(argv.flotiqApiKey, directory, true, yargs.argv['json-output']);
         }
     })
     .command('wordpress-import [flotiqApiKey] [wordpressUrl]', 'Import wordpress to Flotiq', (yargs) => {
@@ -70,6 +81,7 @@ yargs
                 type: 'string',
             });
     }, async (argv) => {
+        console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
         const wordpressStart = require('flotiq-wordpress-import').start;
         if (yargs.argv._.length < 3) {
             const answers = await askQuestions(questionsText.WORDPRESS_IMPORT_QUESTIONS);
@@ -116,10 +128,10 @@ async function checkAllParameters(answer, questions) {
     return newAnswer;
 }
 
-function start(flotiqApiKey, directory, url) {
-    gatsbySetup.setup(directory, url).then(async () => {
+function start(flotiqApiKey, directory, url, isJson) {
+    gatsbySetup.setup(directory, url, isJson).then(async () => {
         let path = getObjectDataPath(directory);
-        await importer.importer(flotiqApiKey, path);
+        await importer.importer(flotiqApiKey, path, false);
         await gatsbySetup.init(directory, flotiqApiKey);
         await gatsbySetup.develop(directory);
     });

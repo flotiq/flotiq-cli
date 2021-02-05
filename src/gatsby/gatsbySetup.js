@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 exports.setup = async (projectDirectory, starterUrl) => {
-    console.log('Gatsby setup');
+    console.log('Starting Gatsby setup');
     await runGatsbyProcess('new', projectDirectory, starterUrl);
 }
 
@@ -18,6 +18,8 @@ exports.init = async (projectDirectory, apiKey) => {
     } catch (e) {
         let fileContent = 'GATSBY_FLOTIQ_API_KEY=' + apiKey + '\n';
         fs.writeFile(projectDirectory + '/.env', fileContent, (err) => {
+            console.errorCode(100);
+            console.error(err);
             if (err) throw err;
 
         });
@@ -44,14 +46,23 @@ function execShellCommand(cmd) {
     return new Promise((resolve, reject) => {
         let commandProcess = exec(cmd, (error, stdout, stderr) => {
             if (error) {
-                console.error(error);
+
+                console.errorCode(200);
                 process.exit(1);
             }
-            resolve(stdout ? stdout : stderr);
+            console.log(stdout);
+            console.error(stderr);
+            resolve(stdout || stderr);
         });
         // live output from command
-        commandProcess.stdout.on('data', function (data) {
-            console.log('\x1b[36m%s\x1b[0m', data);
+        commandProcess.stderr.on('data', function (data) {
+            console.error('\x1b[31m%s\x1b[0m', data);
         });
+
+        commandProcess.stdout.on('data', function (data) {
+            console.log('\x1b[31m%s\x1b[0m', data);
+        });
+
+
     });
 }
