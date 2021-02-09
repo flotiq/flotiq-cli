@@ -81,15 +81,17 @@ yargs
                 type: 'string',
             });
     }, async (argv) => {
-        console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
+
         const wordpressStart = require('flotiq-wordpress-import').start;
+        // overriding the console in this case is not required, custom console is build in wordpress-importer
         if (yargs.argv._.length < 3) {
             const answers = await askQuestions(questionsText.WORDPRESS_IMPORT_QUESTIONS);
             const {flotiqApiKey, wordpressUrl} = answers;
 
-            wordpressStart(flotiqApiKey, wordpressUrl)
+            wordpressStart(flotiqApiKey, wordpressUrl, yargs.argv['json-output'])
+
         } else if (yargs.argv._.length === 3) {
-            wordpressStart(argv.flotiqApiKey, argv.wordpressUrl)
+            wordpressStart(argv.flotiqApiKey, argv.wordpressUrl, yargs.argv['json-output'])
         }
     })
     .help()
