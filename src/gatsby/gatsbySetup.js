@@ -3,7 +3,7 @@ const config = require('../configuration/config');
 const fs = require('fs');
 const path = require('path');
 
-const ERROR_COLOR  ='\x1b[32m%s\x1b[0m';
+const ERROR_COLOR  ='\x1b[36m%s\x1b[0m';
 
 exports.setup = async (projectDirectory, starterUrl) => {
     console.log('Starting Gatsby setup');

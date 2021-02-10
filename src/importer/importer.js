@@ -8,7 +8,7 @@ let headers = {
     accept: 'application/json',
 };
 
-exports.importer = async (apiKey, directoryPath) => {
+exports.importer = async (apiKey, directoryPath, exit = true) => {
     directoryPath = path.resolve(directoryPath);
     console.log('Importing contents to Flotiq');
     const directoryImagePath = path.join(directoryPath, 'images');
@@ -18,8 +18,13 @@ exports.importer = async (apiKey, directoryPath) => {
     let directories = [];
     try {
         directories = fs.readdirSync(directoryPath);
-    } catch(e) {
-        console.error('\x1b[36m%s\x1b[0m' ,'Incorrect import directory, cannot find .flotiq directory inside!');
+    } catch (e) {
+        if (exit) {
+            console.error('\x1b[36m%s\x1b[0m', 'Incorrect import directory, cannot find .flotiq directory inside!');
+            process.exit(1)
+        } else {
+            return
+        }
     }
 
     for (let i = 0; i < directories.length; i++) {
