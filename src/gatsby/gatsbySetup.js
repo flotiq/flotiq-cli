@@ -53,8 +53,6 @@ function execShellCommand(cmd) {
                 console.errorCode(200);
                 process.exit(1);
             }
-            //console.log(stdout);
-            //console.error(stderr);
             resolve(stdout || stderr);
         });
         // live output from command
