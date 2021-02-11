@@ -18,12 +18,12 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
     let directories = [];
     try {
         directories = fs.readdirSync(directoryPath);
-    } catch(e) {
-        console.error('\x1b[36m%s\x1b[0m', 'Incorrect import directory, cannot find .flotiq directory inside!');
-        if(exit) {
-            process.exit(1);
+    } catch (e) {
+        if (exit) {
+            console.error('\x1b[36m%s\x1b[0m', 'Incorrect import directory, cannot find .flotiq directory inside!');
+            process.exit(1)
         } else {
-            return;
+            return
         }
     }
 
@@ -131,7 +131,7 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
         } else if (response.status === 200) {
             console.log(context + ' : "' + name + '" added');
         } else {
-            console.errorCode(301);
+            console.errorCode(300);
             console.error(context + ' : "' + name + '" has not been added: ' + response.statusText);
             process.exit(1);
         }

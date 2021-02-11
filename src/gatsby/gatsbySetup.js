@@ -3,7 +3,7 @@ const config = require('../configuration/config');
 const fs = require('fs');
 const path = require('path');
 
-const ERROR_COLOR  ='\x1b[31m%s\x1b[0m';
+const ERROR_COLOR  ='\x1b[36m%s\x1b[0m';
 
 exports.setup = async (projectDirectory, starterUrl) => {
     console.log('Starting Gatsby setup');
@@ -20,9 +20,11 @@ exports.init = async (projectDirectory, apiKey) => {
     } catch (e) {
         let fileContent = 'GATSBY_FLOTIQ_API_KEY=' + apiKey + '\n';
         fs.writeFile(projectDirectory + '/.env', fileContent, (err) => {
-            console.errorCode(100);
-            console.error(err);
-            if (err) throw err;
+
+            if (err) {
+                console.errorCode(100);
+                throw err;
+            }
 
         });
     }
@@ -51,8 +53,6 @@ function execShellCommand(cmd) {
                 console.errorCode(200);
                 process.exit(1);
             }
-            console.log(stdout);
-            console.error(stderr);
             resolve(stdout || stderr);
         });
         // live output from command
@@ -61,7 +61,7 @@ function execShellCommand(cmd) {
         });
 
         commandProcess.stdout.on('data', function (data) {
-            console.log(ERROR_COLOR, data);
+            console.log(data);
         });
 
 

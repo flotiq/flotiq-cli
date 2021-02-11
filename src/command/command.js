@@ -64,10 +64,10 @@ yargs
             const answers = await askQuestions(questionsText.IMPORT_QUESTIONS);
             let {flotiqApiKey, projectDirectory} = answers;
             let directory = getObjectDataPath(projectDirectory);
-            await importer.importer(flotiqApiKey, directory, true, yargs.argv['json-output']);
+            await importer.importer(flotiqApiKey, directory, true);
         } else if (yargs.argv._.length === 3) {
             let directory = getObjectDataPath(argv.directory);
-            await importer.importer(argv.flotiqApiKey, directory, true, yargs.argv['json-output']);
+            await importer.importer(argv.flotiqApiKey, directory, true);
         }
     })
     .command('wordpress-import [flotiqApiKey] [wordpressUrl]', 'Import wordpress to Flotiq', (yargs) => {

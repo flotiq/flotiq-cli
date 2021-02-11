@@ -121,9 +121,6 @@ To make your life and ours easier, we have prepared an error codes.
 ### #3XX - Import
 
 #### #300
- Incorrect import directory, cannot find .flotiq directory inside.
-
-#### #301
  Problem with adding Content Object.
 
 #### #302

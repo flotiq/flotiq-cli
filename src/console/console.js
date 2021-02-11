@@ -1,4 +1,4 @@
-const ERROR_COLOR  ='\x1b[31m%s\x1b[0m';
+const ERROR_COLOR  = '\x1b[31m%s\x1b[0m';
 
 let console = ((oldConsole, isJson, errors, stdOut, errorObject, fs) => {
 
@@ -38,7 +38,7 @@ let console = ((oldConsole, isJson, errors, stdOut, errorObject, fs) => {
         },
         errorCode: (code) => {
             errorObject.code = code;
-            oldConsole.log(ERROR_COLOR, `Error code: ${code}`)
+            oldConsole.log(ERROR_COLOR, `Error code: ${code}`);
         }
     }
 });
