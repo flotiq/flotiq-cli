@@ -10,6 +10,7 @@ const errors = [];
 const stdOut = [];
 let errorObject = {errorCode: 0};
 const oldConsole = console;
+const purgeContentObjects = require('../purifier/purifier')
 
 yargs
     .boolean('json-output')
@@ -94,6 +95,22 @@ yargs
             wordpressStart(argv.flotiqApiKey, argv.wordpressUrl, yargs.argv['json-output'])
         }
     })
+    .command(
+        'purge [flotiqApiKey]',
+        'Purge Flotiq account, removes all objects to which the key has access',
+        (yargs) => {
+            yargs
+                .positional('flotiqApiKey', {
+                    describe: 'Flotiq Read and write API KEY',
+                    type: 'string',
+                });
+        }, async (argv) => {
+            if (yargs.argv._.length < 2) {
+                console.log('Api key not found')
+            } else if (yargs.argv._.length === 2) {
+                purgeContentObjects(argv.flotiqApiKey);
+            }
+        })
     .help()
     .argv;
 
