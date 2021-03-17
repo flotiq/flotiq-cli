@@ -79,6 +79,10 @@ or in development:
 `flotiqStarterUrl` - full link to GatsbyJs starter, the list below
 `wordpressUrl` - full link to WordPress site from which you wish to migrate content to Flotiq
 
+### Flags
+
+`--json-output`, `-j` - Error and console output will be additionally written into json file named `output.json`.
+
 ## Gatsby Starters
 
 You can choose one of our starters:
@@ -95,3 +99,35 @@ You can choose one of our starters:
 If you wish to talk with us about this project, feel free to hop on [![Discord Chat](https://img.shields.io/discord/682699728454025410.svg)](https://discord.gg/FwXcHnX)  .
    
 If you found a bug, please report it in [issues](https://github.com/flotiq/flotiq-cli/issues).
+
+
+## Errors
+To make your life and ours easier, we have prepared an error codes.
+
+
+### 1XX - Execution error
+
+#### #100
+  Writing or reading a file error.
+  
+#### #101
+  Flotiq API bad response.
+
+### #2XX - Start
+#### #200
+
+ Gatsby's error, more info is in the output.
+ 
+### #3XX - Import
+
+#### #300
+ Problem with adding Content Object.
+
+#### #302
+ Incorrect Flotiq API key.
+ 
+ 
+### #4XX - Wordpress-importer
+
+#### #400
+ Incorrect wordpress url.
