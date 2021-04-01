@@ -1,8 +1,9 @@
 const fetch = require('node-fetch');
 const config = require('../configuration/config');
 
-module.exports = purgeContentObjects = async (apiKey) => {
-    let contentTypeDefinitions = (await (await fetchContentTypeDefinitions(apiKey))
+module.exports = purgeContentObjects = async (apiKey, internal = 0) => {
+
+    let contentTypeDefinitions = (await (await fetchContentTypeDefinitions(apiKey, internal))
         .json()).data;
 
     let i = 0;
@@ -19,9 +20,9 @@ module.exports = purgeContentObjects = async (apiKey) => {
         }
     }
 }
-const fetchContentTypeDefinitions = async (apiKey) => {
+const fetchContentTypeDefinitions = async (apiKey, internal = 0) => {
     return fetch(
-        config.apiUrl + '/api/v1/internal/contenttype?internal=false&auth_token=' + apiKey,
+        config.apiUrl + `/api/v1/internal/contenttype?internal=false&auth_token=${apiKey}&internal=${internal}`,
         {method: 'GET'}
     );
 }
@@ -66,6 +67,5 @@ const removeContentObjects = async (contentTypeDefinition, apiKey) => {
 
         console.log(`${ctdName} - Strona: ${page}/${totalPages}`, await response.json());
         page++;
-
     }
 }

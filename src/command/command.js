@@ -96,7 +96,7 @@ yargs
         }
     })
     .command(
-        'purge [flotiqApiKey]',
+        'purge [flotiqApiKey] [options]',
         'Purge Flotiq account, removes all objects to which the key has access',
         (yargs) => {
             yargs
@@ -108,7 +108,7 @@ yargs
             if (yargs.argv._.length < 2) {
                 console.log('Api key not found')
             } else if (yargs.argv._.length === 2) {
-                purgeContentObjects(argv.flotiqApiKey);
+                purgeContentObjects(argv.flotiqApiKey, argv.withInternal);
             }
         })
     .help()
