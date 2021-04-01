@@ -65,7 +65,7 @@ const removeContentObjects = async (contentTypeDefinition, apiKey) => {
             return contentTypeDefinition;
         }
 
-        console.log(`${ctdName} - Strona: ${page}/${totalPages}`, await response.json());
+        console.log(`${ctdName} - Page: ${page}/${totalPages}`, await response.json());
         page++;
     }
 }
