@@ -22,7 +22,7 @@ const WORDPRESS_PAGE_URL = {
 const PURGE_QUESTION_CONFIRMATION = {
     name: "confirmation",
     type: "input",
-    message: "Are you sure you want to delete data from flotiq? [y/N]",
+    message: "Are you sure you want to delete all data available for this API KEY? [y/N]",
     defaultAnswer: 'n'
 }
 
