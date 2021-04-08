@@ -19,9 +19,12 @@ const WORDPRESS_PAGE_URL = {
     type: "input",
     message: "Url to wordpress project:"
 };
-
-
-
+const PURGE_QUESTION_CONFIRMATION = {
+    name: "confirmation",
+    type: "input",
+    message: "Are you sure you want to delete data from flotiq? [y/N]",
+    defaultAnswer: 'n'
+}
 
 const START_QUESTIONS = [
     FLOTIQ_RW_API_KEY,
@@ -39,6 +42,10 @@ const WORDPRESS_IMPORT_QUESTIONS = [
     WORDPRESS_PAGE_URL,
 ]
 
+const PURGE_QUESTION = [
+    PURGE_QUESTION_CONFIRMATION
+]
+
 module.exports = {
     FLOTIQ_RW_API_KEY,
     PROJECT_DIRECTORY,
@@ -46,6 +53,6 @@ module.exports = {
     WORDPRESS_PAGE_URL,
     START_QUESTIONS,
     IMPORT_QUESTIONS,
-    WORDPRESS_IMPORT_QUESTIONS
-
+    WORDPRESS_IMPORT_QUESTIONS,
+    PURGE_QUESTION
 }
