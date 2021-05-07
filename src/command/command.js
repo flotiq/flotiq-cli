@@ -10,6 +10,7 @@ const errors = [];
 const stdOut = [];
 let errorObject = {errorCode: 0};
 const oldConsole = console;
+const purgeContentObjects = require('../purifier/purifier')
 
 yargs
     .boolean('json-output')
@@ -94,6 +95,29 @@ yargs
             wordpressStart(argv.flotiqApiKey, argv.wordpressUrl, yargs.argv['json-output'])
         }
     })
+    .command(
+        'purge [flotiqApiKey] [options]',
+        'Purge Flotiq account, removes all objects to which the key has access',
+        (yargs) => {
+            yargs
+                .positional('flotiqApiKey', {
+                    describe: 'Flotiq Read and write API KEY',
+                    type: 'string',
+                });
+        }, async (argv) => {
+            if (yargs.argv._.length < 2) {
+                console.log('Api key not found')
+            } else if (yargs.argv._.length === 2) {
+                const answers = await askQuestions(questionsText.PURGE_QUESTION);
+                const {confirmation} = answers;
+                if (confirmation.toUpperCase() === 'Y') {
+                    await purgeContentObjects(argv.flotiqApiKey, argv.withInternal);
+                } else {
+                    console.log('I\'m finishing, no data has been deleted');
+                    process.exit(1);
+                }
+            }
+        })
     .help()
     .argv;
 
@@ -120,11 +144,15 @@ async function checkAllParameters(answer, questions) {
     for (let i = 0; i < questions.length; i++) {
         let paramName = questions[i].name;
         while (!newAnswer[paramName].length) {
-            yargs.showHelp();
-            const param = await inquirer.prompt(questions[i]);
-            newAnswer[paramName] = param[paramName];
-            console.log(newAnswer[paramName]);
-
+            if (!questions[i].defaultAnswer) {
+                yargs.showHelp();
+                const param = await inquirer.prompt(questions[i]);
+                newAnswer[paramName] = param[paramName];
+                console.log(newAnswer[paramName]);
+            } else {
+                newAnswer[paramName] = questions[i].defaultAnswer;
+                console.log(newAnswer[paramName]);
+            }
         }
     }
     return newAnswer;
