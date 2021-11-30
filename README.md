@@ -72,12 +72,25 @@ or in development:
 
 `node bin/flotiq wordpress-import [flotiqApiKey] [wordpressUrl]`
 
+### Purge data in Flotiq account
+
+This command will remove all data from your account. Great for testing imports. Command require additional confirmation.
+
+Execute:
+`flotiq purge [flotiqApiKey] [options]`
+
+or in development:
+
+`node bin/flotiq purge [flotiqApiKey] [options]`
+
 ### Parameters
 
-`flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
-`projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
-`flotiqStarterUrl` - full link to GatsbyJs starter, the list below
-`wordpressUrl` - full link to WordPress site from which you wish to migrate content to Flotiq
+* `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
+* `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
+* `flotiqStarterUrl` - full link to GatsbyJs starter, the list below
+* `wordpressUrl` - full link to WordPress site from which you wish to migrate content to Flotiq
+* `options` - additional options for command:
+    * `withInternal=1` - purge should remove also internal type objects (`_media`)
 
 ### Flags
 
