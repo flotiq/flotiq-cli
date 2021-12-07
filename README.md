@@ -59,6 +59,18 @@ or in development:
 
 `node bin/flotiq import [flotiqApiKey] [projectName]`
 
+#### Import variables
+
+There is a possibility to use dynamic data in json files. 
+We implemented our parser to create dynamic date value, but it can be extended in the future.
+To use dynamic date in imported `contentObject.json` files use `{{date}}` function:
+
+* {{date}} means "now", outputs e.g. 2022-01-01
+* {{date:+5d}} means "now + 5 days", outputs e.g. 2022-01-06 
+* {{date:-5m}} means "now - 5 months", outputs e.g. 2021-06-01
+* {{date:+5y}} means "now + 5 years", outputs e.g. 2027-01-01
+
+
 ### Import data from Wordpress to Flotiq
 
 The `wordpress-import` command will:
