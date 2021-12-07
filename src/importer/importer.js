@@ -3,7 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const FormData = require('form-data');
 const config = require('../configuration/config');
-const parser = require("./parser/parser");
 
 let headers = {
     accept: 'application/json',
@@ -92,8 +91,7 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
         let files = fs.readdirSync(directoryPath);
         await Promise.all(files.map(async function (file) {
             if (file.indexOf('contentObject') === 0) {
-                let contentObjectRaw = require(path.resolve(directoryPath, file));
-                let contentObject = parser(contentObjectRaw);
+                let contentObject = require(path.resolve(directoryPath, file));
                 let response = await fetch(
                     config.apiUrl + '/api/v1/content/' + contentTypeName + '/' + contentObject.id,
                     {method: 'HEAD', headers: headers}
