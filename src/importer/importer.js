@@ -32,20 +32,27 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
         const directory = directories[i];
         if (directory.indexOf(`ContentType`) === 0) {
             let contentTypeName = await importContentTypedDefinitions(path.join(directoryPath, directory), headers);
-
-            await importContentObjects(path.join(directoryPath, directory), imageImportData, contentTypeName, headers);
+            if(contentTypeName) {
+                await importContentObjects(path.join(directoryPath, directory), imageImportData, contentTypeName, headers);
+            } else {
+                console.log('Nothing to import');
+            }
         }
     }
 
     async function importContentTypedDefinitions(directoryPath, headers) {
-        let contentDefinition = require(path.resolve(directoryPath, 'ContentTypeDefinition.json'));
-        let result = await fetch(config.apiUrl + '/api/v1/internal/contenttype', {
-            method: 'POST',
-            body: JSON.stringify(contentDefinition),
-            headers: {...headers, 'Content-Type': 'application/json'},
-        });
-        resultNotify(result, 'Definition', contentDefinition.name);
-        return contentDefinition.name;
+        try {
+            let contentDefinition = require(path.resolve(directoryPath, 'ContentTypeDefinition.json'));
+            let result = await fetch(config.apiUrl + '/api/v1/internal/contenttype', {
+                method: 'POST',
+                body: JSON.stringify(contentDefinition),
+                headers: {...headers, 'Content-Type': 'application/json'},
+            });
+            resultNotify(result, 'Definition', contentDefinition.name);
+            return contentDefinition.name;
+        } catch(e) {
+            return null;
+        }
     }
 
     /**
@@ -58,6 +65,9 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
         if (fs.existsSync(directoryImagePath)) {
             let files = fs.readdirSync(directoryImagePath);
             await Promise.all(files.map(async function (file) {
+                if(file === '.gitkeep') {
+                    return;
+                }
                 const fileId = file.split('.')[0];
                 imageToReplace.push(fileId);
                 let image = await fetch(config.apiUrl + '/api/v1/content/_media?filters={"fileName":{"filter":"' + file + '","type":"contains"}}', {headers: headers});
