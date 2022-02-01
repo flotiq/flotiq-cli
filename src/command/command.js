@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const questionsText = require('./questions');
 const importer = require('../importer/importer');
+const exporter = require('../exporter/exporter');
 const gatsbySetup = require('../gatsby/gatsbySetup');
 const custom = require('../console/console');
 const inquirer = require("inquirer");
@@ -118,6 +119,29 @@ yargs
                 }
             }
         })
+    .command(
+        'export [flotiqApiKey] [directory]',
+        'Export objects from Flotiq to directory',
+        (yargs) => {
+            yargs
+                .positional('flotiqApiKey', {
+                    describe: 'Flotiq Read API KEY.',
+                    type: 'string',
+                })
+                .positional('directory', {
+                    describe: 'Directory path to save data.',
+                    type: 'string',
+                });
+        }, async (argv) => {
+            console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
+            if (yargs.argv._.length < 3) {
+                const answers = await askQuestions(questionsText.IMPORT_QUESTIONS);
+                let {flotiqApiKey, projectDirectory} = answers;
+                await exporter.export(flotiqApiKey, projectDirectory, true);
+            } else if (yargs.argv._.length === 3) {
+                await exporter.export(argv.flotiqApiKey, argv.directory, true);
+            }
+    })
     .help()
     .argv;
 
@@ -166,5 +190,3 @@ function start(flotiqApiKey, directory, url, isJson) {
         await gatsbySetup.develop(directory);
     });
 }
-
-
