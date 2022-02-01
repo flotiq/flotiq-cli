@@ -8,22 +8,21 @@ exports.export = async (apiKey, directoryPath) => {
     let totalObjects = 0;
     let totalPages = contentTypedDefinitionsResponse.total_pages;
 
-    for (let page = 1; page <= totalPages; page++) {
-
+    let page = 1;
+    while (page <= totalPages) {
         console.log(`CTD Page: ${page}/${totalPages}`);
-
         for (let i = 0; i < contentTypedDefinitionsResponse.data.length; i++) {
             await saveSchema(contentTypedDefinitionsResponse.data[i], directoryPath, directoryNumber);
             let countSavedObjects = await saveObjects(apiKey, contentTypedDefinitionsResponse.data[i].name, directoryPath, directoryNumber);
             totalObjects = totalObjects + countSavedObjects;
             directoryNumber++;
         }
-
+        page++;
         contentTypedDefinitionsResponse = await getContentTypeDefinitionsData(apiKey, page);
     }
 
     console.log('\x1b[32mSummary:');
-    console.log(`\x1b[32mTotal content types definitions: ${directoryNumber}`);
+    console.log(`\x1b[32mTotal content types definitions: ${directoryNumber - 1}`);
     console.log(`\x1b[32mTotal content objects: ${totalObjects}`)
 }
 
