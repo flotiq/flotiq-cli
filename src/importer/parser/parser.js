@@ -18,7 +18,7 @@ const deepMap = (obj, fn) => {
     Object.keys(obj).forEach(function(key) {
         let value = obj[key];
         if (value !== null && typeof value === 'object') {
-            newObj[key] = deepMap(value);
+            newObj[key] = deepMap(value, fn);
         } else {
             newObj[key] = fn(value);
         }

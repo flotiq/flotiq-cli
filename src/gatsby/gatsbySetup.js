@@ -13,13 +13,24 @@ exports.setup = async (projectDirectory, starterUrl) => {
 exports.init = async (projectDirectory, apiKey) => {
     try {
         let configPath =  projectDirectory + '/.env';
+        let configPathDev =  projectDirectory + '/.env.development';
         fs.copyFileSync(projectDirectory + '/.flotiq/.env.dist', configPath);
+        fs.copyFileSync(projectDirectory + '/.flotiq/.env.dist', configPathDev);
         let file = fs.readFileSync(configPath);
         file = file.replace('GATSBY_FLOTIQ_API_KEY=', 'GATSBY_FLOTIQ_API_KEY=' + apiKey);
         fs.writeFileSync(configPath, file);
+        fs.writeFileSync(configPathDev, file);
     } catch (e) {
         let fileContent = 'GATSBY_FLOTIQ_API_KEY=' + apiKey + '\n';
         fs.writeFile(projectDirectory + '/.env', fileContent, (err) => {
+
+            if (err) {
+                console.errorCode(100);
+                throw err;
+            }
+
+        });
+        fs.writeFile(projectDirectory + '/.env.development', fileContent, (err) => {
 
             if (err) {
                 console.errorCode(100);
