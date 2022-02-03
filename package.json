@@ -7,7 +7,7 @@
     "flotiq": "bin/flotiq"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [
     "flotiq",
@@ -22,5 +22,9 @@
     "inquirer": "^7.2.0",
     "node-fetch": "^2.6.1",
     "yargs": "^15.3.1"
+  },
+  "devDependencies": {
+    "jest": "^27.4.7",
+    "jest-when": "^3.5.0"
   }
 }

@@ -18,12 +18,17 @@ exports.export = async (apiKey, directoryPath) => {
             directoryNumber++;
         }
         page++;
-        contentTypedDefinitionsResponse = await getContentTypeDefinitionsData(apiKey, page);
+        if (page <= totalPages) {
+            contentTypedDefinitionsResponse = await getContentTypeDefinitionsData(apiKey, page);
+        }
     }
 
+    let totalTypesDefinition = directoryNumber - 1
     console.log('\x1b[32mSummary:');
-    console.log(`\x1b[32mTotal content types definitions: ${directoryNumber - 1}`);
-    console.log(`\x1b[32mTotal content objects: ${totalObjects}`)
+    console.log(`\x1b[32mTotal content types definitions: ${totalTypesDefinition}`);
+    console.log(`\x1b[32mTotal content objects: ${totalObjects}`);
+
+    return {totalTypesDefinition: totalTypesDefinition, totalObjects: totalObjects};
 }
 
 const saveObjects = async (apiKey, ctdName, directoryPath, directoryNumber) => {
@@ -33,12 +38,19 @@ const saveObjects = async (apiKey, ctdName, directoryPath, directoryNumber) => {
     let coDirectoryNumber = 1;
     let countSavedObjects = 0;
     console.log(`Total objects: ${contentObjectsResponseJson.total_count}`)
-    for (let pageCo = 1; pageCo <= totalPages; pageCo++) {
+
+    let pageCo = 1;
+    while(pageCo <= totalPages) {
         console.log(`CO: ${ctdName} Page: ${pageCo}/${totalPages}`);
         for (let i = 0; i < contentObjectsResponseJson.data.length; i++) {
             await saveObject(ctdName, contentObjectsResponseJson.data[i], directoryPath, directoryNumber, coDirectoryNumber);
             coDirectoryNumber++;
             countSavedObjects++;
+        }
+        pageCo++;
+        if (pageCo <= totalPages) {
+            contentObjectsResponse = await fetchContentObjects(apiKey, ctdName, pageCo);
+            contentObjectsResponseJson = await contentObjectsResponse.json();
         }
     }
     return countSavedObjects;

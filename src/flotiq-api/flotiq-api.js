@@ -1,9 +1,9 @@
 const fetch = require("node-fetch");
 const config = require("../configuration/config");
 
-const fetchContentTypeDefinitions = async (apiKey, page = 1, limit = 10, internal = 0) => {
+const fetchContentTypeDefinitions = async (apiKey, page = 1, limit = 100, internal = 0) => {
     return fetch(
-        `${config.apiUrl}/api/v1/internal/contenttype?internal=false&auth_token=${apiKey}&internal=${internal}&page=${page}&limit=${limit}`,
+        `${config.apiUrl}/api/v1/internal/contenttype?auth_token=${apiKey}&internal=${internal}&page=${page}&limit=${limit}`,
         {method: 'GET'}
     );
 }
