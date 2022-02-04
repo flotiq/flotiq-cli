@@ -40,10 +40,11 @@ const saveObjects = async (apiKey, ctdName, directoryPath, directoryNumber) => {
     console.log(`Total objects: ${contentObjectsResponseJson.total_count}`)
 
     let pageCo = 1;
-    while(pageCo <= totalPages) {
+    while (pageCo <= totalPages) {
         console.log(`CO: ${ctdName} Page: ${pageCo}/${totalPages}`);
         for (let i = 0; i < contentObjectsResponseJson.data.length; i++) {
-            await saveObject(ctdName, contentObjectsResponseJson.data[i], directoryPath, directoryNumber, coDirectoryNumber);
+            let co = await clearObject(contentObjectsResponseJson.data[i])
+            await saveObject(ctdName, co, directoryPath, directoryNumber, coDirectoryNumber);
             coDirectoryNumber++;
             countSavedObjects++;
         }
@@ -54,6 +55,13 @@ const saveObjects = async (apiKey, ctdName, directoryPath, directoryNumber) => {
         }
     }
     return countSavedObjects;
+}
+
+const clearObject = async (object) => {
+    delete object.internal;
+    delete object.id;
+
+    return object;
 }
 
 const capitalizeFirstLetter = (string) => {
