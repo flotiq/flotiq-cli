@@ -1,5 +1,6 @@
 module.exports.ctds = {
     "total_pages": 2,
+    "total_count": 20,
     "data": [
         {"data": "1", "name": "a"},
         {"data": "2", "name": "b"},
