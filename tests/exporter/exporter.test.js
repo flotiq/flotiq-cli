@@ -51,11 +51,11 @@ const mockContentObjects = (apiKey, type, page) => {
     if (page === 1) {
         coList = require('./mocks/ctos1-page-1');
     }
-    const CTOS1 = JSON.stringify(coList.ctds);
+    const CTOS = JSON.stringify(coList.ctds);
     when(fetch)
         .expectCalledWith(
             expect.stringContaining(`${config.apiUrl}/api/v1/content/${type}?auth_token=${apiKey}&page=${page}&limit=10`),
             {method: 'GET'}
         )
-        .mockReturnValueOnce(Promise.resolve(new Response(CTOS1)));
+        .mockReturnValueOnce(Promise.resolve(new Response(CTOS)));
 }
