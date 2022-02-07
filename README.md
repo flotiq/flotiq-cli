@@ -96,7 +96,7 @@ or in development:
 `node bin/flotiq purge [flotiqApiKey] [options]`
 ### Export data from Flotiq to json files
 
-This command exports data from the flotiq account to local json files. If the key is limited to selected contentTypes then the data available for this key will be exported.
+This command exports data from the Flotiq account to local JSON files. If the key is limited to selected Content Types, then the data available for this key will be exported.
 
 Execute:
 `flotiq export [flotiqApiKey] [directory]`
@@ -105,7 +105,7 @@ or in development:
 
 `node bin/flotiq export [flotiqApiKey] [directory]`
 
-`[directory]` - path to the directory where the files are to be saved.
+`[directory]` - path to the directory where the files will be saved.
 ### Parameters
 
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
