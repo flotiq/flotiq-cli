@@ -12,7 +12,7 @@ exports.export = async (apiKey, directoryPath) => {
     while (page <= totalPages) {
         console.log(`CTD Page: ${page}/${totalPages}`);
         for (let i = 0; i < contentTypedDefinitionsResponse.data.length; i++) {
-            let ctd = clearCtd(contentTypedDefinitionsResponse.data[i]);
+            let ctd = await clearCtd(contentTypedDefinitionsResponse.data[i]);
             await saveSchema(ctd, directoryPath, directoryNumber);
             let countSavedObjects = await saveObjects(apiKey, contentTypedDefinitionsResponse.data[i].name, directoryPath, directoryNumber);
             totalObjects = totalObjects + countSavedObjects;
