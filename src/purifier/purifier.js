@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const config = require('../configuration/config');
+const {fetchContentTypeDefinitions} = require('../flotiq-api/flotiq-api');
 
 module.exports = purgeContentObjects = async (apiKey, internal = 0) => {
 
@@ -19,12 +20,6 @@ module.exports = purgeContentObjects = async (apiKey, internal = 0) => {
             i--;
         }
     }
-}
-const fetchContentTypeDefinitions = async (apiKey, internal = 0) => {
-    return fetch(
-        config.apiUrl + `/api/v1/internal/contenttype?internal=false&auth_token=${apiKey}&internal=${internal}`,
-        {method: 'GET'}
-    );
 }
 
 const removeContentObjects = async (contentTypeDefinition, apiKey) => {

@@ -1,13 +1,13 @@
 {
   "name": "flotiq-cli",
-  "version": "1.3.3",
+  "version": "1.4.0",
   "description": "Flotiq CLI",
   "main": "src/command/command.js",
   "bin": {
     "flotiq": "bin/flotiq"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [
     "flotiq",
@@ -22,5 +22,9 @@
     "inquirer": "^7.2.0",
     "node-fetch": "^2.6.1",
     "yargs": "^15.3.1"
+  },
+  "devDependencies": {
+    "jest": "^27.4.7",
+    "jest-when": "^3.5.0"
   }
 }
