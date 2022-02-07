@@ -60,6 +60,9 @@ const saveObjects = async (apiKey, ctdName, directoryPath, directoryNumber) => {
 const clearCtd = async (object) => {
     delete object.internal;
     delete object.id;
+    delete object.deletedAt;
+    delete object.createdAt
+    delete object.updatedAt
 
     return object;
 }
