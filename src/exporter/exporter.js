@@ -12,7 +12,8 @@ exports.export = async (apiKey, directoryPath) => {
     while (page <= totalPages) {
         console.log(`CTD Page: ${page}/${totalPages}`);
         for (let i = 0; i < contentTypedDefinitionsResponse.data.length; i++) {
-            await saveSchema(contentTypedDefinitionsResponse.data[i], directoryPath, directoryNumber);
+            let ctd = clearCtd(contentTypedDefinitionsResponse.data[i]);
+            await saveSchema(ctd, directoryPath, directoryNumber);
             let countSavedObjects = await saveObjects(apiKey, contentTypedDefinitionsResponse.data[i].name, directoryPath, directoryNumber);
             totalObjects = totalObjects + countSavedObjects;
             directoryNumber++;
@@ -43,8 +44,7 @@ const saveObjects = async (apiKey, ctdName, directoryPath, directoryNumber) => {
     while (pageCo <= totalPages) {
         console.log(`CO: ${ctdName} Page: ${pageCo}/${totalPages}`);
         for (let i = 0; i < contentObjectsResponseJson.data.length; i++) {
-            let co = await clearObject(contentObjectsResponseJson.data[i])
-            await saveObject(ctdName, co, directoryPath, directoryNumber, coDirectoryNumber);
+            await saveObject(ctdName, contentObjectsResponseJson.data[i], directoryPath, directoryNumber, coDirectoryNumber);
             coDirectoryNumber++;
             countSavedObjects++;
         }
@@ -57,7 +57,7 @@ const saveObjects = async (apiKey, ctdName, directoryPath, directoryNumber) => {
     return countSavedObjects;
 }
 
-const clearObject = async (object) => {
+const clearCtd = async (object) => {
     delete object.internal;
     delete object.id;
 
