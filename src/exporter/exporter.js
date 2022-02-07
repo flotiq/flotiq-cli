@@ -94,7 +94,7 @@ const saveSchema = async (contentTypedDefinition, directoryPath, directoryNumber
 const saveObject = async (ctdName, data, directoryPath, directoryNumber, index) => {
     ctdName = capitalizeFirstLetter(ctdName);
     let ctdPath = `${directoryPath}/ContentType${directoryNumber}`;
-    ctdPath = `${ctdPath}/ContentObject${ctdName}${index}.json`;
+    ctdPath = `${ctdPath}/contentObject${ctdName}${index}.json`;
 
     try {
         fs.writeFileSync(ctdPath, JSON.stringify(data));
