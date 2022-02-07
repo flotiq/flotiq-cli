@@ -27,7 +27,7 @@ exports.export = async (apiKey, directoryPath) => {
     let totalTypesDefinition = directoryNumber - 1
     console.log('\x1b[32mSummary:');
     console.log(`\x1b[32mTotal content types definitions: ${totalTypesDefinition}`);
-    console.log(`\x1b[32mTotal content objects: ${totalObjects}`);
+    console.log(`\x1b[32mTotal content objects: ${totalObjects}\u001b[0m`);
 
     return {totalTypesDefinition: totalTypesDefinition, totalObjects: totalObjects};
 }
