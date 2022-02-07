@@ -135,7 +135,7 @@ yargs
         }, async (argv) => {
             console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
             if (yargs.argv._.length < 3) {
-                const answers = await askQuestions(questionsText.IMPORT_QUESTIONS);
+                const answers = await askQuestions(questionsText.EXPORT_QUESTIONS);
                 let {flotiqApiKey, projectDirectory} = answers;
                 await exporter.export(flotiqApiKey, projectDirectory, true);
             } else if (yargs.argv._.length === 3) {

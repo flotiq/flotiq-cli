@@ -4,6 +4,12 @@ const FLOTIQ_RW_API_KEY = {
     message: "Flotiq RW api key:"
 };
 
+const FLOTIQ_API_KEY = {
+    name: "flotiqApiKey",
+    type: "input",
+    message: "Flotiq api key:"
+};
+
 const PROJECT_DIRECTORY = {
     name: "projectDirectory",
     type: "input",
@@ -46,6 +52,11 @@ const PURGE_QUESTION = [
     PURGE_QUESTION_CONFIRMATION
 ]
 
+const EXPORT_QUESTIONS = [
+    FLOTIQ_API_KEY,
+    PROJECT_DIRECTORY
+]
+
 module.exports = {
     FLOTIQ_RW_API_KEY,
     PROJECT_DIRECTORY,
@@ -54,5 +65,6 @@ module.exports = {
     START_QUESTIONS,
     IMPORT_QUESTIONS,
     WORDPRESS_IMPORT_QUESTIONS,
-    PURGE_QUESTION
+    PURGE_QUESTION,
+    EXPORT_QUESTIONS
 }
