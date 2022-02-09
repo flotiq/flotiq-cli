@@ -6,7 +6,7 @@ Flotiq CLI
 ==================
 
 CLI application for starting your next project with Flotiq fast. 
-Currently supports importing data from Wordpress into Flotiq and seeding example data from our Gatsby starters.
+Currently supports importing data from WordPress into Flotiq and seeding example data from our Gatsby starters.
 
 ## Setup for usage
 
