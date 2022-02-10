@@ -8,13 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Publish if version has been updated
+        uses: pascalgn/npm-publish-action@1.3.8
         with:
-          node-version: 14
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@octocat'
-          always-auth: true
-      - run: npm ci
-      - run: npm publish
+          tag_name: "v%s"
+          tag_message: "v%s"
+          create_tag: "true"
+          commit_pattern: "^Release (\\S+)"
+          workspace: "."
+          publish_command: "npm"
+          publish_args: "--non-interactive"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
