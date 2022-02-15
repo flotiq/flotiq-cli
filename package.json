@@ -1,6 +1,6 @@
 {
   "name": "flotiq-cli",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Flotiq CLI",
   "main": "src/command/command.js",
   "bin": {
@@ -16,7 +16,7 @@
   "author": "Flotiq team <hello@flotiq.com>",
   "license": "MIT",
   "dependencies": {
-    "flotiq-wordpress-import": "^1.0.4",
+    "flotiq-wordpress-import": "^1.1.7",
     "form-data": "^3.0.0",
     "gatsby-cli": "^4.2.0",
     "inquirer": "^7.2.0",

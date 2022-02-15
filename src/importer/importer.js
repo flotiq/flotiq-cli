@@ -129,7 +129,7 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
                     headers: {...headers, 'Content-Type': 'application/json'},
                 });
 
-                resultNotify(result, 'Object', contentObject.name);
+                resultNotify(result, 'Object', contentObject.id);
             }
         }))
     }
