@@ -4,7 +4,7 @@ const {fetchContentTypeDefinitions} = require('../flotiq-api/flotiq-api');
 
 module.exports = purgeContentObjects = async (apiKey, internal = 0) => {
 
-    let contentTypeDefinitions = (await (await fetchContentTypeDefinitions(apiKey, internal))
+    let contentTypeDefinitions = (await (await fetchContentTypeDefinitions(apiKey, 1, 100, internal))
         .json()).data;
 
     let i = 0;
