@@ -7,17 +7,21 @@ const custom = require('../console/console');
 const inquirer = require("inquirer");
 const yargs = require('yargs');
 const fs = require('fs');
+const homedir = require('os').homedir();
 const errors = [];
 const stdOut = [];
 let errorObject = {errorCode: 0};
 const oldConsole = console;
 const purgeContentObjects = require('../purifier/purifier')
+const CONFIG_DIR = homedir + '/.config/configstore/;'
+const FILE_NAME = 'flotiq-cli.json';
+const CONFIG_FILE_PATH = CONFIG_DIR + FILE_NAME ;
 
-yargs
-    .boolean('json-output')
-    .alias('json-output', ['j'])
-    .describe('json-output', ' Whether to save results as JSON')
-    .command('start [flotiqApiKey] [directory] [url]', 'Start the project', (yargs) => {
+
+const startCommand = {
+    command: 'start [flotiqApiKey] [directory] [url]',
+    describe: 'Start the project',
+    builder: ((yargs) => {
         yargs
             .positional('flotiqApiKey', {
                 describe: 'Flotiq Read and write API KEY.',
@@ -31,7 +35,8 @@ yargs
                 describe: 'Url to git repository with Gatbsy starter.',
                 type: 'string',
             });
-    }, async (argv) => {
+    }),
+    handler: (async (argv) => {
         console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
         if (yargs.argv.help) {
             yargs.showHelp();
@@ -48,10 +53,63 @@ yargs
             yargs.showHelp();
             process.exit(1);
         }
+    }),
+}
+
+const configCommand = {
+    command: 'configure [flotiqApiKey]',
+    describe: 'Saves flotiq API key for later usage',
+    builder: (() => {
+        yargs.positional('flotiqApiKey', {
+            describe: 'Flotiq Read and write API KEY.',
+            type: 'string',
+        })
+    }),
+    handler: (async (argv) => {
+        const argCount = argv._.length;
+        let apiKey;
+        if(argCount > 1) {
+            console.error('\x1b[31m', 'To many arguments.');
+            process.exit(1);
+        }
+        if(!argv?.flotiqApiKey) {
+            let { flotiqApiKey } = await askQuestions(questionsText.FLOTIQ_RW_API_KEY);
+            apiKey = flotiqApiKey;
+        } else {
+            apiKey = argv.flotiqApiKey;
+        }
+        if(!/^[a-z\d]{32}$/.test(apiKey)){
+            console.error('\x1b[31m', 'Incorrect value, pass correct Read and Write Flotiq API key.');
+            process.exit();
+        }
+        const configJson = {
+            flotiqApiKey: apiKey
+        }
+        try {
+            fs.accessSync((CONFIG_DIR));
+        } catch (e) {
+            fs.mkdirSync(CONFIG_DIR, {recursive: true});
+        }
+        try {
+            fs.writeFileSync( CONFIG_FILE_PATH, JSON.stringify(configJson, null, "\t"));
+        } catch (e) {
+            console.error('\x1b[31m', 'Cannot save config, make sure console have admin privileges.');
+            process.exit(1);
+        }
     })
+}
+
+yargs
+    .scriptName('flotiq-cli')
+    .boolean('json-output')
+    .alias('json-output', ['j'])
+    .describe('json-output', ' Whether to save results as JSON')
+    .command(startCommand)
+    .command(configCommand)
     .command('import [flotiqApiKey] [directory]', 'Import objects from directory to Flotiq', (yargs) => {
 
         yargs
+
             .positional('flotiqApiKey', {
                 describe: 'Flotiq Read and write API KEY.',
                 type: 'string',
