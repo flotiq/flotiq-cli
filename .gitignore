@@ -48,4 +48,5 @@ Thumbs.db
 # App-specific Files
 output.json
 
-.env
+# environment variables
+/.env
