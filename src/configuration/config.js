@@ -1,9 +1,8 @@
+require('dotenv').config();
+
 let settings = {
-    apiUrl: 'https://api.flotiq.com',
+    apiUrl: process.env.FLOTIQ_API_URL || 'https://api.flotiq.com',
     gatsbyCli:'./node_modules/.bin/gatsby'
 }
-// let settings = {
-//     apiUrl: 'http://localhost:8069',
-//     gatsbyCli: './node_modules/.bin/gatsby'
-// }
+
 module.exports = settings;

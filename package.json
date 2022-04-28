@@ -17,6 +17,7 @@
   "author": "Flotiq team <hello@flotiq.com>",
   "license": "MIT",
   "dependencies": {
+    "dotenv": "^16.0.0",
     "flotiq-wordpress-import": "^1.1.7",
     "form-data": "^3.0.0",
     "gatsby-cli": "^4.2.0",
