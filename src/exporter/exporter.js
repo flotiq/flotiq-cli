@@ -1,5 +1,12 @@
-const {fetchContentTypeDefinitions, fetchContentObjects} = require('../flotiq-api/flotiq-api');
+const {
+    fetchContentTypeDefinitions,
+    fetchContentObjects,
+    fetchMedia
+} = require('../flotiq-api/flotiq-api');
 const fs = require('fs');
+const config = require("../configuration/config");
+const Stream = require('stream').Transform;
+const https = require('https');
 
 exports.export = async (apiKey, directoryPath) => {
 
@@ -14,7 +21,12 @@ exports.export = async (apiKey, directoryPath) => {
         for (let i = 0; i < contentTypedDefinitionsResponse.data.length; i++) {
             let ctd = await clearCtd(contentTypedDefinitionsResponse.data[i]);
             await saveSchema(ctd, directoryPath, directoryNumber);
-            let countSavedObjects = await saveObjects(apiKey, contentTypedDefinitionsResponse.data[i].name, directoryPath, directoryNumber);
+            let countSavedObjects = await saveObjects(
+                apiKey,
+                contentTypedDefinitionsResponse.data[i].name,
+                directoryPath,
+                directoryNumber
+            );
             totalObjects = totalObjects + countSavedObjects;
             directoryNumber++;
         }
@@ -25,11 +37,58 @@ exports.export = async (apiKey, directoryPath) => {
     }
 
     let totalTypesDefinition = directoryNumber - 1
+    let media = await fetchMedia(apiKey);
+    let mediaSummary = await saveMedia(media, apiKey, directoryPath);
+
     console.log('\x1b[32mSummary:');
     console.log(`\x1b[32mTotal content types definitions: ${totalTypesDefinition}`);
     console.log(`\x1b[32mTotal content objects: ${totalObjects}\u001b[0m`);
+    console.log(`\x1b[32mTotal media: ${mediaSummary.totalObjects}\u001b[0m`);
 
-    return {totalTypesDefinition: totalTypesDefinition, totalObjects: totalObjects};
+    return {
+        totalTypesDefinition: totalTypesDefinition,
+        totalObjects: totalObjects,
+        totalMedia: mediaSummary.totalObjects
+    };
+}
+
+const saveMedia = async (response, apiKey, directoryPath) => {
+    let totalObjects = 0;
+    let totalPages = response.total_pages;
+
+    let page = 1;
+    let imagesPath = `${directoryPath}/images`;
+    if (!fs.existsSync(imagesPath)) {
+        fs.mkdirSync(imagesPath, {recursive: true});
+    }
+
+    while (page <= totalPages) {
+        console.log(`Media page: ${page}/${totalPages}`);
+        for (let i = 0; i < response.data.length; i++) {
+            await saveImage(response.data[i], imagesPath);
+            totalObjects = totalObjects + 1;
+        }
+        page++;
+        if (page <= totalPages) {
+            response = await fetchMedia(apiKey, page);
+        }
+    }
+
+    return {totalObjects: totalObjects};
+}
+
+const saveImage = async (data, imagesPath) => {
+    let imageUrl = `${config.apiUrl}/image/0x0/${data.id}.${data.extension}`;
+    let filePath = `${imagesPath}/${data.id}.${data.extension}`;
+    https.request(imageUrl, (response) => {
+        let data = new Stream();
+        response.on('data', function (chunk) {
+            data.push(chunk);
+        });
+        response.on('end', function () {
+            fs.writeFileSync(filePath, data.read());
+        });
+    }).end();
 }
 
 const saveObjects = async (apiKey, ctdName, directoryPath, directoryNumber) => {
