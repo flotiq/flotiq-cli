@@ -18,18 +18,18 @@ yargs
     .boolean('json-output')
     .alias('json-output', ['j'])
     .describe('json-output', ' Whether to save results as JSON')
-    .command('start [directory] [url] [flotiqApiKey]', 'Start the project', (yargs) => {
+    .command('start [flotiqApiKey] [directory] [url]', 'Start the project', (yargs) => {
         yargs
+            .positional('flotiqApiKey', {
+                describe: 'Flotiq Read and write API KEY.',
+                type: 'string',
+            })
             .positional('directory', {
                 describe: 'Directory to create project in.',
                 type: 'string',
             })
             .positional('url', {
                 describe: 'Url to git repository with Gatbsy starter.',
-                type: 'string',
-            })
-            .positional('flotiqApiKey', {
-                describe: 'Flotiq Read and write API KEY.',
                 type: 'string',
             });
     }, async (argv) => {
