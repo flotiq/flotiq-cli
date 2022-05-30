@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+require('dotenv').config();
 const questionsText = require('./questions');
 const importer = require('../importer/importer');
 const exporter = require('../exporter/exporter');
@@ -17,18 +18,18 @@ yargs
     .boolean('json-output')
     .alias('json-output', ['j'])
     .describe('json-output', ' Whether to save results as JSON')
-    .command('start [flotiqApiKey] [directory] [url]', 'Start the project', (yargs) => {
+    .command('start [directory] [url] [flotiqApiKey]', 'Start the project', (yargs) => {
         yargs
-            .positional('flotiqApiKey', {
-                describe: 'Flotiq Read and write API KEY.',
-                type: 'string',
-            })
             .positional('directory', {
                 describe: 'Directory to create project in.',
                 type: 'string',
             })
             .positional('url', {
                 describe: 'Url to git repository with Gatbsy starter.',
+                type: 'string',
+            })
+            .positional('flotiqApiKey', {
+                describe: 'Flotiq Read and write API KEY.',
                 type: 'string',
             });
     }, async (argv) => {
@@ -40,6 +41,9 @@ yargs
         if (yargs.argv._.length < 4) {
             let answers = await askQuestions(questionsText.START_QUESTIONS);
             let {flotiqApiKey, projectDirectory, url} = answers;
+            if(flotiqApiKey === '' || flotiqApiKey === null) {
+                flotiqApiKey = process.env.FLOTIQ_API_KEY;
+            }
             start(flotiqApiKey, projectDirectory, url, yargs.argv['json-output'])
 
         } else if (yargs.argv._.length === 4) {
@@ -88,8 +92,10 @@ yargs
         // overriding the console in this case is not required, custom console is build in wordpress-importer
         if (yargs.argv._.length < 3) {
             const answers = await askQuestions(questionsText.WORDPRESS_IMPORT_QUESTIONS);
-            const {flotiqApiKey, wordpressUrl} = answers;
-
+            let {flotiqApiKey, wordpressUrl} = answers;
+            if(flotiqApiKey === '' || flotiqApiKey === null) {
+                flotiqApiKey = process.env.FLOTIQ_API_KEY;
+            }
             wordpressStart(flotiqApiKey, wordpressUrl, yargs.argv['json-output'])
 
         } else if (yargs.argv._.length === 3) {
@@ -106,11 +112,14 @@ yargs
                     type: 'string',
                 });
         }, async (argv) => {
-            if (yargs.argv._.length < 2) {
+            if (yargs.argv._.length < 2 && process.env.FLOTIQ_API_KEY === "") {
                 console.log('Api key not found')
             } else if (yargs.argv._.length === 2) {
                 const answers = await askQuestions(questionsText.PURGE_QUESTION);
                 const {confirmation} = answers;
+                if(argv.flotiqApiKey === "" || argv.flotiqApiKey === null) {
+                    argv.flotiqApiKey = process.env.FLOTIQ_API_KEY;
+                }
                 if (confirmation.toUpperCase() === 'Y') {
                     await purgeContentObjects(argv.flotiqApiKey, argv.withInternal);
                 } else {
@@ -137,6 +146,9 @@ yargs
             if (yargs.argv._.length < 3) {
                 const answers = await askQuestions(questionsText.EXPORT_QUESTIONS);
                 let {flotiqApiKey, projectDirectory} = answers;
+                if(flotiqApiKey === '' || flotiqApiKey === null) {
+                    flotiqApiKey = process.env.FLOTIQ_API_KEY;
+                }
                 await exporter.export(flotiqApiKey, projectDirectory, true);
             } else if (yargs.argv._.length === 3) {
                 await exporter.export(argv.flotiqApiKey, argv.directory, true);
