@@ -15,4 +15,9 @@ const fetchContentObjects = async (apiKey, ctdName, page = 1, limit = 10) => {
     );
 }
 
-module.exports = {fetchContentTypeDefinitions, fetchContentObjects}
+const fetchMedia = async (apiKey, page = 1, limit = 10) => {
+    let media = await fetchContentObjects(apiKey, '_media', page, limit);
+    return await media.json();
+}
+
+module.exports = {fetchContentTypeDefinitions, fetchContentObjects, fetchMedia}
