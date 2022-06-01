@@ -38,7 +38,7 @@ yargs
             let answers = await askQuestions(questionsText.START_QUESTIONS);
             let {flotiqApiKey, projectDirectory, url} = answers;
             start(flotiqApiKey, projectDirectory, url, yargs.argv['json-output']);
-        } else if (yargs.argv._.length === 3 && process.env.FLOTIQ_API_KEY !== "") {
+        } else if (yargs.argv._.length === 3 && apiKeyDefinedInDotEnv()) {
             start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, yargs.argv['json-output']);
         } else if (yargs.argv._.length === 4) {
             start(argv.flotiqApiKey, argv.directory, argv.url, yargs.argv['json-output']);
@@ -60,7 +60,7 @@ yargs
             let {flotiqApiKey, projectDirectory} = answers;
             let directory = getObjectDataPath(projectDirectory);
             await importer.importer(flotiqApiKey, directory, true);
-        } else if (yargs.argv._.length === 2 && process.env.FLOTIQ_API_KEY !== "") {
+        } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
             let directory = getObjectDataPath(argv.directory);
             await importer.importer(process.env.FLOTIQ_API_KEY, directory, true);
         } else if (yargs.argv._.length === 3) {
@@ -82,7 +82,7 @@ yargs
             const answers = await askQuestions(questionsText.WORDPRESS_IMPORT_QUESTIONS);
             let {flotiqApiKey, wordpressUrl} = answers;
             wordpressStart(flotiqApiKey, wordpressUrl, yargs.argv['json-output'])
-        } else if (yargs.argv._.length === 2 && process.env.FLOTIQ_API_KEY !== "") {
+        } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
             wordpressStart(process.env.FLOTIQ_API_KEY, argv.wordpressUrl, yargs.argv['json-input']);
         } else if (yargs.argv._.length === 3) {
             wordpressStart(argv.flotiqApiKey, argv.wordpressUrl, yargs.argv['json-output']);
@@ -125,7 +125,7 @@ yargs
                 const answers = await askQuestions(questionsText.EXPORT_QUESTIONS);
                 let {flotiqApiKey, projectDirectory} = answers;
                 await exporter.export(flotiqApiKey, projectDirectory, true);
-            } else if (yargs.argv._.length === 2 && process.env.FLOTIQ_API_KEY !== "") {
+            } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
                 await exporter.export(process.env.FLOTIQ_API_KEY, argv.directory, true);
             } else if (yargs.argv._.length === 3) {
                 await exporter.export(argv.flotiqApiKey, argv.directory, true);
@@ -135,6 +135,10 @@ yargs
     .argv;
 
 checkCommand(yargs, 0);
+
+function apiKeyDefinedInDotEnv() {
+    return (process.env.FLOTIQ_API_KEY !== undefined && process.env.FLOTIQ_API_KEY !== "")
+}
 
 function optionalParamFlotiqApiKey(yargs) {
     if (process.env.FLOTIQ_API_KEY === "") {
