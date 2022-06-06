@@ -94,12 +94,14 @@ yargs
         (yargs) => {
             optionalParamFlotiqApiKey(yargs);
         }, async (argv) => {
-            if (yargs.argv._.length < 2 && process.env.FLOTIQ_API_KEY === "") {
+            if (yargs.argv._.length < 2 && !apiKeyDefinedInDotEnv()) {
                 console.log('Api key not found')
+            } else if(yargs.argv._.length === 1 && apiKeyDefinedInDotEnv()) {
+                await purgeContentObjects(argv.flotiqApiKey, argv.withInternal);
             } else if (yargs.argv._.length === 2) {
                 const answers = await askQuestions(questionsText.PURGE_QUESTION);
                 const {confirmation} = answers;
-                if (argv.flotiqApiKey === "" || argv.flotiqApiKey === null) {
+                if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
                     argv.flotiqApiKey = process.env.FLOTIQ_API_KEY;
                 }
                 if (confirmation.toUpperCase() === 'Y') {
