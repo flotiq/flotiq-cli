@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Publish if version has been updated
-        uses: pascalgn/npm-publish-action@1.3.8
+        uses: pascalgn/npm-publish-action@99edcbddc04403efe904d1ad125c867d4dcabdcd
         with:
           tag_name: "v%s"
           tag_message: "v%s"
