@@ -37,11 +37,11 @@ This command will:
 - import example content into your account (e.g. images, blog posts, product descriptions),
 - run `gatsby develop` for you.
 Execute:
-`flotiq start [flotiqApiKey] [projectName] [flotiqStarterUrl]`
+`flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey]`
 
 or in development:
 
-`node bin/flotiq start [flotiqApiKey] [projectName] [flotiqStarterUrl]`
+`node bin/flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey]`
 
 
 ### Import example data for a Gatsby starter
@@ -53,11 +53,11 @@ The number at the end of the directory or file name defines the file import orde
 The `.flotiq/images` directory in a particular starter stores images that will be imported into your Media Library.
 
 Execute:
-`flotiq import [flotiqApiKey] [projectName]`
+`flotiq import [projectName] [flotiqApiKey]`
 
 or in development:
 
-`node bin/flotiq import [flotiqApiKey] [projectName]`
+`node bin/flotiq import [projectName] [flotiqApiKey]`
 
 #### Import variables
 
@@ -78,11 +78,11 @@ The `wordpress-import` command will:
 - automatically pull tags, categories, media, posts and pages from the provided Wordpress URL into your Flotiq account.
 
 Execute:
-`flotiq wordpress-import [flotiqApiKey] [wordpressUrl]`
+`flotiq wordpress-import [wordpressUrl] [flotiqApiKey]`
 
 or in development:
 
-`node bin/flotiq wordpress-import [flotiqApiKey] [wordpressUrl]`
+`node bin/flotiq wordpress-import [wordpressUrl] [flotiqApiKey]`
 
 ### Purge data in Flotiq account
 
@@ -99,11 +99,11 @@ or in development:
 This command exports data from the Flotiq account to local JSON files. If the key is limited to selected Content Types, then the data available for this key will be exported.
 
 Execute:
-`flotiq export [flotiqApiKey] [directory]`
+`flotiq export [directory] [flotiqApiKey]`
 
 or in development:
 
-`node bin/flotiq export [flotiqApiKey] [directory]`
+`node bin/flotiq export [directory] [flotiqApiKey]`
 
 `[directory]` - path to the directory where the files will be saved.
 ### Parameters

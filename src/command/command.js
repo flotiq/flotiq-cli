@@ -143,7 +143,7 @@ function apiKeyDefinedInDotEnv() {
 }
 
 function optionalParamFlotiqApiKey(yargs) {
-    if (process.env.FLOTIQ_API_KEY === "") {
+    if (apiKeyDefinedInDotEnv()) {
         yargs.positional('flotiqApiKey', {
             describe: 'Flotiq Read and write API KEY.',
             type: 'string',
