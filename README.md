@@ -119,6 +119,15 @@ or in development:
 
 `--json-output`, `-j` - Error and console output will be additionally written into json file named `output.json`.
 
+### Install Flotiq SDK
+
+Execute:
+`flotiq sdk install [directory] [flotiqApiKey]`
+
+or in development:
+
+`node bin/flotiq sdk install [directory] [flotiqApiKey]`
+
 ## Gatsby Starters
 
 You can choose one of our starters:
