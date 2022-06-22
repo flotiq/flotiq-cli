@@ -140,7 +140,7 @@ yargs
             type: 'string',
         })
         yargs.positional('directory', {
-            describe: 'Directory when SDK are installed',
+            describe: 'Directory where to install SDK',
             type: 'string',
         });
         optionalParamFlotiqApiKey(yargs);
