@@ -136,8 +136,9 @@ yargs
         })
     .command('sdk install [language] [directory] [flotiqApiKey]', 'Install Flotiq SDK', (yargs) => {
         yargs.positional('language', {
-            describe: 'SDK language',
+            describe: 'SDK language, choices: csharp, go, java, javascript, php, python, typescript',
             type: 'string',
+            choices: ['csharp', 'go', 'java', 'javascript', 'php', 'python', 'typescript']
         })
         yargs.positional('directory', {
             describe: 'Directory where to install SDK',

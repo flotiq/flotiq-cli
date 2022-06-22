@@ -122,11 +122,11 @@ or in development:
 ### Install Flotiq SDK
 
 Execute:
-`flotiq sdk install [directory] [language] [flotiqApiKey]`
+`flotiq sdk install [language] [directory] [flotiqApiKey]`
 
 or in development:
 
-`node bin/flotiq sdk install [directory] [language] [flotiqApiKey]`
+`node bin/flotiq sdk install [language] [directory] [flotiqApiKey]`
 ### Parameters
 
 * `language` - SDK language: csharp, go, java, javascript, php, python, typescript

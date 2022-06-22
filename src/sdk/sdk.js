@@ -17,7 +17,7 @@ module.exports = sdk = async (language, directory, apiKey) => {
     await clean(filePath);
 }
 checkProject = async (directory, language) => {
-    const path = `${directory}/${language}-sdk`;
+    const path = `${directory}/flotiq-${language}-sdk`;
 
     if (fs.existsSync(path)) {
         console.error(ERROR_COLOR, `SDK are installed in ${directory}`);
