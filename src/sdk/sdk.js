@@ -1,28 +1,26 @@
 const https = require('https');
 const fs = require('fs');
 const unzipper = require('unzipper');
-const {exec} = require("child_process");
+const {execSync} = require("child_process");
 const ERROR_COLOR  ='\x1b[36m%s\x1b[0m';
 
 module.exports = sdk = async (language, directory, apiKey) => {
     const filePath = `${directory}/flotiq-sdk-${language}.zip`;
-    await checkProject(language);
+    await checkProject(directory, language);
     await download(language, filePath, apiKey);
-    await extract(filePath);
+    await extract(directory, filePath);
     if (language === 'javascript') {
-        await installJSsdk(language);
-    } else {
-        console.error(ERROR_COLOR, `Language: ${language} - not supported.`);
-        process.exit(1);
+        await installJSsdk(directory, language);
+        console.log(`SDK success installed!`)
     }
+    console.log(`SDK success installed! Please see ${directory}/flotiq-${language}-sdk/README.md for more details.`);
     await clean(filePath);
-    console.log(`SDK success installed! Please see lib/flotiq-${language}-sdk/README.md for more details.`);
 }
-checkProject = async (language) => {
-    const path = `lib/${language}-sdk`;
+checkProject = async (directory, language) => {
+    const path = `${directory}/${language}-sdk`;
 
     if (fs.existsSync(path)) {
-        console.error(ERROR_COLOR, 'SDK are installed in lib/');
+        console.error(ERROR_COLOR, `SDK are installed in ${directory}`);
         process.exit(1);
     }
 }
@@ -48,15 +46,15 @@ download = async (language, filePath, apiKey) => {
     })
 }
 
-extract = async (filePath) => {
+extract = async (directory, filePath) => {
     return fs.createReadStream(filePath)
-        .pipe(unzipper.Extract({path: 'lib/'}))
+        .pipe(unzipper.Extract({path: directory}))
         .promise();
 }
 
-installJSsdk = async (language) => {
-    const cmd = `cd lib/flotiq-${language}-sdk && npm install && npm run build`;
-    exec(cmd, (error, stdout, stderr) => {
+installJSsdk = async (directory, language) => {
+    const cmd = `cd ${directory}/flotiq-${language}-sdk && npm install && npm run build`;
+    execSync(cmd, (error, stdout, stderr) => {
         if (error) {
             console.error(ERROR_COLOR, `error: ${error.message}`);
             return;
