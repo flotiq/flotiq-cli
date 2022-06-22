@@ -11,8 +11,12 @@ module.exports = sdk = async (language, directory, apiKey) => {
     await extract(filePath);
     if (language === 'javascript') {
         await installJSsdk(language);
+    } else {
+        console.error(ERROR_COLOR, `Language: ${language} - not supported.`);
+        process.exit(1);
     }
     await clean(filePath);
+    console.log(`SDK success installed! Please see lib/flotiq-${language}-sdk/README.md for more details.`);
 }
 checkProject = async (language) => {
     const path = `lib/${language}-sdk`;
@@ -23,12 +27,12 @@ checkProject = async (language) => {
     }
 }
 download = async (language, filePath, apiKey) => {
-    console.log('Start downloading SDK');
+    console.log('Start downloading SDK.');
     const file = fs.createWriteStream(filePath);
     return new Promise((resolve) => {
         https.get(`https://lambda-api.flotiq.com/generate-sdk?lang=${language}&token=${apiKey}`, (response) => {
             if (response.statusCode !== 200) {
-                console.error(ERROR_COLOR, 'Error downloading SDK, please check FLOTIQ API KEY');
+                console.error(ERROR_COLOR, 'Error downloading SDK, please check FLOTIQ API KEY.');
                 console.error(ERROR_COLOR, `Response status code: ${response.statusCode}`);
                 file.close();
                 fs.unlinkSync(filePath);
@@ -37,7 +41,7 @@ download = async (language, filePath, apiKey) => {
             response.pipe(file);
             file.on('finish', () => {
                 file.close();
-                console.log('Download Completed');
+                console.log('Download Completed.');
                 resolve();
             })
         });
@@ -51,7 +55,7 @@ extract = async (filePath) => {
 }
 
 installJSsdk = async (language) => {
-    const cmd = `cd lib/${language}-sdk && npm install && npm run build`;
+    const cmd = `cd lib/flotiq-${language}-sdk && npm install && npm run build`;
     exec(cmd, (error, stdout, stderr) => {
         if (error) {
             console.error(ERROR_COLOR, `error: ${error.message}`);
