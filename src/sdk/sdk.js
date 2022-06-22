@@ -2,6 +2,7 @@ const https = require('https');
 const fs = require('fs');
 const unzipper = require('unzipper');
 const {exec} = require("child_process");
+const ERROR_COLOR  ='\x1b[36m%s\x1b[0m';
 
 module.exports = sdk = async (language, directory, apiKey) => {
     const filePath = `${directory}/flotiq-sdk-${language}.zip`;
@@ -17,7 +18,7 @@ checkProject = async (language) => {
     const path = `lib/${language}-sdk`;
 
     if (fs.existsSync(path)) {
-        console.error('SDK are installed in lib/');
+        console.error(ERROR_COLOR, 'SDK are installed in lib/');
         process.exit(1);
     }
 }
@@ -27,8 +28,8 @@ download = async (language, filePath, apiKey) => {
     return new Promise((resolve) => {
         https.get(`https://lambda-api.flotiq.com/generate-sdk?lang=${language}&token=${apiKey}`, (response) => {
             if (response.statusCode !== 200) {
-                console.error('Error downloading SDK, please check FLOTIQ API KEY');
-                console.error(`Response status code: ${response.statusCode}`);
+                console.error(ERROR_COLOR, 'Error downloading SDK, please check FLOTIQ API KEY');
+                console.error(ERROR_COLOR, `Response status code: ${response.statusCode}`);
                 file.close();
                 fs.unlinkSync(filePath);
                 return;
@@ -53,7 +54,7 @@ installJSsdk = async (language) => {
     const cmd = `cd lib/${language}-sdk && npm install && npm run build`;
     exec(cmd, (error, stdout, stderr) => {
         if (error) {
-            console.error(`error: ${error.message}`);
+            console.error(ERROR_COLOR, `error: ${error.message}`);
             return;
         }
         if (stderr) {
