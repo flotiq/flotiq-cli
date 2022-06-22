@@ -113,7 +113,7 @@ or in development:
 * `flotiqStarterUrl` - full link to GatsbyJs starter, the list below
 * `wordpressUrl` - full link to WordPress site from which you wish to migrate content to Flotiq
 * `options` - additional options for command:
-    * `withInternal=1` - purge should remove also internal type objects (`_media`)
+* `withInternal=1` - purge should remove also internal type objects (`_media`)
 
 ### Flags
 
@@ -122,11 +122,15 @@ or in development:
 ### Install Flotiq SDK
 
 Execute:
-`flotiq sdk install [directory] [flotiqApiKey]`
+`flotiq sdk install [directory] [language] [flotiqApiKey]`
 
 or in development:
 
-`node bin/flotiq sdk install [directory] [flotiqApiKey]`
+`node bin/flotiq sdk install [directory] [language] [flotiqApiKey]`
+### Parameters
+
+* `language` - SDK language: csharp, go, java, javascript, php, python, typescript
+
 
 ## Gatsby Starters
 
