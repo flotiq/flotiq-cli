@@ -17,6 +17,11 @@ module.exports = sdk = async (language, directory, apiKey) => {
     await clean(filePath);
 }
 checkProject = async (directory, language) => {
+    if (!fs.existsSync(directory)) {
+        console.log(`Path: '${directory}' doesn't exist, creating it.`);
+        fs.mkdirSync(directory);
+    }
+
     const path = `${directory}/flotiq-${language}-sdk`;
 
     if (fs.existsSync(path)) {
