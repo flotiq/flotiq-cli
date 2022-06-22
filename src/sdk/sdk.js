@@ -13,7 +13,7 @@ module.exports = sdk = async (language, directory, apiKey) => {
         await installJSsdk(directory, language);
         console.log(`SDK successfully installed!`)
     }
-    console.log(`SDK success installed! Please see ${directory}/flotiq-${language}-sdk/README.md for more details.`);
+    console.log(`Please see ${directory}/flotiq-${language}-sdk/README.md for more details.`);
     await clean(filePath);
 }
 checkProject = async (directory, language) => {
