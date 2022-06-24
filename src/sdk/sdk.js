@@ -10,8 +10,10 @@ module.exports = sdk = async (language, directory, apiKey) => {
     await download(language, filePath, apiKey);
     await extract(directory, filePath);
     if (language === 'javascript') {
+        console.log(`Installing...`)
         await installJSsdk(directory, language);
         console.log(`SDK successfully installed!`)
+        console.log(`Now add it to your project running: npm i ${directory}/flotiq-${language}-sdk --save`)
     }
     console.log(`Please see ${directory}/flotiq-${language}-sdk/README.md for more details.`);
     await clean(filePath);
@@ -25,12 +27,12 @@ checkProject = async (directory, language) => {
     const path = `${directory}/flotiq-${language}-sdk`;
 
     if (fs.existsSync(path)) {
-        console.error(ERROR_COLOR, `SDK are installed in ${directory}`);
+        console.error(ERROR_COLOR, `SDK is already installed in ${directory}`);
         process.exit(1);
     }
 }
 download = async (language, filePath, apiKey) => {
-    console.log('Start downloading SDK.');
+    console.log('Start downloading SDK...');
     const file = fs.createWriteStream(filePath);
     return new Promise((resolve) => {
         https.get(`https://lambda-api.flotiq.com/generate-sdk?lang=${language}&token=${apiKey}`, (response) => {
