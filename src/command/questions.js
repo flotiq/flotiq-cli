@@ -31,7 +31,12 @@ const PURGE_QUESTION_CONFIRMATION = {
     message: "Are you sure you want to delete all data available for this API KEY? [y/N]",
     defaultAnswer: 'n'
 }
-
+const LANGUAGE = {
+    name: "language",
+    type: "input",
+    message: "SDK language to install",
+    defaultAnswer: 'javascript'
+}
 const START_QUESTIONS = [
     FLOTIQ_RW_API_KEY,
     PROJECT_DIRECTORY,
@@ -57,6 +62,12 @@ const EXPORT_QUESTIONS = [
     PROJECT_DIRECTORY
 ]
 
+const INSTALL_SDK = [
+    LANGUAGE,
+    PROJECT_DIRECTORY,
+    FLOTIQ_API_KEY,
+]
+
 module.exports = {
     FLOTIQ_RW_API_KEY,
     PROJECT_DIRECTORY,
@@ -66,5 +77,6 @@ module.exports = {
     IMPORT_QUESTIONS,
     WORDPRESS_IMPORT_QUESTIONS,
     PURGE_QUESTION,
-    EXPORT_QUESTIONS
+    EXPORT_QUESTIONS,
+    INSTALL_SDK
 }

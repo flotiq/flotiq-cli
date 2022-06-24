@@ -13,6 +13,7 @@ const stdOut = [];
 let errorObject = {errorCode: 0};
 const oldConsole = console;
 const purgeContentObjects = require('../purifier/purifier')
+const sdk = require('../sdk/sdk');
 
 yargs
     .boolean('json-output')
@@ -133,6 +134,35 @@ yargs
                 await exporter.export(argv.flotiqApiKey, argv.directory, true);
             }
         })
+    .command('sdk install [language] [directory] [flotiqApiKey]', 'Install Flotiq SDK', (yargs) => {
+        yargs.positional('language', {
+            describe: 'SDK language, choices: csharp, go, java, javascript, php, python, typescript',
+            type: 'string',
+            choices: ['csharp', 'go', 'java', 'javascript', 'php', 'python', 'typescript']
+        })
+        yargs.positional('directory', {
+            describe: 'Directory where to install SDK',
+            type: 'string',
+        });
+        optionalParamFlotiqApiKey(yargs);
+    }, async (argv) => {
+        if (yargs.argv.help) {
+            yargs.showHelp();
+            process.exit(1);
+        }
+        if (yargs.argv._.length < 3) {
+            let answers = await askQuestions(questionsText.INSTALL_SDK);
+            let {language, directory, apiKey} = answers;
+            await sdk(language, directory, apiKey);
+        } else if (yargs.argv._.length === 4 && apiKeyDefinedInDotEnv()) {
+            await sdk(argv.language, argv.directory, process.env.FLOTIQ_API_KEY);
+        } else if (yargs.argv._.length === 5) {
+            await sdk(argv.language, argv.directory, argv.flotiqApiKey);
+        } else {
+            yargs.showHelp();
+            process.exit(1);
+        }
+    })
     .help()
     .argv;
 

@@ -113,11 +113,24 @@ or in development:
 * `flotiqStarterUrl` - full link to GatsbyJs starter, the list below
 * `wordpressUrl` - full link to WordPress site from which you wish to migrate content to Flotiq
 * `options` - additional options for command:
-    * `withInternal=1` - purge should remove also internal type objects (`_media`)
+* `withInternal=1` - purge should remove also internal type objects (`_media`)
 
 ### Flags
 
 `--json-output`, `-j` - Error and console output will be additionally written into json file named `output.json`.
+
+### Install Flotiq SDK
+
+Execute:
+`flotiq sdk install [language] [directory] [flotiqApiKey]`
+
+or in development:
+
+`node bin/flotiq sdk install [language] [directory] [flotiqApiKey]`
+### Parameters
+
+* `language` - SDK language: csharp, go, java, javascript, php, python, typescript
+
 
 ## Gatsby Starters
 
