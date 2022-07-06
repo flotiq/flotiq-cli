@@ -16,7 +16,7 @@ exports.init = async (projectDirectory, apiKey) => {
         let configPathDev =  projectDirectory + '/.env.development';
         fs.copyFileSync(projectDirectory + '/.flotiq/.env.dist', configPath);
         fs.copyFileSync(projectDirectory + '/.flotiq/.env.dist', configPathDev);
-        let file = fs.readFileSync(configPath);
+        let file = fs.readFileSync(configPath, 'utf-8');
         file = file.replace('GATSBY_FLOTIQ_API_KEY=', 'GATSBY_FLOTIQ_API_KEY=' + apiKey);
         fs.writeFileSync(configPath, file);
         fs.writeFileSync(configPathDev, file);
