@@ -14,6 +14,8 @@ let errorObject = {errorCode: 0};
 const oldConsole = console;
 const purgeContentObjects = require('../purifier/purifier')
 const sdk = require('../sdk/sdk');
+const stats = require('../stats/stats');
+const { argv } = require('process');
 
 yargs
     .boolean('json-output')
@@ -161,6 +163,16 @@ yargs
         } else {
             yargs.showHelp();
             process.exit(1);
+        }
+    })
+    .command('stats [flotiqApiKey]', 'Display Flotiq stats', (yargs) => {
+    }, (argv) => {
+        if (yargs.argv._.length < 2) {
+            yargs.showHelp();
+            process.exit(1);
+        } else if (yargs.argv._.length === 2) {
+            let apiKey = argv.flotiqApiKey;
+            stats(apiKey);
         }
     })
     .help()
