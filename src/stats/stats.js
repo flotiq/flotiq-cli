@@ -38,20 +38,50 @@ module.exports = stats = async (apiKey) => {
         `${config.apiUrl}/api/v1/search?auth_token=${apiKey}&limit=${limit}&q=*&order_by=internal.updatedAt&order_direction=desc`,
         {method: 'GET'}
     )).json();
-    
-    console.log("Recently updated objects (Content type, ID, Modification date, Title):");
+
+    const idIndex = {};
+
+    function latestObject(title, ctd, time) {
+        this.Title = title;
+        this.CTD = ctd;
+        this.Date = time;
+    };
+
+    function padTo2Digits(num) {
+        return num.toString().padStart(2, '0');
+      }
+      
+      function formatDate(date) {
+        return (
+          [
+            padTo2Digits(date.getMonth() + 1),
+            padTo2Digits(date.getDate()),
+            date.getFullYear(),
+          ].join('/') +
+          ' ' +
+          [
+            padTo2Digits(date.getHours()),
+            padTo2Digits(date.getMinutes()),
+            padTo2Digits(date.getSeconds()),
+          ].join(':')
+        );
+      }
+
+    console.log('\n10 recently modified objects:');
     while (index < limit) {
         
         let ctd = await latestContentObjects.data[index].item.internal.contentType;
         let id = await latestContentObjects.data[index].item.id;
-        let date = await latestContentObjects.data[index].item.internal.updatedAt;
+        let time = await latestContentObjects.data[index].item.internal.updatedAt;
         let title = await latestContentObjects.data[index].item.internal.objectTitle;
         
         if (title == "" && ctd == '_media') {
             title = config.apiUrl + latestContentObjects.data[index].item.url;
         }
 
+        idIndex[id] = new latestObject(title, ctd, formatDate(new Date(time)));
+        
         index++;
-        console.log('\n', ctd, '   ', id, '   ', date, '   ', title);
     }
+    console.table(idIndex);
 }
