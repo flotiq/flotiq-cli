@@ -167,12 +167,13 @@ yargs
     })
     .command('stats [flotiqApiKey]', 'Display Flotiq stats', (yargs) => {
     }, (argv) => {
-        if (yargs.argv._.length < 2) {
+        if (yargs.argv._.length < 2 && apiKeyDefinedInDotEnv()) {
+            stats(process.env.FLOTIQ_API_KEY);
+        } else if (yargs.argv._.length === 2) {
+            stats(argv.flotiqApiKey);
+        } else {
             yargs.showHelp();
             process.exit(1);
-        } else if (yargs.argv._.length === 2) {
-            let apiKey = argv.flotiqApiKey;
-            stats(apiKey);
         }
     })
     .help()
