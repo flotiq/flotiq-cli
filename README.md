@@ -133,7 +133,9 @@ or in development:
 
 ### Display stats
 
-This command displays your Flotiq API Key statistics.
+This command displays your Flotiq API Key following statistics:
+* number of Content Type Definitions, Content Objects by CTD, total Content Objects, Media, Webhooks,
+* 10 recently modified objects.
 
 Execute:
 `flotiq stats [flotiqApiKey]`
