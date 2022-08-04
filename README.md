@@ -131,6 +131,17 @@ or in development:
 
 * `language` - SDK language: csharp, go, java, javascript, php, python, typescript
 
+### Display stats
+
+This command displays your Flotiq API Key statistics.
+
+Execute:
+`flotiq stats [flotiqApiKey]`
+
+or in development:
+
+`node bin/flotiq stats [flotiqApiKey]`
+
 
 ## Gatsby Starters
 
