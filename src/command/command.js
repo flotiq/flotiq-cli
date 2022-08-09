@@ -15,7 +15,6 @@ const oldConsole = console;
 const purgeContentObjects = require('../purifier/purifier')
 const sdk = require('../sdk/sdk');
 const stats = require('../stats/stats');
-const { argv } = require('process');
 
 yargs
     .boolean('json-output')
@@ -166,11 +165,11 @@ yargs
         }
     })
     .command('stats [flotiqApiKey]', 'Display Flotiq stats', (yargs) => {
-    }, (argv) => {
+    }, async (argv) => {
         if (yargs.argv._.length < 2 && apiKeyDefinedInDotEnv()) {
-            stats(process.env.FLOTIQ_API_KEY);
+            await stats(process.env.FLOTIQ_API_KEY);
         } else if (yargs.argv._.length === 2) {
-            stats(argv.flotiqApiKey);
+            await stats(argv.flotiqApiKey);
         } else {
             yargs.showHelp();
             process.exit(1);
