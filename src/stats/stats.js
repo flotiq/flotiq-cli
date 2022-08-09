@@ -7,7 +7,18 @@ const {
 } = require('../flotiq-api/flotiq-api');
 
 module.exports = stats = async (apiKey) => {
-    console.log('Fetching statistics ...');
+    let loading = (function() {
+        let h = ['|', '/', '-', '\\'];
+        let i = 0;
+
+        return setInterval(() => {
+            i = (i > 3) ? 0 : i;
+            console.clear();
+            console.log('Fetching statistics ...' + h[i]);
+            i++;
+        }, 300);
+    })();
+
     let contentTypeDefinitionsResponse = await fetchContentTypeDefinitions(apiKey, 1, 1000);
     let contentTypeDefinitions = await contentTypeDefinitionsResponse.json();
     let totalCTDS = contentTypeDefinitions.total_count;
@@ -97,5 +108,6 @@ module.exports = stats = async (apiKey) => {
 
         index++;
     }
+    clearInterval(loading);
     console.table(idIndex);
 }
