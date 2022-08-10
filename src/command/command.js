@@ -166,7 +166,12 @@ yargs
     })
     .command('stats [flotiqApiKey]', 'Display Flotiq stats', (yargs) => {
     }, async (argv) => {
-        if (yargs.argv._.length < 2 && apiKeyDefinedInDotEnv()) {
+
+        if (yargs.argv._.length === 1 && !apiKeyDefinedInDotEnv()) {
+            let answers = await askQuestions(questionsText.STATS);
+            let {flotiqApiKey} = answers;
+            await stats(flotiqApiKey);
+        } else if(yargs.argv._.length < 2 && apiKeyDefinedInDotEnv()) {
             await stats(process.env.FLOTIQ_API_KEY);
         } else if (yargs.argv._.length === 2) {
             await stats(argv.flotiqApiKey);

@@ -6,6 +6,8 @@ const {
     fetchMedia
 } = require('../flotiq-api/flotiq-api');
 
+let countedObjects = {};
+
 module.exports = stats = async (apiKey) => {
     let loading = (function() {
         let h = ['|', '/', '-', '\\'];
@@ -14,7 +16,7 @@ module.exports = stats = async (apiKey) => {
         return setInterval(() => {
             i = (i > 3) ? 0 : i;
             console.clear();
-            console.log('Fetching statistics ...' + h[i]);
+            console.log('Fetching statistics... ' + h[i]);
             i++;
         }, 300);
     })();
@@ -22,16 +24,6 @@ module.exports = stats = async (apiKey) => {
     let contentTypeDefinitionsResponse = await fetchContentTypeDefinitions(apiKey, 1, 1000);
     let contentTypeDefinitions = await contentTypeDefinitionsResponse.json();
     let totalCTDS = contentTypeDefinitions.total_count;
-
-    const countedObjects = {};
-
-    function CountObjects(numberOfObj) {
-        this['Number of Objects'] = numberOfObj;
-    }
-
-    function pushObj(str, num) {
-        countedObjects[str] = new CountObjects(num);
-    }
 
     pushObj("Content Type Definitions", totalCTDS);
 
@@ -66,32 +58,6 @@ module.exports = stats = async (apiKey) => {
 
     const idIndex = {};
 
-    function LatestObject(title, ctd, time) {
-        this.Title = title;
-        this.CTD = ctd;
-        this.Date = time;
-    }
-
-    function padTo2Digits(num) {
-        return num.toString().padStart(2, '0');
-    }
-
-    function formatDate(date) {
-        return (
-            [
-                padTo2Digits(date.getMonth() + 1),
-                padTo2Digits(date.getDate()),
-                date.getFullYear(),
-            ].join('/') +
-            ' ' +
-            [
-                padTo2Digits(date.getHours()),
-                padTo2Digits(date.getMinutes()),
-                padTo2Digits(date.getSeconds()),
-            ].join(':')
-        );
-    }
-
     console.log('\n10 recently modified objects:');
     while (index < limit) {
 
@@ -110,4 +76,38 @@ module.exports = stats = async (apiKey) => {
     }
     clearInterval(loading);
     console.table(idIndex);
+}
+
+function LatestObject(title, ctd, time) {
+    this.Title = title;
+    this.CTD = ctd;
+    this.Date = time;
+}
+
+function CountObjects(numberOfObj) {
+    this['Number of Objects'] = numberOfObj;
+}
+
+function pushObj(str, num) {
+    countedObjects[str] = new CountObjects(num);
+}
+
+function formatDate(date) {
+    return (
+        [
+            padTo2Digits(date.getMonth() + 1),
+            padTo2Digits(date.getDate()),
+            date.getFullYear(),
+        ].join('/') +
+        ' ' +
+        [
+            padTo2Digits(date.getHours()),
+            padTo2Digits(date.getMinutes()),
+            padTo2Digits(date.getSeconds()),
+        ].join(':')
+    );
+}
+
+function padTo2Digits(num) {
+    return num.toString().padStart(2, '0');
 }

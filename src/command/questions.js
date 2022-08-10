@@ -68,6 +68,10 @@ const INSTALL_SDK = [
     FLOTIQ_API_KEY,
 ]
 
+const STATS = [
+    FLOTIQ_API_KEY,
+]
+
 module.exports = {
     FLOTIQ_RW_API_KEY,
     PROJECT_DIRECTORY,
@@ -78,5 +82,6 @@ module.exports = {
     WORDPRESS_IMPORT_QUESTIONS,
     PURGE_QUESTION,
     EXPORT_QUESTIONS,
-    INSTALL_SDK
+    INSTALL_SDK,
+    STATS
 }
