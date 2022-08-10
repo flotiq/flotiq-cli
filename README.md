@@ -131,6 +131,19 @@ or in development:
 
 * `language` - SDK language: csharp, go, java, javascript, php, python, typescript
 
+### Display stats
+
+This command displays your Flotiq API Key following statistics:
+* number of Content Type Definitions, Content Objects by CTD, total Content Objects, Media, Webhooks,
+* 10 recently modified objects.
+
+Execute:
+`flotiq stats [flotiqApiKey]`
+
+or in development:
+
+`node bin/flotiq stats [flotiqApiKey]`
+
 
 ## Gatsby Starters
 
