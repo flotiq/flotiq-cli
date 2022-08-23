@@ -15,7 +15,6 @@ const oldConsole = console;
 const purgeContentObjects = require('../purifier/purifier')
 const sdk = require('../sdk/sdk');
 const stats = require('../stats/stats');
-const wordpressStart = require("flotiq-wordpress-import");
 
 yargs
     .boolean('json-output')
@@ -84,7 +83,7 @@ yargs
         if (yargs.argv._.length < 2) {
             const answers = await askQuestions(questionsText.WORDPRESS_IMPORT_QUESTIONS);
             let {flotiqApiKey, wordpressUrl} = answers;
-            wordpressStart(flotiqApiKey, wordpressUrl, yargs.argv['json-output'])
+            await wordpressStart(flotiqApiKey, wordpressUrl, yargs.argv['json-output'])
         } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
             await wordpressStart.run(process.env.FLOTIQ_API_KEY, argv.wordpressUrl, yargs.argv['json-input']);
         } else if (yargs.argv._.length === 3) {
