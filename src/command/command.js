@@ -90,6 +90,23 @@ yargs
             wordpressStart(argv.flotiqApiKey, argv.wordpressUrl, yargs.argv['json-output']);
         }
     })
+    .command('contentful-import [flotiqApiKey] [cont_spaceId] [cont_contentManagementApiKey]', 'Import Contentful to Flotiq', (yargs) => {
+    }, async (argv) => {
+
+        const contentful = require('../temp/flotiq-contentful-import.js');
+        // if (yargs.argv._.length === 1 && !apiKeyDefinedInDotEnv()) {
+        //     let answers = await askQuestions(questionsText.STATS);
+        //     let {flotiqApiKey} = answers;
+        contentful(argv.flotiqApiKey, argv.cont_spaceId, argv.cont_contentManagementApiKey);
+        // } else if(yargs.argv._.length < 2 && apiKeyDefinedInDotEnv()) {
+        //     await stats(process.env.FLOTIQ_API_KEY);
+        // } else if (yargs.argv._.length === 2) {
+        //     await stats(argv.flotiqApiKey);
+        // } else {
+        //     yargs.showHelp();
+        //     process.exit(1);
+        // }
+    })
     .command(
         'purge [flotiqApiKey] [options]',
         'Purge Flotiq account, removes all objects to which the key has access',
