@@ -153,8 +153,8 @@ yargs
         }
         if (yargs.argv._.length < 3) {
             let answers = await askQuestions(questionsText.INSTALL_SDK);
-            let {language, directory, apiKey} = answers;
-            await sdk(language, directory, apiKey);
+            let {language, projectDirectory, apiKey} = answers;
+            await sdk(language, projectDirectory, apiKey);
         } else if (yargs.argv._.length === 4 && apiKeyDefinedInDotEnv()) {
             await sdk(argv.language, argv.directory, process.env.FLOTIQ_API_KEY);
         } else if (yargs.argv._.length === 5) {
