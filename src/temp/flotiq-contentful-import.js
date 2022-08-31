@@ -44,15 +44,24 @@ module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentMa
         return;
     }
 
-    // resultMedia = await importMedia(exportData.assets, translation, flotiq_ApiKey, cont_spaceId); 
+    await importCtd(exportData.contentTypes)
+        .then((resultCtd) => importMedia(exportData.assets, translation, flotiq_ApiKey, cont_spaceId))
+        .then((resultMedia) => importCo(exportData.entries, resultMedia, translation))
+        .catch(
+            console.log("Import Error!") // (todo) error message: try harder
+        )
+        
+        // (?) this doesnt work, idk why
+    // resultMedia = await importMedia(exportData.assets, translation, flotiq_ApiKey, cont_spaceId);
 
-    await importCtd(exportData.contentTypes);
+    // await importCtd(exportData.contentTypes);
 
-    // importCo(exportData.entries, resultMedia, translation);
+    // await importCo(exportData.entries, resultMedia, translation);
 }
 
 async function importCtd(data) {
 
+    let resultArr = [];
     data.forEach(async (obj) => {
         let ctdRec = {
             name: obj.sys.id,
@@ -73,7 +82,7 @@ async function importCtd(data) {
                 propertiesConfig: {},
             },
         };
-        
+
         // (todo) appropriate message for change of the ctd name, this one i wouldnt call appropriate
         if (/\d/.test(ctdRec.name)) {
             console.log("\n\n", ctdRec.name, " has a number!\n\n");   
@@ -91,13 +100,13 @@ async function importCtd(data) {
         });
 
         //  IMPORT
-        let result = await fetch(config.apiUrl + '/api/v1/internal/contenttype', {
+        resultArr[obj] = await fetch(config.apiUrl + '/api/v1/internal/contenttype', {
             method: 'POST',
             body: JSON.stringify(ctdRec), // (?) error code 500 Internal server error
             headers: {...headers, 'Content-Type': 'application/json'},
         })
-        console.log("Import: ", ctdRec.name); // DEL
-        console.log(await result.json());
+        // console.log("Import: ", ctdRec.name); // DEL
+        // console.log(await resultArr[obj].json());
         // console.log(JSON.stringify(ctdRec, null, 2)); // DEL
     });
 
@@ -213,9 +222,8 @@ async function importCtd(data) {
         }
         return objTypes[type];
     }
+    return resultArr;
 }
-
-
 
 async function importCo(data, media, trans) {
     
