@@ -249,8 +249,6 @@ async function importCo(data, media, trans) {
             } else console.error(field.sys.type, ': unknown field type!');
 
         }
-        console.log('test import co: ', JSON.stringify(coRec, null, 2), '\n\n'); //DEL
-        
             //IMPORT
         let response = await fetch(
             'https://api.flotiq.com/api/v1/content/' + obj.sys.contentType.sys.id, {
@@ -258,7 +256,6 @@ async function importCo(data, media, trans) {
             body: JSON.stringify(coRec),
             headers: {...headers, 'Content-Type': 'application/json' }
         });
-        console.log('response: ', response);
     });
 }
 
@@ -271,7 +268,6 @@ async function importMedia(data, trans, apiKey) {
     
     await data.forEach(async (file) => {
         let result = await flotiqMediaUpload(apiKey, file, images);
-        // console.log("Result for uploading: ", file.fileName, " : ", result); // DEL
 
         if (!result.code) {
             uploadedFiles[uploaded] = {
@@ -284,11 +280,7 @@ async function importMedia(data, trans, apiKey) {
             // notifyErrorsMedia // (TODO)
         }
         // resultNotify(result, file.fileName);
-
-        // console.log("data test: ", file); //DEL
-        // console.log("\n###\n");
     });
-    // console.log(uploadedFiles);
     return (uploadedFiles);
 
     function convertImages(images) {
@@ -298,94 +290,95 @@ async function importMedia(data, trans, apiKey) {
         })
         return convertedImages;
     }
+    async function flotiqMedia(apiKey) {
+        let totalPages = 1;
+        let totalCount = 0;
+        let page = 1;
+        let allImages = [];
+        let headers = {
+            accept: 'application/json',
+        };
+        headers['X-AUTH-TOKEN'] = apiKey;
+        for (page; page <= totalPages; page++) {
+            console.log('Fetching ' + config.apiUrl + '/api/v1/content/_media?limit=1000&page=' + page);
+            let images = await fetch(config.apiUrl + '/api/v1/content/_media?limit=1000&page=' + page, {headers: headers})
+            let imagesJson = await images.json();
+            totalCount = imagesJson.total_count;
+            totalPages = imagesJson.total_pages;
+            allImages = [...allImages, ...imagesJson.data];
+        }
+        return allImages;
+    }
+    
+    async function convertCfMedia(data, trans) {
+        const assets = [];
+        for (i in data) {
+            assets[i] = {
+                fileName: data[i].fields.file[trans].fileName,
+                url: 'http:' + data[i].fields.file[trans].url,
+                mime_type: data[i].fields.file[trans].contentType,
+                cf_id: data[i].sys.id
+            }
+        }
+        return (assets);
+    }
+    
+    async function flotiqMediaUpload(apiKey, contentObject, images) { // (?) leave argument contentTypeName or make const `media`?
+        let headers = {
+            accept: 'application/json',
+        };
+        headers['X-AUTH-TOKEN'] = apiKey;
+    
+        //console.log("Test image matching filename: ", images);
+        // console.log("Does file exist in flotiq media library already?: ", (!!images[contentObject.fileName])); // DEL
+        // console.log("Content object: ", contentObject); // DEL
+    
+        
+        if (!images[contentObject.fileName]) {
+            let file = await fetch(encodeURI(contentObject.url));
+            if (file.status === 200) {
+                file = await file.buffer();
+                const form = new FormData();
+                form.append('file', file, contentObject.fileName);
+                if (imageMimeType(contentObject.mime_type)) {
+                    form.append('type', 'image');
+                } else {
+                    form.append('type', 'file');
+                }
+                form.append('save', '1');
+                return await fetch(config.apiUrl + '/api/media', {
+                    method: 'POST',
+                    body: form,
+                    headers: headers,
+                }).then(async res => {
+                    if (res.status < 200 || res.status >= 300) {
+                        // console.errorCode(101);
+                        console.error(res.statusText + '(' + res.status + ')')
+                    }
+                    return res.json()
+                });
+            }
+        } else {
+            return images[contentObject.fileName];
+        }
+    
+        function imageMimeType(mime_type) {
+            return [
+                "image/jpeg",
+                "image/png",
+                "image/apng",
+                "image/bmp",
+                "image/gif",
+                "image/x-icon",
+                "image/svg+xml",
+                "image/tiff",
+                "image/webp"
+            ].indexOf(mime_type) > -1
+        }
+    }
 };
 
-const flotiqMedia = async (apiKey) => {
-    let totalPages = 1;
-    let totalCount = 0;
-    let page = 1;
-    let allImages = [];
-    let headers = {
-        accept: 'application/json',
-    };
-    headers['X-AUTH-TOKEN'] = apiKey;
-    for (page; page <= totalPages; page++) {
-        console.log('Fetching ' + config.apiUrl + '/api/v1/content/_media?limit=1000&page=' + page);
-        let images = await fetch(config.apiUrl + '/api/v1/content/_media?limit=1000&page=' + page, {headers: headers})
-        let imagesJson = await images.json();
-        totalCount = imagesJson.total_count;
-        totalPages = imagesJson.total_pages;
-        allImages = [...allImages, ...imagesJson.data];
-    }
-    return allImages;
-}
 
-async function convertCfMedia(data, trans) {
-    const assets = [];
-    for (i in data) {
-        assets[i] = {
-            fileName: data[i].fields.file[trans].fileName,
-            url: 'http:' + data[i].fields.file[trans].url,
-            mime_type: data[i].fields.file[trans].contentType,
-            cf_id: data[i].sys.id
-        }
-    }
-    return (assets);
-}
-
-const flotiqMediaUpload = async (apiKey, contentObject, images) => { // (?) leave argument contentTypeName or make const `media`?
-    let headers = {
-        accept: 'application/json',
-    };
-    headers['X-AUTH-TOKEN'] = apiKey;
-
-    //console.log("Test image matching filename: ", images);
-    // console.log("Does file exist in flotiq media library already?: ", (!!images[contentObject.fileName])); // DEL
-    // console.log("Content object: ", contentObject); // DEL
-
-    
-    if (!images[contentObject.fileName]) {
-        let file = await fetch(encodeURI(contentObject.url));
-        if (file.status === 200) {
-            file = await file.buffer();
-            const form = new FormData();
-            form.append('file', file, contentObject.fileName);
-            if (imageMimeType(contentObject.mime_type)) {
-                form.append('type', 'image');
-            } else {
-                form.append('type', 'file');
-            }
-            form.append('save', '1');
-            return await fetch(config.apiUrl + '/api/media', {
-                method: 'POST',
-                body: form,
-                headers: headers,
-            }).then(async res => {
-                if (res.status < 200 || res.status >= 300) {
-                    // console.errorCode(101);
-                    console.error(res.statusText + '(' + res.status + ')')
-                }
-                return res.json()
-            });
-        }
-    } else {
-        return images[contentObject.fileName];
-    }
-
-    function imageMimeType(mime_type) {
-        return [
-            "image/jpeg",
-            "image/png",
-            "image/apng",
-            "image/bmp",
-            "image/gif",
-            "image/x-icon",
-            "image/svg+xml",
-            "image/tiff",
-            "image/webp"
-        ].indexOf(mime_type) > -1
-    }
-}
 
 resultNotify = (response, name) => { // (todo) result notify should be made anew and for whole migrator
     
