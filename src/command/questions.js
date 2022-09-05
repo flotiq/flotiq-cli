@@ -25,6 +25,16 @@ const WORDPRESS_PAGE_URL = {
     type: "input",
     message: "Url to wordpress project:"
 };
+const CF_SPACE_ID = {
+    name: "contentfulSpaceId",
+    type: "input",
+    message: "Contentful space ID"
+}
+const CF_API_KEY = {
+    name: "contentfulApiKey",
+    type: "input",
+    message: "Contentful api key"
+}
 const PURGE_QUESTION_CONFIRMATION = {
     name: "confirmation",
     type: "input",
@@ -51,6 +61,12 @@ const IMPORT_QUESTIONS = [
 const WORDPRESS_IMPORT_QUESTIONS = [
     FLOTIQ_RW_API_KEY,
     WORDPRESS_PAGE_URL,
+]
+
+const CONTENTFUL_IMPORT = [
+    FLOTIQ_RW_API_KEY,
+    CF_SPACE_ID,
+    CF_API_KEY,
 ]
 
 const PURGE_QUESTION = [
@@ -80,6 +96,7 @@ module.exports = {
     START_QUESTIONS,
     IMPORT_QUESTIONS,
     WORDPRESS_IMPORT_QUESTIONS,
+    CONTENTFUL_IMPORT,
     PURGE_QUESTION,
     EXPORT_QUESTIONS,
     INSTALL_SDK,

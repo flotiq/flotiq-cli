@@ -44,19 +44,10 @@ module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentMa
         return;
     }
 
-    await importCtd(exportData.contentTypes)
-        .then((resultCtd) => importMedia(exportData.assets, translation, flotiq_ApiKey, cont_spaceId))
-        .then((resultMedia) => importCo(exportData.entries, resultMedia, translation))
-        .catch(
-            console.log("Import Error!") // (todo) error message: try harder
-        )
-        
-        // (?) this doesnt work, idk why
-    // resultMedia = await importMedia(exportData.assets, translation, flotiq_ApiKey, cont_spaceId);
-
-    // await importCtd(exportData.contentTypes);
-
-    // await importCo(exportData.entries, resultMedia, translation);
+    Promise.all([importCtd(exportData.contentTypes), importMedia(exportData.assets, translation, flotiq_ApiKey)])
+        .then((resultMedia) => {
+            importCo(exportData.entries, resultMedia, translation)
+        });
 }
 
 async function importCtd(data) {
