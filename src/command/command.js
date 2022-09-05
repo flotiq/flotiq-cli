@@ -95,8 +95,8 @@ yargs
         const contentful = require('../contentful-import/flotiq-contentful-import.js');
         if (yargs.argv._.length < 3 || yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv()) {
             const answers = await askQuestions(questionsText.CONTENTFUL_IMPORT);
-            let { flotiqApiKey, cf_spaceId, cf_contentManagementApiKey } = answers;
-            contentful(flotiqApiKey, cf_spaceId, cf_contentManagementApiKey);
+            let { flotiqApiKey, contentfulSpaceId, contentfulApiKey } = answers;
+            contentful(flotiqApiKey, contentfulSpaceId, contentfulApiKey);
         } else if(yargs.argv._.length === 3 && apiKeyDefinedInDotEnv()) {
             contentful(process.env.FLOTIQ_API_KEY, argv.cf_spaceId, argv.cf_contentManagementApiKey);
         } else if (yargs.argv._.length === 4) {
