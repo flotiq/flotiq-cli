@@ -1,17 +1,17 @@
 const fetch = require('node-fetch');
 const config = require("../configuration/config");
-const contentfulExport = require('contentful-export')
+const contentfulExport = require('contentful-export');
 const fs = require('fs');
 const { string } = require('yargs');
 const { parse } = require('path');
 const FormData = require('form-data');
+const cfHtmlRenderer = require('@contentful/rich-text-html-renderer/dist/rich-text-html-renderer.es5');
 
 let headers = {
     accept: 'application/json',
 };
 
 module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentManagementApiKey, translation = "en-US") => {
-
     headers['X-AUTH-TOKEN'] = flotiq_ApiKey;
 
         // directory
@@ -45,14 +45,12 @@ module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentMa
     }
 
     Promise.all([importCtd(exportData.contentTypes), importMedia(exportData.assets, translation, flotiq_ApiKey)])
-        .then((resultMedia) => {
-            importCo(exportData.entries, resultMedia, translation)
+        .then((resultCtd_Media) => {
+            importCo(exportData.entries, resultCtd_Media[1], translation)
         });
 }
 
 async function importCtd(data) {
-
-    let resultArr = [];
     data.forEach(async (obj) => {
         let ctdRec = {
             name: obj.sys.id,
@@ -87,17 +85,17 @@ async function importCtd(data) {
             ctdRec.metaDefinition.order.push(field.id);
 
             ctdRec.schemaDefinition.allOf[1].properties[field.id] = buildSchemaDefinition(field);
-            ctdRec.metaDefinition.propertiesConfig[field.id] = buildMetaDefinition(field);
+            ctdRec.metaDefinition.propertiesConfig[field.id] = buildMetaDefinition(field, obj.displayField);
         });
 
         //  IMPORT
-        resultArr[obj] = await fetch(config.apiUrl + '/api/v1/internal/contenttype', {
+        result = await fetch(config.apiUrl + '/api/v1/internal/contenttype', {
             method: 'POST',
             body: JSON.stringify(ctdRec), // (?) error code 500 Internal server error
             headers: {...headers, 'Content-Type': 'application/json'},
         })
         // console.log("Import: ", ctdRec.name); // DEL
-        // console.log(await resultArr[obj].json());
+        // console.log(await result.json());
         // console.log(JSON.stringify(ctdRec, null, 2)); // DEL
     });
 
@@ -118,8 +116,38 @@ async function importCtd(data) {
             schemaDefinition.items = buildSchemaDefinition(field.items);
             schemaDefinition.minItems = 1;
         } else if (field.type === "Object") {
-            // schemaDefinition.properties = buildSchemaDefinition(field.items); // (TODO) check if works with json objects properly
-            schemaDefinition.minItems = 1;
+            schemaDefinition.properties = { // (?)
+                time: {
+                    type: "number"
+                },
+                blocks: {
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: {
+                            id: {
+                                type: "string"
+                            },
+                            data: {
+                                type: "object",
+                                properties: {
+                                    text: {
+                                        type: "string"
+                                    }
+                                },
+                                additionalProperties: true
+                            },
+                            type: {
+                                type: "string"
+                            }
+                        }
+                    }
+                },
+                version: {
+                    type: "string"
+                }
+            }
+            schemaDefinition.additionalProperties = true;
         } else {
             schemaDefinition.minLength = 1;
         }
@@ -127,16 +155,17 @@ async function importCtd(data) {
         return schemaDefinition;
     }
     
-    function buildMetaDefinition(field) {
+    function buildMetaDefinition(field, displayField) {
         let metaDefinition = {
             label: field.name,
             unique: false,
-            helpText: "", // (todo) get helptext prop from CF fields. where?
-            inputType: convertFieldType(field.type, field.linkType), // (todo) make CF field types match Flotiq field types
+            helpText: "",
+            inputType: convertFieldType(field.type, field.linkType),
             //CF FT: Rich text, Text, Number, Date, Location, Media, Boolean, JSON, Reference
             //Flotiq FT: Text, Textarea, Markdown, Rich text, Email, Number, Radio, Checkbox, Select, Relation, List, Geo, Media, Date, Block
-            
-            // (todo) other properties like :isTitlePart
+        }
+        if (field.id === displayField) {
+            metaDefinition.isTitlePart = true;   
         }
 
         field.validations.forEach((validation) => {
@@ -154,7 +183,11 @@ async function importCtd(data) {
             
             if (field.linkType === "Entry") {
                 metaDefinition.validation.relationMultiple = true; // (?) (todo) how to determine if multiple relation should be enabled? for now it is by default
-                metaDefinition.validation.relationContenttype = field.validations[0].linkContentType[0]
+                if (!!field.validations[0]?.linkContentType[0]) {
+                    metaDefinition.validation.relationContenttype = field.validations[0].linkContentType[0]
+                } else {
+                    metaDefinition.validation.relationContenttype = "";
+                }
             }
         }
         if (field.type === "Array") {
@@ -179,7 +212,7 @@ async function importCtd(data) {
 
     function findJsonType(type) {
         // 
-        if (type === "Text" || type === "Symbol" || type === "Date") return ("string");
+        if (type === "Text" || type === "Symbol" || type === "Date" || type === "RichText") return ("string");
         if (type === "Integer" || type === "Number") return ("number");
         if (type === "Location" || type === "Object") return ("object");
         if (type === "Array" || type === "Link") return ("array");
@@ -206,29 +239,35 @@ async function importCtd(data) {
             Number: "number",
             Date: "dateTime",
             Location: "geo",
-            Array: "datasource", // (?) TBU
+            Array: "datasource",
             Boolean: "checkbox", // (?)
-            Object: "object",
-            Link: "datasource", // (?)
+            Object: "block",
+            Link: "datasource",
         }
         return objTypes[type];
     }
-    return resultArr;
 }
 
 async function importCo(data, media, trans) {
-    
+    // console.log(JSON.stringify(data, null, 2)); //DEL
+    // return; //DEL
     data.forEach(async (obj) => {
         let coRec = {}
-        
         for (const i in obj.fields) {
 
             let field = obj.fields[`${i}`][trans];
 
-            if (field.hasOwnProperty("sys") == false) {
-                coRec[i] = field;
+            if (field.hasOwnProperty("sys") === false) {
+                if (field?.nodeType === "document") {
+                    coRec[i] = cfHtmlRenderer.documentToHtmlString(field);
+                } else {
+                    coRec[i] = field;
+                }
             } else if (field.sys.type === "Link") {
                 media.forEach((asset) => {
+                    // console.log("test: this field: ", i, "may cause trouble!\n"); //DEL
+                    // console.log("field.sys.id: ", field.sys.id); //DEL
+                    // console.log("asset.id: ", asset.id, "\n\n"); //DEL
                     if (field.sys.id === asset.id) {
                         coRec[i] = [{
                             dataUrl: asset.url,
@@ -241,12 +280,14 @@ async function importCo(data, media, trans) {
 
         }
             //IMPORT
-        let response = await fetch(
+        let result = await fetch(
             'https://api.flotiq.com/api/v1/content/' + obj.sys.contentType.sys.id, {
             method: 'post',
             body: JSON.stringify(coRec),
             headers: {...headers, 'Content-Type': 'application/json' }
         });
+        console.log(JSON.stringify(coRec, null, 2), "\n"); //DEL
+        // console.log(result); //DEL
     });
 }
 
@@ -314,16 +355,11 @@ async function importMedia(data, trans, apiKey) {
         return (assets);
     }
     
-    async function flotiqMediaUpload(apiKey, contentObject, images) { // (?) leave argument contentTypeName or make const `media`?
+    async function flotiqMediaUpload(apiKey, contentObject, images) {
         let headers = {
             accept: 'application/json',
         };
         headers['X-AUTH-TOKEN'] = apiKey;
-    
-        //console.log("Test image matching filename: ", images);
-        // console.log("Does file exist in flotiq media library already?: ", (!!images[contentObject.fileName])); // DEL
-        // console.log("Content object: ", contentObject); // DEL
-    
         
         if (!images[contentObject.fileName]) {
             let file = await fetch(encodeURI(contentObject.url));
