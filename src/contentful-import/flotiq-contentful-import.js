@@ -45,8 +45,8 @@ module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentMa
     }
 
     Promise.all([importCtd(exportData.contentTypes), importMedia(exportData.assets, translation, flotiq_ApiKey)])
-        .then((resultCtd_Media) => {
-            importCo(exportData.entries, resultCtd_Media[1], translation)
+        .then((result) => {
+            importCo(exportData.entries, result[1], translation)
         });
 }
 
@@ -58,7 +58,7 @@ async function importCtd(data) {
             schemaDefinition: {
                 type: "object",
                 allOf: [{
-                    "$ref": "#/components/schemas/AbstractContentTypeSchemaDefinition", // (?) idk what is it for
+                    "$ref": "#/components/schemas/AbstractContentTypeSchemaDefinition",
                 }, {
                     type: "object",
                     properties: {},
@@ -87,13 +87,7 @@ async function importCtd(data) {
             ctdRec.schemaDefinition.allOf[1].properties[field.id] = buildSchemaDefinition(field);
             ctdRec.metaDefinition.propertiesConfig[field.id] = buildMetaDefinition(field, obj.displayField);
         });
-
-        //  IMPORT
-        result = await fetch(config.apiUrl + '/api/v1/internal/contenttype', {
-            method: 'POST',
-            body: JSON.stringify(ctdRec), // (?) error code 500 Internal server error
-            headers: {...headers, 'Content-Type': 'application/json'},
-        })
+        let result = flotiqCtdUpload(ctdRec);
         // console.log("Import: ", ctdRec.name); // DEL
         // console.log(await result.json());
         // console.log(JSON.stringify(ctdRec, null, 2)); // DEL
@@ -110,46 +104,54 @@ async function importCtd(data) {
             schemaDefinition.items = {
                 $ref: "#/components/schemas/DataSource",
             }
-            schemaDefinition.minItems = 1;
+            schemaDefinition.minItems = 0; // (todo) check if that doesnt change to 1 if the field is required
         } else if (field.type === "Array") {
             // (TODO) find if CF can have nested fields in array/field/object
             schemaDefinition.items = buildSchemaDefinition(field.items);
-            schemaDefinition.minItems = 1;
+            schemaDefinition.minItems = 0;
         } else if (field.type === "Object") {
-            schemaDefinition.properties = { // (?)
-                time: {
+            schemaDefinition.additionalProperties = false;
+            // schemaDefinition.properties = { // (todo) get JSON objects imported
+            //     blocks: {
+            //         items: {
+            //             properties: {
+            //                 data: {
+            //                     additionalProperties: true,
+            //                     properties: {
+            //                         text: {
+            //                             type: "string"
+            //                         }
+            //                     },
+            //                     type: "object"
+            //                 },
+            //                 id: {
+            //                     type: "string"
+            //                 },
+            //                 type: {
+            //                     type: "string"
+            //                 }
+            //             },
+            //             type: "object"
+            //         },
+            //         type: "array"
+            //     },
+            //     time: {
+            //         type: "number"
+            //     },
+            //     version: {
+            //         type: "string"
+            //     }
+            // }
+        } else if (field.type === "Location") {
+            schemaDefinition.additionalProperties = false;
+            schemaDefinition.properties = {
+                lat: {
                     type: "number"
                 },
-                blocks: {
-                    type: "array",
-                    items: {
-                        type: "object",
-                        properties: {
-                            id: {
-                                type: "string"
-                            },
-                            data: {
-                                type: "object",
-                                properties: {
-                                    text: {
-                                        type: "string"
-                                    }
-                                },
-                                additionalProperties: true
-                            },
-                            type: {
-                                type: "string"
-                            }
-                        }
-                    }
-                },
-                version: {
-                    type: "string"
+                lon: {
+                    type: "number"
                 }
             }
-            schemaDefinition.additionalProperties = true;
-        } else {
-            schemaDefinition.minLength = 1;
         }
 
         return schemaDefinition;
@@ -160,7 +162,7 @@ async function importCtd(data) {
             label: field.name,
             unique: false,
             helpText: "",
-            inputType: convertFieldType(field.type, field.linkType),
+            inputType: convertFieldType(field.type),
             //CF FT: Rich text, Text, Number, Date, Location, Media, Boolean, JSON, Reference
             //Flotiq FT: Text, Textarea, Markdown, Rich text, Email, Number, Radio, Checkbox, Select, Relation, List, Geo, Media, Date, Block
         }
@@ -210,47 +212,49 @@ async function importCtd(data) {
         return metaDefinition;
     }
 
-    function findJsonType(type) {
-        // 
-        if (type === "Text" || type === "Symbol" || type === "Date" || type === "RichText") return ("string");
-        if (type === "Integer" || type === "Number") return ("number");
-        if (type === "Location" || type === "Object") return ("object");
-        if (type === "Array" || type === "Link") return ("array");
-        if (type === "Boolean") return ("boolean");
-        
-        return ("Unknown field type");
-        // (todo) change to object and return its proper value like in convertFieldType below
+    async function flotiqCtdUpload(data) {
+        let result = await fetch(config.apiUrl + '/api/v1/internal/contenttype', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {...headers, 'Content-Type': 'application/json'},
+        })
+        return result;
     }
+}
+
+function findJsonType(type) {
+    // 
+    if (type === "Text" || type === "Symbol" || type === "Date" || type === "RichText") return ("string");
+    if (type === "Integer" || type === "Number") return ("number");
+    if (type === "Location" || type === "Object") return ("object");
+    if (type === "Array" || type === "Link") return ("array");
+    if (type === "Boolean") return ("boolean");
     
-    function convertFieldType(type, linkType) {
-        // if (type === "Link") {
-        //     if (linkType === "Asset") return ("datasource");
-        //     if (linkType === "Entry") return ("datasource"); // (?) TBU idk what field type should it be
-        //     console.error("Unknown link type!");
-        // }
-        // if (type === "Array") {
-        //     return ("datasource");
-        // } //DEL?
-        objTypes = {
-            RichText: "richtext",
-            Text: "text",
-            Symbol: "text",
-            Integer: "number",
-            Number: "number",
-            Date: "dateTime",
-            Location: "geo",
-            Array: "datasource",
-            Boolean: "checkbox", // (?)
-            Object: "block",
-            Link: "datasource",
-        }
-        return objTypes[type];
+    return ("Unknown field type");
+    // (todo) change to object and return its proper value like in convertFieldType below
+}
+
+function convertFieldType(type) {
+    objTypes = {
+        RichText: "richtext",
+        Text: "text",
+        Symbol: "text",
+        Integer: "number",
+        Number: "number",
+        Date: "dateTime",
+        Location: "geo",
+        Array: "datasource",
+        Boolean: "checkbox",
+        Object: "block", // (todo) flotiq block is not the same as CF's JSON object
+        Link: "datasource",
     }
+    return objTypes[type];
 }
 
 async function importCo(data, media, trans) {
     // console.log(JSON.stringify(data, null, 2)); //DEL
     // return; //DEL
+    const Media = media;
     data.forEach(async (obj) => {
         let coRec = {}
         for (const i in obj.fields) {
@@ -259,42 +263,66 @@ async function importCo(data, media, trans) {
 
             if (field.hasOwnProperty("sys") === false) {
                 if (field?.nodeType === "document") {
-                    coRec[i] = cfHtmlRenderer.documentToHtmlString(field);
+                    coRec[i] = await cfHtmlRenderer.documentToHtmlString(field);
+                    coRec[i] = selectImages(coRec[i], field.content);
+                } else if (field.hasOwnProperty("type")) { // (!) (todo) this one is for JSON object, WIP
+                //     coRec[i] = {
+                //         type: convertFieldType(field.type),
+                //     }
                 } else {
                     coRec[i] = field;
                 }
             } else if (field.sys.type === "Link") {
-                media.forEach((asset) => {
-                    // console.log("test: this field: ", i, "may cause trouble!\n"); //DEL
-                    // console.log("field.sys.id: ", field.sys.id); //DEL
-                    // console.log("asset.id: ", asset.id, "\n\n"); //DEL
-                    if (field.sys.id === asset.id) {
-                        coRec[i] = [{
-                            dataUrl: asset.url,
-                            type: "internal" // (?) should it be internal?
-                        }]
-                    }
-                });
-
+                coRec[i] = getImage(field.sys.id)
             } else console.error(field.sys.type, ': unknown field type!');
 
         }
-            //IMPORT
-        let result = await fetch(
-            'https://api.flotiq.com/api/v1/content/' + obj.sys.contentType.sys.id, {
-            method: 'post',
-            body: JSON.stringify(coRec),
-            headers: {...headers, 'Content-Type': 'application/json' }
-        });
-        console.log(JSON.stringify(coRec, null, 2), "\n"); //DEL
+        let result = flotiqCoUpload(coRec, obj.sys.contentType.sys.id);
+        console.log("Test import CO: \n", JSON.stringify(coRec, null, 2), "\n"); //DEL
         // console.log(result); //DEL
     });
+
+    function getImage(id) {
+        let image = Media.find(element => element.id === id);
+        if (image) {
+            return [{
+                dataUrl: image.url,
+                type: "internal", // (?) should it be internal?
+            }]
+        } else return;
+    }
+
+    function selectImages(html, obj) { // (todo) bind entries
+        obj.forEach((cont) => {
+            if (cont.nodeType === "asset-hyperlink") { // (!) does it work properly? missing extension?
+                let image = getImage(cont.data.target.sys.id);
+                html = html.replace("type: asset-hyperlink id: " + cont.data.target.sys.id, "<a href=\"" + config.apiUrl + image[0].dataUrl + "\">" + cont.content[0].value + "</a>");
+            } else if (cont.nodeType === "embedded-asset-block") {
+                let image = getImage(cont.data.target.sys.id);
+                html += "<img alt=\"\" src=\"" + config.apiUrl + image[0].dataUrl + `"/>`; // (?) " adds backslash at the ned of URL???
+                console.log("TEST DATA URL: ", image[0].dataUrl);
+            } else if (cont.hasOwnProperty("content")) {
+                html = selectImages(html, cont.content);
+            }
+        });
+        return html;
+    }
+
+    async function flotiqCoUpload(data, ctd) {
+        let result = await fetch(
+            'https://api.flotiq.com/api/v1/content/' + ctd, {
+            method: 'post',
+            body: JSON.stringify(data),
+            headers: {...headers, 'Content-Type': 'application/json' }
+        });
+        return result;
+    }
 }
 
 // (todo) mssg for exceeding file quota
 async function importMedia(data, trans, apiKey) {
     let images = await flotiqMedia(apiKey);
-    images = convertImages(images);
+    images = nameImages(images);
     data = await convertCfMedia(data, trans);
     let uploadedFiles = []; let uploaded = 0;
     
@@ -315,7 +343,7 @@ async function importMedia(data, trans, apiKey) {
     });
     return (uploadedFiles);
 
-    function convertImages(images) {
+    function nameImages(images) {
         let convertedImages = {};
         images.forEach(image => {
             convertedImages[image.fileName] = image;
@@ -404,8 +432,6 @@ async function importMedia(data, trans, apiKey) {
         }
     }
 };
-
-
 
 resultNotify = (response, name) => { // (todo) result notify should be made anew and for whole migrator
     
