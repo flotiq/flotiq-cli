@@ -38,8 +38,6 @@ module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentMa
 }
 
 async function importCtd(data) {
-    let ctd = [];
-    let count = 0;
     data.forEach(async (obj) => {
         let ctdRec = {
             name: obj.sys.id,
@@ -76,15 +74,13 @@ async function importCtd(data) {
             ctdRec.schemaDefinition.allOf[1].properties[field.id] = buildSchemaDefinition(field);
             ctdRec.metaDefinition.propertiesConfig[field.id] = buildMetaDefinition(field, obj.displayField);
         });
-        ctd[count] = ctdRec;
-        count++;
-        // let result = flotiqCtdUpload(ctdRec);
+        let result = flotiqCtdUpload(ctdRec);
+        // (todo) notify
+
         // console.log("Import: ", ctdRec.name); // DEL
         // console.log(await result.json());
         // console.log(JSON.stringify(ctdRec, null, 2)); // DEL
     });
-
-    let result = flotiqCtdUpload(ctd);
 
     function buildSchemaDefinition(field) {
         
@@ -141,10 +137,10 @@ async function importCtd(data) {
             schemaDefinition.additionalProperties = false;
             schemaDefinition.properties = {
                 lat: {
-                    type: "number"
+                    type: "number",
                 },
                 lon: {
-                    type: "number"
+                    type: "number",
                 }
             }
         }
@@ -249,7 +245,9 @@ function convertFieldType(type) {
 async function importCo(data, media, trans) {
     // console.log(JSON.stringify(data, null, 2)); //DEL
     // return; //DEL
-    data.forEach(async (obj) => {
+    let co = {};
+    await Promise.all(data.map(async (obj) => {
+        co[obj.sys.contentType.sys.id] = [];
         let coRec = {}
         for (const i in obj.fields) {
 
@@ -277,10 +275,14 @@ async function importCo(data, media, trans) {
             } else console.error(field.sys.type, ': unknown field type!');
 
         }
-        let result = flotiqCoUpload(coRec, obj.sys.contentType.sys.id);
-        console.log("Test import CO: \n", JSON.stringify(coRec, null, 2), "\n"); //DEL
+        // let result = flotiqCoUpload(coRec, obj.sys.contentType.sys.id);
+        await co[obj.sys.contentType.sys.id].push(coRec);
+        // console.log("please work", JSON.stringify(co[obj.sys.contentType.sys.id],null,2)); //DEL
+        // console.log("Test import CoRec to push: \n", JSON.stringify(coRec, null, 2), "\n"); //DEL
         // console.log(result); //DEL
-    });
+    }));
+    // console.log("test co\n", JSON.stringify(co, null, 2)); //DEL
+    flotiqCoUpload(co);
 
     function getImage(id) {
         let image = media.find(element => element.id === id);
@@ -293,12 +295,10 @@ async function importCo(data, media, trans) {
         obj.forEach((cont) => {
             if (cont.nodeType === "asset-hyperlink") {
                 let image = getImage(cont.data.target.sys.id);
-                console.log("test image: ", image);
                 html = html.replace("type: asset-hyperlink id: " + cont.data.target.sys.id, "<a href=\"" + config.apiUrl + image.url + path.extname(image.fileName) + `\">` + cont.content[0].value + "</a>"); //(todo) extension
                 html = html.replace(`<a href=\"https://api.flotiq.com/api/v1/content/_media/`, `<a href=\"https://api.flotiq.com/image/0x0/`);
             } else if (cont.nodeType === "embedded-asset-block") {
                 let image = getImage(cont.data.target.sys.id);
-                console.log("test image: ", image);
                 html += "<img alt=\"\" src=\"" + config.apiUrl + image.url + path.extname(image.fileName) + `\"/>`;
                 html = html.replace(`src=\"https://api.flotiq.com/api/v1/content/_media/`, `src=\"https://api.flotiq.com/image/0x0/`);
             } else if (cont.hasOwnProperty("content")) {
@@ -308,18 +308,28 @@ async function importCo(data, media, trans) {
         return html;
     }
 
-    async function flotiqCoUpload(data, ctd) {
-        let result = await fetch(
-            'https://api.flotiq.com/api/v1/content/' + ctd, {
-            method: 'post',
-            body: JSON.stringify(data),
-            headers: {...headers, 'Content-Type': 'application/json' }
-        });
+    async function flotiqCoUpload(data) {
+        let result = [];
+        const limit = 100;
+        // console.log("data test:", JSON.stringify(data,null,2));//DEL
+        for (i in data) {
+            // console.log("\n\nTEST data[i]: ", i, ":\n", JSON.stringify(data[i], null, 2)); //DEL
+            for (let j = 0; j < data[i].length; j += limit) {
+                let page = data[i].slice(j, j + limit);
+                result[i] = await fetch(
+                    'https://api.flotiq.com/api/v1/content/' + i + '/batch', {
+                    method: 'post',
+                    body: JSON.stringify(page),
+                    headers: { ...headers, 'Content-Type': 'application/json' }
+                });
+            }
+        }
         return result;
     }
 }
 
 // (todo) mssg for exceeding file quota
+// (todo) batch
 async function importMedia(data, trans, apiKey) {
     let images = await flotiqMedia(apiKey);
     images = nameImages(images);
