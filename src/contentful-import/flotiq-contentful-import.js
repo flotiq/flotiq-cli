@@ -14,19 +14,6 @@ let headers = {
 module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentManagementApiKey, translation = "en-US") => {
     headers['X-AUTH-TOKEN'] = flotiq_ApiKey;
 
-        // directory
-    // let directories = [];
-    // try {
-    //     directories = fs.readdirSync(directoryPath);
-    // } catch (e) {
-    //     if (exit) {
-    //         console.error('\x1b[36m%s\x1b[0m', 'Incorrect import directory, cannot find .flotiq directory inside!');
-    //         process.exit(1);
-    //     } else {
-    //         return
-    //     }
-    // }
-
     const export_options = {
         spaceId: cont_spaceId,
         managementToken: cont_contentManagementApiKey,
@@ -43,7 +30,7 @@ module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentMa
         console.error('Oh no! Some errors occurred!', err)
         return;
     }
-
+    
     Promise.all([importCtd(exportData.contentTypes), importMedia(exportData.assets, translation, flotiq_ApiKey)])
         .then((result) => {
             importCo(exportData.entries, result[1], translation)
@@ -92,7 +79,6 @@ async function importCtd(data) {
         // console.log(await result.json());
         // console.log(JSON.stringify(ctdRec, null, 2)); // DEL
     });
-
 
     function buildSchemaDefinition(field) {
         
@@ -254,7 +240,6 @@ function convertFieldType(type) {
 async function importCo(data, media, trans) {
     // console.log(JSON.stringify(data, null, 2)); //DEL
     // return; //DEL
-    const Media = media;
     data.forEach(async (obj) => {
         let coRec = {}
         for (const i in obj.fields) {
@@ -283,7 +268,7 @@ async function importCo(data, media, trans) {
     });
 
     function getImage(id) {
-        let image = Media.find(element => element.id === id);
+        let image = media.find(element => element.id === id);
         if (image) {
             return [{
                 dataUrl: image.url,
@@ -293,14 +278,17 @@ async function importCo(data, media, trans) {
     }
 
     function selectImages(html, obj) { // (todo) bind entries
+        console.log("\n\ntest media: ", media); //DEL
         obj.forEach((cont) => {
             if (cont.nodeType === "asset-hyperlink") { // (!) does it work properly? missing extension?
                 let image = getImage(cont.data.target.sys.id);
-                html = html.replace("type: asset-hyperlink id: " + cont.data.target.sys.id, "<a href=\"" + config.apiUrl + image[0].dataUrl + "\">" + cont.content[0].value + "</a>");
+                html = html.replace("type: asset-hyperlink id: " + cont.data.target.sys.id, "<a href=\"" + config.apiUrl + image[0].dataUrl + ".png" + "\">" + cont.content[0].value + "</a>"); //(todo) extension
+                html = html.replace(`<a href=\"https://api.flotiq.com/api/v1/content/_media/`, `<a href=\"https://api.flotiq.com/image/0x0/`);
             } else if (cont.nodeType === "embedded-asset-block") {
                 let image = getImage(cont.data.target.sys.id);
-                html += "<img alt=\"\" src=\"" + config.apiUrl + image[0].dataUrl + `"/>`; // (?) " adds backslash at the ned of URL???
-                console.log("TEST DATA URL: ", image[0].dataUrl);
+                html += "<img alt=\"\" src=\"" + config.apiUrl + image[0].dataUrl + ".png" + `"/>`; // (?) " adds backslash at the ned of URL???
+                html = html.replace(`src=\"https://api.flotiq.com/api/v1/content/_media/`, `src=\"https://api.flotiq.com/image/0x0/`);
+                // console.log("TEST DATA URL: ", image[0].dataUrl); //DEL
             } else if (cont.hasOwnProperty("content")) {
                 html = selectImages(html, cont.content);
             }
