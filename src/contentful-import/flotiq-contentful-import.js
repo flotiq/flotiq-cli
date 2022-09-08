@@ -3,7 +3,7 @@ const config = require("../configuration/config");
 const contentfulExport = require('contentful-export');
 const fs = require('fs');
 const { string } = require('yargs');
-const { parse } = require('path');
+const path = require('path');
 const FormData = require('form-data');
 const cfHtmlRenderer = require('@contentful/rich-text-html-renderer/dist/rich-text-html-renderer.es5');
 
@@ -30,7 +30,7 @@ module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentMa
         console.error('Oh no! Some errors occurred!', err)
         return;
     }
-    
+
     Promise.all([importCtd(exportData.contentTypes), importMedia(exportData.assets, translation, flotiq_ApiKey)])
         .then((result) => {
             importCo(exportData.entries, result[1], translation)
@@ -38,6 +38,8 @@ module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentMa
 }
 
 async function importCtd(data) {
+    let ctd = [];
+    let count = 0;
     data.forEach(async (obj) => {
         let ctdRec = {
             name: obj.sys.id,
@@ -66,7 +68,7 @@ async function importCtd(data) {
 
         obj.fields.forEach((field) => {
 
-            if (field.required === true) {
+            if (field.required) {
                 ctdRec.schemaDefinition.required.push(field.id);
             }
             ctdRec.metaDefinition.order.push(field.id);
@@ -74,11 +76,15 @@ async function importCtd(data) {
             ctdRec.schemaDefinition.allOf[1].properties[field.id] = buildSchemaDefinition(field);
             ctdRec.metaDefinition.propertiesConfig[field.id] = buildMetaDefinition(field, obj.displayField);
         });
-        let result = flotiqCtdUpload(ctdRec);
+        ctd[count] = ctdRec;
+        count++;
+        // let result = flotiqCtdUpload(ctdRec);
         // console.log("Import: ", ctdRec.name); // DEL
         // console.log(await result.json());
         // console.log(JSON.stringify(ctdRec, null, 2)); // DEL
     });
+
+    let result = flotiqCtdUpload(ctd);
 
     function buildSchemaDefinition(field) {
         
@@ -90,11 +96,14 @@ async function importCtd(data) {
             schemaDefinition.items = {
                 $ref: "#/components/schemas/DataSource",
             }
-            schemaDefinition.minItems = 0; // (todo) check if that doesnt change to 1 if the field is required
+            if (field.required) {
+                schemaDefinition.minItems = 1;
+            }
         } else if (field.type === "Array") {
-            // (TODO) find if CF can have nested fields in array/field/object
             schemaDefinition.items = buildSchemaDefinition(field.items);
-            schemaDefinition.minItems = 0;
+            if (field.required) {
+                schemaDefinition.minItems = 1;
+            }
         } else if (field.type === "Object") {
             schemaDefinition.additionalProperties = false;
             // schemaDefinition.properties = { // (todo) get JSON objects imported
@@ -258,7 +267,13 @@ async function importCo(data, media, trans) {
                     coRec[i] = field;
                 }
             } else if (field.sys.type === "Link") {
-                coRec[i] = getImage(field.sys.id)
+                let image = await getImage(field.sys.id)
+                if (image) {
+                    coRec[i] = [{
+                        dataUrl: image.url,
+                        type: "internal", // (?) should it be internal?
+                    }]
+                }
             } else console.error(field.sys.type, ': unknown field type!');
 
         }
@@ -270,25 +285,22 @@ async function importCo(data, media, trans) {
     function getImage(id) {
         let image = media.find(element => element.id === id);
         if (image) {
-            return [{
-                dataUrl: image.url,
-                type: "internal", // (?) should it be internal?
-            }]
-        } else return;
+            return image;
+        } else return; //(todo) error notify
     }
 
     function selectImages(html, obj) { // (todo) bind entries
-        console.log("\n\ntest media: ", media); //DEL
         obj.forEach((cont) => {
-            if (cont.nodeType === "asset-hyperlink") { // (!) does it work properly? missing extension?
+            if (cont.nodeType === "asset-hyperlink") {
                 let image = getImage(cont.data.target.sys.id);
-                html = html.replace("type: asset-hyperlink id: " + cont.data.target.sys.id, "<a href=\"" + config.apiUrl + image[0].dataUrl + ".png" + "\">" + cont.content[0].value + "</a>"); //(todo) extension
+                console.log("test image: ", image);
+                html = html.replace("type: asset-hyperlink id: " + cont.data.target.sys.id, "<a href=\"" + config.apiUrl + image.url + path.extname(image.fileName) + `\">` + cont.content[0].value + "</a>"); //(todo) extension
                 html = html.replace(`<a href=\"https://api.flotiq.com/api/v1/content/_media/`, `<a href=\"https://api.flotiq.com/image/0x0/`);
             } else if (cont.nodeType === "embedded-asset-block") {
                 let image = getImage(cont.data.target.sys.id);
-                html += "<img alt=\"\" src=\"" + config.apiUrl + image[0].dataUrl + ".png" + `"/>`; // (?) " adds backslash at the ned of URL???
+                console.log("test image: ", image);
+                html += "<img alt=\"\" src=\"" + config.apiUrl + image.url + path.extname(image.fileName) + `\"/>`;
                 html = html.replace(`src=\"https://api.flotiq.com/api/v1/content/_media/`, `src=\"https://api.flotiq.com/image/0x0/`);
-                // console.log("TEST DATA URL: ", image[0].dataUrl); //DEL
             } else if (cont.hasOwnProperty("content")) {
                 html = selectImages(html, cont.content);
             }
@@ -320,7 +332,7 @@ async function importMedia(data, trans, apiKey) {
         if (!result.code) {
             uploadedFiles[uploaded] = {
                 fileName: file.fileName,
-                url: result.url.replace("/image/0x0/", "/api/v1/content/_media/").replace("." + result.extension, ""), // (?) is there more cleaver way to remove extension and replace config url?
+                url: result.url.replace("/image/0x0/", "/api/v1/content/_media/").replace("." + result.extension, ""),
                 id: file.cf_id
             }
             uploaded++;
