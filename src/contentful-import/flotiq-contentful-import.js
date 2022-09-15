@@ -15,6 +15,8 @@ module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentMa
         useVerboseRenderer: true
     }
 
+    console.log("Running Contentful export");
+
     let exportData;
     try {
         exportData = await contentfulExport(export_options)
@@ -29,12 +31,8 @@ module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentMa
             resultNotify(result[1][0], "media");
             return await importCo(exportData.entries, result[1][1], translation, flotiq_ApiKey);
         })
-        .then(async /* DEL */ (result) => {
+        .then((result) => {
             resultNotify(result, "content_object");
-            // DEL 
-            // for (i in result) {
-            //     console.log("co result:", await result[i].json());
-            // }
         });
 }
 
@@ -60,10 +58,6 @@ async function importCtd(data, apiKey) {
                 propertiesConfig: {},
             },
         };
-
-        if (/\d/.test(ctdRec.name)) {
-            throw new Error("Err ", ctdRec.name, "contains digits.");
-        }
 
         obj.fields.forEach((field) => {
             if (field.required) {
@@ -171,7 +165,7 @@ function findJsonType(type) {
 function convertFieldType(type) {
     objTypes = {
         RichText: "richtext",
-        Text: "text",
+        Text: "textMarkdown",
         Symbol: "text",
         Integer: "number",
         Number: "number",
@@ -184,18 +178,16 @@ function convertFieldType(type) {
     }
     return objTypes[type];
 }
-//(todo) untitled CO causes a bug
+//(todo) untitled CO causes a bug --- in notify co success count(?) data still migrates properly
 async function importCo(data, media, trans, apiKey) {
-    // console.log(JSON.stringify(data, null, 2)); //DEL
-    // return; //DEL
     let co = {};
     await Promise.all(data.map(async (obj) => {
         co[obj.sys.contentType.sys.id] = [];
         let coRec = {
             id: obj.sys.contentType.sys.id + "-" + obj.sys.id,
         }
-        for (const i in obj.fields) {
 
+        for (const i in obj.fields) {
             let field = obj.fields[`${i}`][trans];
 
             if (field.hasOwnProperty("sys") === false) {
@@ -215,7 +207,8 @@ async function importCo(data, media, trans, apiKey) {
                         type: "internal",
                     }]
                 }
-            } else console.error(field.sys.type, ': unknown field type!');
+            }
+            // if (field.hasOwnProperty("sys") === false) { coRec[i] = "jajko" } // DEL test notify co error
         }
         await co[obj.sys.contentType.sys.id].push(coRec);
         // console.log(JSON.stringify(co[obj.sys.contentType.sys.id],null,2)); //DEL
@@ -229,11 +222,7 @@ async function importCo(data, media, trans, apiKey) {
 
     function getImageByCfId(id) {
         let image = media.find(element => element.id === id);
-        if (image) {
-            return image;
-        } else {
-            console.error("Error! Couldn't find flotiq media of Contentful's id: ", id);
-        }
+        return image;
     }
 
     function cfImagesToHtml(html, obj) {
@@ -260,18 +249,17 @@ async function importMedia(data, trans, apiKey) {
     let mediaRec = [];
     let uploadedFiles = []; let uploaded = 0;
     
-    await data.forEach(async (file) => {
-        mediaRec[file] = await flotiqMediaUpload(apiKey, file, images);
-
-        if (!mediaRec[file].code) {
+    await Promise.all(data.map(async (file) => {
+        mediaRec[file.cf_id] = await flotiqMediaUpload(apiKey, file, images);
+        if (!mediaRec[file.cf_id].code) {
             uploadedFiles[uploaded] = {
                 fileName: file.fileName,
-                url: mediaRec[file].url.replace("/image/0x0/", "/api/v1/content/_media/").replace("." + mediaRec[file].extension, ""),
+                url: mediaRec[file.cf_id].url.replace("/image/0x0/", "/api/v1/content/_media/").replace("." + mediaRec[file.cf_id].extension, ""),
                 id: file.cf_id
             }
             uploaded++;
         }
-    });
+    }));
     return ([mediaRec, uploadedFiles]);
         
     function nameImages(images) {
