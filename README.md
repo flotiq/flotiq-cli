@@ -131,6 +131,19 @@ or in development:
 
 * `language` - SDK language: csharp, go, java, javascript, php, python, typescript
 
+### Import data from Contentful to Flotiq
+
+The `contentful-import` command will automatically pull content types, assets and content objects from Contentful space to your Flotiq account.
+
+Execute:
+`flotiq contentful-import [flotiqApiKey] [contentfulSpaceId] [contentfulContentManagementToken] [translation]`
+
+or in development:
+
+`node bin/flotiq contentful-import [flotiqApiKey] [contentfulSpaceId] [contentfulContentManagementToken] [translation]`
+
+`[translation]` - selection of Contentful's locale. en-US by default.
+
 ### Display stats
 
 This command displays your Flotiq API Key following statistics:

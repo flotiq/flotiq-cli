@@ -90,17 +90,19 @@ yargs
             wordpressStart(argv.flotiqApiKey, argv.wordpressUrl, yargs.argv['json-output']);
         }
     })
-    .command('contentful-import [flotiqApiKey] [cf_spaceId] [cf_contentManagementApiKey]', 'Import Contentful to Flotiq', (yargs) => {
+    .command('contentful-import [flotiqApiKey] [cf_spaceId] [cf_contentManagementApiKey] [translation]', 'Import Contentful to Flotiq', (yargs) => {
     }, async (argv) => {
         const contentful = require('../contentful-import/flotiq-contentful-import.js');
         if (yargs.argv._.length < 3 || yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv()) {
             const answers = await askQuestions(questionsText.CONTENTFUL_IMPORT);
             let { flotiqApiKey, contentfulSpaceId, contentfulApiKey } = answers;
             contentful(flotiqApiKey, contentfulSpaceId, contentfulApiKey);
-        } else if(yargs.argv._.length === 3 && apiKeyDefinedInDotEnv()) {
+        } else if (yargs.argv._.length === 3 && apiKeyDefinedInDotEnv()) {
             contentful(process.env.FLOTIQ_API_KEY, argv.cf_spaceId, argv.cf_contentManagementApiKey);
         } else if (yargs.argv._.length === 4) {
             contentful(argv.flotiqApiKey, argv.cf_spaceId, argv.cf_contentManagementApiKey);
+        } else if (yargs.argv._.length === 5) {
+            contentful(argv.flotiqApiKey, argv.cf_spaceId, argv.cf_contentManagementApiKey, argv.translation);
         } else {
             yargs.showHelp();
             process.exit(1);
