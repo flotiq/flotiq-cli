@@ -25,15 +25,12 @@ module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentMa
         return;
     }
 
-    Promise.all([importCtd(exportData.contentTypes, flotiq_ApiKey), importMedia(exportData.assets, translation, flotiq_ApiKey)])
-        .then(async (result) => {
-            resultNotify(result[0], "content_type");
-            resultNotify(result[1][0], "media");
-            return await importCo(exportData.entries, result[1][1], translation, flotiq_ApiKey);
-        })
-        .then((result) => {
-            resultNotify(result, "content_object");
-        });
+    resultCtd = await importCtd(exportData.contentTypes, flotiq_ApiKey);
+    resultNotify(resultCtd, "content_type");
+    resultMedia = await importMedia(exportData.assets, translation, flotiq_ApiKey);
+    resultNotify(resultMedia[0], "media");
+    resultCo = await importCo(exportData.entries, resultMedia[1], translation, flotiq_ApiKey);
+    resultNotify(resultCo, "content_object");
 }
 
 async function importCtd(data, apiKey) {
@@ -69,10 +66,7 @@ async function importCtd(data, apiKey) {
             ctdRec.metaDefinition.propertiesConfig[field.id] = buildMetaDefinition(field, obj.displayField);
         });
         ctd.push(await flotiqCtdUpload(ctdRec, apiKey));
-        // console.log("Import: ", ctdRec.name); // DEL
-        // console.log(JSON.stringify(ctdRec, null, 2)); // DEL
     }));
-    // console.log("allCTDs: ", ctd); //DEL
     return ctd;
 
     function buildSchemaDefinition(field) {
@@ -152,7 +146,6 @@ async function importCtd(data, apiKey) {
 }
 
 function findJsonType(type) {
-    // 
     if (type === "Text" || type === "Symbol" || type === "Date" || type === "RichText" || type === "Object") return ("string");
     if (type === "Integer" || type === "Number") return ("number");
     if (type === "Location") return ("object");
@@ -161,7 +154,6 @@ function findJsonType(type) {
     
     return ("Unknown field type");
 }
-// (todo) fix! contentfuls long text is a markdown!
 function convertFieldType(type) {
     objTypes = {
         RichText: "richtext",
@@ -178,11 +170,12 @@ function convertFieldType(type) {
     }
     return objTypes[type];
 }
-//(todo) untitled CO causes a bug --- in notify co success count(?) data still migrates properly
 async function importCo(data, media, trans, apiKey) {
     let co = {};
     await Promise.all(data.map(async (obj) => {
-        co[obj.sys.contentType.sys.id] = [];
+        if (!co[obj.sys.contentType.sys.id]) {
+            co[obj.sys.contentType.sys.id] = [];   
+        }
         let coRec = {
             id: obj.sys.contentType.sys.id + "-" + obj.sys.id,
         }
@@ -208,17 +201,10 @@ async function importCo(data, media, trans, apiKey) {
                     }]
                 }
             }
-            // if (field.hasOwnProperty("sys") === false) { coRec[i] = "jajko" } // DEL test notify co error
         }
         await co[obj.sys.contentType.sys.id].push(coRec);
-        // console.log(JSON.stringify(co[obj.sys.contentType.sys.id],null,2)); //DEL
-        // console.log("Test import CoRec to push: \n", JSON.stringify(coRec, null, 2), "\n"); //DEL
-        // console.log(result); //DEL
     }));
-    // console.log("test co\n", JSON.stringify(co, null, 2)); //DEL
     return await flotiqCoUpload(co, apiKey);
-    // resultNotify(result, "content_object"); //DEL
-    // console.log("RESULT:", result); //DEL
 
     function getImageByCfId(id) {
         let image = media.find(element => element.id === id);
