@@ -45,7 +45,7 @@ Execute:
 
 **Parameters**
 * `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
-* `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
+* `flotiqApiKey` - read and write API key to your Flotiq account
 
 #### Import variables
 
@@ -69,7 +69,7 @@ Execute:
 
 **Parameters**
 * `wordpressUrl` - full link to WordPress site from which you wish to migrate content to Flotiq
-* `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
+* `flotiqApiKey` - read and write API key to your Flotiq account
 
 ### Purge data in Flotiq account
 
@@ -79,7 +79,7 @@ Execute:
 `flotiq purge [flotiqApiKey] [options]`
 
 **Parameters**
-* `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
+* `flotiqApiKey` - read and write API key to your Flotiq account
 * `options` - additional options for command:
   * `withInternal=1` - purge should remove also internal type objects (`_media`)
 
@@ -92,7 +92,7 @@ Execute:
 
 **Parameters**
 * `directory` - path to the directory where the files will be saved
-* `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
+* `flotiqApiKey` - read only or read and write API key to your Flotiq account
 
 ### Flags
 
@@ -106,7 +106,7 @@ Execute:
 **Parameters**
 * `language` - SDK language: csharp, go, java, javascript, php, python, typescript
 * `directory` - path to the directory where the files will be saved
-* `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
+* `flotiqApiKey` - read and write API key to your Flotiq account
 
 ### Display stats
 
@@ -186,12 +186,13 @@ To make your life and ours easier, we have prepared an error codes.
 ### 1XX - Execution error
 
 #### #100
-  Writing or reading a file error.
+ Writing or reading a file error.
   
 #### #101
-  Flotiq API bad response.
+ Flotiq API bad response.
 
 ### #2XX - Start
+
 #### #200
 
  Gatsby's error, more info is in the output.
