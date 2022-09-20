@@ -27,7 +27,6 @@ Execute:
 `flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey]`
 
 **Parameters**
-
 * `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
 * `flotiqStarterUrl` - full link to GatsbyJs starter, the list below
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
@@ -45,7 +44,6 @@ Execute:
 `flotiq import [projectName] [flotiqApiKey]`
 
 **Parameters**
-
 * `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 
@@ -70,7 +68,6 @@ Execute:
 `flotiq wordpress-import [wordpressUrl] [flotiqApiKey]`
 
 **Parameters**
-
 * `wordpressUrl` - full link to WordPress site from which you wish to migrate content to Flotiq
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 
@@ -82,7 +79,6 @@ Execute:
 `flotiq purge [flotiqApiKey] [options]`
 
 **Parameters**
-
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 * `options` - additional options for command:
   * `withInternal=1` - purge should remove also internal type objects (`_media`)
@@ -95,7 +91,6 @@ Execute:
 `flotiq export [directory] [flotiqApiKey]`
 
 **Parameters**
-
 * `directory` - path to the directory where the files will be saved
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 
@@ -109,7 +104,6 @@ Execute:
 `flotiq sdk install [language] [directory] [flotiqApiKey]`
 
 **Parameters**
-
 * `language` - SDK language: csharp, go, java, javascript, php, python, typescript
 * `directory` - path to the directory where the files will be saved
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
@@ -124,7 +118,6 @@ Execute:
 `flotiq stats [flotiqApiKey]`
 
 **Parameters**
-
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 
 
@@ -147,43 +140,33 @@ You can choose one of our starters:
 ## Setup for development
 
 Clone this repository:
-
 `git clone https://github.com/flotiq/flotiq-cli.git`
 
 Enter the directory:
-
 ` cd flotiq-cli`
 
 Install dependencies:
-
 ` npm install`
 
 **Usage**
-
 `node bin/flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey]`
 
 **Import example data**
-
 `node bin/flotiq import [projectName] [flotiqApiKey]`
 
 **Import from wordpress**
-
 `node bin/flotiq wordpress-import [wordpressUrl] [flotiqApiKey]`
 
 **Purge data**
-
 `node bin/flotiq purge [flotiqApiKey] [options]`
 
 **Export data to JSON file**
-
 `node bin/flotiq export [directory] [flotiqApiKey]`
 
 **Install Flotiq SDK**
-
 `node bin/flotiq sdk install [language] [directory] [flotiqApiKey]`
 
 **Display Stats**
-
 `node bin/flotiq stats [flotiqApiKey]`
 
 
