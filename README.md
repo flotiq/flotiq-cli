@@ -8,23 +8,9 @@ Flotiq CLI
 CLI application for starting your next project with Flotiq fast. 
 Currently supports importing data from WordPress into Flotiq and seeding example data from our Gatsby starters.
 
-## Setup for usage
+## Setup
 
 `npm install -g flotiq-cli`
-
-## Setup for development
-
-Clone this repository:
-
-`git clone https://github.com/flotiq/flotiq-cli.git`
-
-Enter the directory:
-
-` cd flotiq-cli`
-
-Install dependencies:
-
-` npm install`
 
 
 ## Usage
@@ -36,12 +22,15 @@ This command will:
 - setup your Flotiq account to include the required Content Type Definitions,
 - import example content into your account (e.g. images, blog posts, product descriptions),
 - run `gatsby develop` for you.
+
 Execute:
 `flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey]`
 
-or in development:
+**Parameters**
 
-`node bin/flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey]`
+* `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
+* `flotiqStarterUrl` - full link to GatsbyJs starter, the list below
+* `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 
 
 ### Import example data for a Gatsby starter
@@ -55,9 +44,10 @@ The `.flotiq/images` directory in a particular starter stores images that will b
 Execute:
 `flotiq import [projectName] [flotiqApiKey]`
 
-or in development:
+**Parameters**
 
-`node bin/flotiq import [projectName] [flotiqApiKey]`
+* `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
+* `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 
 #### Import variables
 
@@ -70,7 +60,6 @@ To use dynamic date in imported `contentObject.json` files use `{{date}}` functi
 * `{{date:-5m}}` means `now - 5 months`, outputs e.g. 2021-06-01
 * `{{date:+5y}}` means `now + 5 years`, outputs e.g. 2027-01-01
 
-
 ### Import data from Wordpress to Flotiq
 
 The `wordpress-import` command will:
@@ -80,9 +69,10 @@ The `wordpress-import` command will:
 Execute:
 `flotiq wordpress-import [wordpressUrl] [flotiqApiKey]`
 
-or in development:
+**Parameters**
 
-`node bin/flotiq wordpress-import [wordpressUrl] [flotiqApiKey]`
+* `wordpressUrl` - full link to WordPress site from which you wish to migrate content to Flotiq
+* `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 
 ### Purge data in Flotiq account
 
@@ -91,9 +81,12 @@ This command will remove all data from your account. Great for testing imports. 
 Execute:
 `flotiq purge [flotiqApiKey] [options]`
 
-or in development:
+**Parameters**
 
-`node bin/flotiq purge [flotiqApiKey] [options]`
+* `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
+* `options` - additional options for command:
+  * `withInternal=1` - purge should remove also internal type objects (`_media`)
+
 ### Export data from Flotiq to json files
 
 This command exports data from the Flotiq account to local JSON files. If the key is limited to selected Content Types, then the data available for this key will be exported.
@@ -101,19 +94,10 @@ This command exports data from the Flotiq account to local JSON files. If the ke
 Execute:
 `flotiq export [directory] [flotiqApiKey]`
 
-or in development:
+**Parameters**
 
-`node bin/flotiq export [directory] [flotiqApiKey]`
-
-`[directory]` - path to the directory where the files will be saved.
-### Parameters
-
+* `directory` - path to the directory where the files will be saved
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
-* `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
-* `flotiqStarterUrl` - full link to GatsbyJs starter, the list below
-* `wordpressUrl` - full link to WordPress site from which you wish to migrate content to Flotiq
-* `options` - additional options for command:
-* `withInternal=1` - purge should remove also internal type objects (`_media`)
 
 ### Flags
 
@@ -124,12 +108,11 @@ or in development:
 Execute:
 `flotiq sdk install [language] [directory] [flotiqApiKey]`
 
-or in development:
-
-`node bin/flotiq sdk install [language] [directory] [flotiqApiKey]`
-### Parameters
+**Parameters**
 
 * `language` - SDK language: csharp, go, java, javascript, php, python, typescript
+* `directory` - path to the directory where the files will be saved
+* `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 
 ### Display stats
 
@@ -140,9 +123,9 @@ This command displays your Flotiq API Key following statistics:
 Execute:
 `flotiq stats [flotiqApiKey]`
 
-or in development:
+**Parameters**
 
-`node bin/flotiq stats [flotiqApiKey]`
+* `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 
 
 ## Gatsby Starters
@@ -159,6 +142,49 @@ You can choose one of our starters:
 * [Simple blog Gatsby starter-2](https://github.com/flotiq/flotiq-gatsby-blog-2) - to use this starter use: `https://github.com/flotiq/flotiq-gatsby-blog-2` as the `flotiqStarterUrl`
 * [Gatsby and Snipcart boilerplate, sourcing products from Flotiq-1](https://github.com/flotiq/flotiq-gatsby-shop-1) - to use this starter use: `https://github.com/flotiq/flotiq-gatsby-shop-1` as the `flotiqStarterUrl`
 * [Gatsby and Snipcart boilerplate, sourcing products from Flotiq-2](https://github.com/flotiq/flotiq-gatsby-shop-2) - to use this starter use: `https://github.com/flotiq/flotiq-gatsby-shop-2` as the `flotiqStarterUrl`
+
+
+## Setup for development
+
+Clone this repository:
+
+`git clone https://github.com/flotiq/flotiq-cli.git`
+
+Enter the directory:
+
+` cd flotiq-cli`
+
+Install dependencies:
+
+` npm install`
+
+**Usage**
+
+`node bin/flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey]`
+
+**Import example data**
+
+`node bin/flotiq import [projectName] [flotiqApiKey]`
+
+**Import from wordpress**
+
+`node bin/flotiq wordpress-import [wordpressUrl] [flotiqApiKey]`
+
+**Purge data**
+
+`node bin/flotiq purge [flotiqApiKey] [options]`
+
+**Export data to JSON file**
+
+`node bin/flotiq export [directory] [flotiqApiKey]`
+
+**Install Flotiq SDK**
+
+`node bin/flotiq sdk install [language] [directory] [flotiqApiKey]`
+
+**Display Stats**
+
+`node bin/flotiq stats [flotiqApiKey]`
 
 
 ## Collaboration
