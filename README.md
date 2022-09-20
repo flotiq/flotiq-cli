@@ -140,12 +140,15 @@ You can choose one of our starters:
 ## Setup for development
 
 Clone this repository:
+
 `git clone https://github.com/flotiq/flotiq-cli.git`
 
 Enter the directory:
+
 ` cd flotiq-cli`
 
 Install dependencies:
+
 ` npm install`
 
 **Usage**
@@ -180,7 +183,6 @@ If you found a bug, please report it in [issues](https://github.com/flotiq/floti
 ## Errors
 To make your life and ours easier, we have prepared an error codes.
 
-
 ### 1XX - Execution error
 
 #### #100
@@ -201,7 +203,6 @@ To make your life and ours easier, we have prepared an error codes.
 
 #### #302
  Incorrect Flotiq API key.
- 
  
 ### #4XX - Wordpress-importer
 
