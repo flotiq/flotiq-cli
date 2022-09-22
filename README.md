@@ -94,10 +94,6 @@ Execute:
 * `directory` - path to the directory where the files will be saved
 * `flotiqApiKey` - read only or read and write API key to your Flotiq account
 
-### Flags
-
-`--json-output`, `-j` - Error and console output will be additionally written into json file named `output.json`.
-
 ### Install Flotiq SDK
 
 Execute:
@@ -119,6 +115,11 @@ Execute:
 
 **Parameters**
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
+
+
+## Flags
+
+`--json-output`, `-j` - Error and console output will be additionally written into json file named `output.json`.
 
 
 ## Gatsby Starters
@@ -187,23 +188,16 @@ To make your life and ours easier, we have prepared an error codes.
 
 #### #100
  Writing or reading a file error.
-  
-#### #101
- Flotiq API bad response.
 
 ### #2XX - Start
 
 #### #200
-
  Gatsby's error, more info is in the output.
  
 ### #3XX - Import
 
 #### #300
  Problem with adding Content Object.
-
-#### #302
- Incorrect Flotiq API key.
  
 ### #4XX - Wordpress-importer
 
