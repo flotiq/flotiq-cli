@@ -26,7 +26,7 @@ async function notifyCtd(response) {
     let totalError = 0;
     let warnings = [];
 
-    for (record in response) {
+    for (let record in response) {
         ctd[record] = await response[record].json();
         if (response[record]?.status < 200 || response[record]?.status >= 300) {
             totalError++;
@@ -55,7 +55,7 @@ async function notifyCtd(response) {
             content: "WARNINGS"
         }]);
 
-        for (record in warnings) {
+        for (let record in warnings) {
             notifyTable.push([
                 warnings[record].label, warnings[record].warning
             ])
@@ -69,7 +69,7 @@ function notifyMedia(response) {
     const notifyTable = new cliTable();
     let totalSuccess = 0;
     let totalError = 0;
-    for (record in response) {
+    for (let record in response) {
         if (!response[record].code) {
             totalSuccess++;
         } else {
@@ -93,7 +93,7 @@ function notifyMedia(response) {
         }], [
             "Contentful asset ID", "Warning"
         ]);
-        for (record in response) {
+        for (let record in response) {
             if (!!response[record].code) {
                 notifyTable.push([
                     record, response[record].code + ": " + response[record].reason + "\n" + response[record].message
@@ -116,7 +116,7 @@ async function notifyCo(response) {
     let totalSuccess = 0;
     let totalError = 0;
     let warnings = [];
-    for (contentType in response) {
+    for (let contentType in response) {
         co.contentType = await response[contentType].json();
         if (!!co.contentType.batch_total_count) {
             totalSuccess += co.contentType.batch_success_count;
@@ -132,14 +132,14 @@ async function notifyCo(response) {
     }
     notifyTable.push(["TOTAL", totalSuccess, totalError]);
 
-    if (warnings.length != 0) {
+    if (warnings.length !== 0) {
         notifyTable.push([{
             colSpan: 3,
             content: "WARNINGS",
         }], [
             "Content Type", "Content object ID", "Warning"
         ]);
-        for (element in warnings) {
+        for (let element in warnings) {
             if (warnings[element][2] === "batchError") {
                 notifyTable.push([
                     warnings[element][0],
@@ -149,7 +149,7 @@ async function notifyCo(response) {
                     }
                 ]);
             } else {
-                for (object in warnings[element][1]) {
+                for (let object in warnings[element][1]) {
                     notifyTable.push([
                         warnings[element][0],
                         warnings[element][1][object].id,
@@ -164,10 +164,10 @@ async function notifyCo(response) {
 function typeOutWarnings(data, starting_line = "") {
     let text = "";
     text += starting_line;
-    for (field in data) {
+    for (let field in data) {
         if (field === "") text += data[field];
     }
-    for (field in data) {
+    for (let field in data) {
         if (field === "") continue;
         text += "\n\n" + field + ": " + data[field];
     }

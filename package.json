@@ -17,6 +17,8 @@
   "author": "Flotiq team <hello@flotiq.com>",
   "license": "MIT",
   "dependencies": {
+    "@contentful/rich-text-html-renderer": "^15.13.1",
+    "contentful-export": "^7.18.12",
     "dotenv": "^16.0.0",
     "flotiq-wordpress-import": "^1.1.7",
     "form-data": "^3.0.0",

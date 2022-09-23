@@ -20,7 +20,7 @@ const flotiqMedia = async (apiKey) => {
 
 const cfMediaToObject = (data, trans) => {
     const assets = [];
-    for (i in data) {
+    for (let i in data) {
         assets[i] = {
             fileName: data[i].fields.file[trans].fileName,
             url: 'http:' + data[i].fields.file[trans].url,

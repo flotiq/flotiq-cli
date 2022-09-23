@@ -4,13 +4,13 @@ const path = require('path');
 const cfHtmlRenderer = require('@contentful/rich-text-html-renderer/dist/rich-text-html-renderer.es5');
 const { resultNotify } = require('./notify');
 const { flotiqMedia, cfMediaToObject} = require('./media');
-const { flotiqCtdUpload, flotiqCoUpload, flotiqMediaUpload } = require('./upload');
+const { flotiqCtdUpload, flotiqCoUploadByCtd, flotiqMediaUpload } = require('../flotiq-api/flotiq-api');
 
-module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentManagementApiKey, translation = "en-US") => {
+module.exports = contentful = async (flotiqApiKey, contentfulSpaceId, contentfulContentManagementToken, translation = "en-US") => {
 
     const export_options = {
-        spaceId: cont_spaceId,
-        managementToken: cont_contentManagementApiKey,
+        spaceId: contentfulSpaceId,
+        managementToken: contentfulContentManagementToken,
         saveFile: false,
         useVerboseRenderer: true
     }
@@ -25,11 +25,11 @@ module.exports = contentful = async (flotiq_ApiKey, cont_spaceId, cont_contentMa
         return;
     }
 
-    resultCtd = await importCtd(exportData.contentTypes, flotiq_ApiKey);
+    let resultCtd = await importCtd(exportData.contentTypes, flotiqApiKey);
     resultNotify(resultCtd, "content_type");
-    resultMedia = await importMedia(exportData.assets, translation, flotiq_ApiKey);
+    let resultMedia = await importMedia(exportData.assets, translation, flotiqApiKey);
     resultNotify(resultMedia[0], "media");
-    resultCo = await importCo(exportData.entries, resultMedia[1], translation, flotiq_ApiKey);
+    let resultCo = await importCo(exportData.entries, resultMedia[1], translation, flotiqApiKey);
     resultNotify(resultCo, "content_object");
 }
 
@@ -65,7 +65,10 @@ async function importCtd(data, apiKey) {
             ctdRec.schemaDefinition.allOf[1].properties[field.id] = buildSchemaDefinition(field);
             ctdRec.metaDefinition.propertiesConfig[field.id] = buildMetaDefinition(field, obj.displayField);
         });
-        ctd.push(await flotiqCtdUpload(ctdRec, apiKey));
+        let response = await flotiqCtdUpload(ctdRec, apiKey);
+        response.name = ctdRec.name;
+        response.label = ctdRec.label;
+        ctd.push(response);
     }));
     return ctd;
 
@@ -146,16 +149,16 @@ async function importCtd(data, apiKey) {
 }
 
 function findJsonType(type) {
-    if (type === "Text" || type === "Symbol" || type === "Date" || type === "RichText" || type === "Object") return ("string");
-    if (type === "Integer" || type === "Number") return ("number");
-    if (type === "Location") return ("object");
-    if (type === "Array" || type === "Link") return ("array");
-    if (type === "Boolean") return ("boolean");
+    if (type === "Text" || type === "Symbol" || type === "Date" || type === "RichText" || type === "Object") return "string";
+    if (type === "Integer" || type === "Number") return "number";
+    if (type === "Location") return "object";
+    if (type === "Array" || type === "Link") return "array";
+    if (type === "Boolean") return "boolean";
     
-    return ("Unknown field type");
+    return "Unknown field type";
 }
 function convertFieldType(type) {
-    objTypes = {
+    let objTypes = {
         RichText: "richtext",
         Text: "textMarkdown",
         Symbol: "text",
@@ -204,11 +207,10 @@ async function importCo(data, media, trans, apiKey) {
         }
         await co[obj.sys.contentType.sys.id].push(coRec);
     }));
-    return await flotiqCoUpload(co, apiKey);
+    return await flotiqCoUploadByCtd(co, apiKey);
 
     function getImageByCfId(id) {
-        let image = media.find(element => element.id === id);
-        return image;
+        return media.find(element => element.id === id);
     }
 
     function cfImagesToHtml(html, obj) {
