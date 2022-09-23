@@ -17,14 +17,13 @@ Currently supports importing data from WordPress into Flotiq and seeding example
 
 ### Launch a Gatsby starter project
 
+`flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey]`
+
 This command will:
 - clone the Flotiq Gatsby starter,
 - setup your Flotiq account to include the required Content Type Definitions,
 - import example content into your account (e.g. images, blog posts, product descriptions),
 - run `gatsby develop` for you.
-
-Execute:
-`flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey]`
 
 **Parameters**
 * `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
@@ -34,14 +33,13 @@ Execute:
 
 ### Import example data for a Gatsby starter
 
+`flotiq import [projectName] [flotiqApiKey]`
+
 This command imports Content Types and Content Objects from Gatsby starter to your Flotiq account using the API key.
 Gatsby starter must include directory `.flotiq` with `ContentType[0-9]` folders, each of them containing ContentTypeDefinition.json file, and contentObject[0-9].json files.
 
 The number at the end of the directory or file name defines the file import order. 
 The `.flotiq/images` directory in a particular starter stores images that will be imported into your Media Library.
-
-Execute:
-`flotiq import [projectName] [flotiqApiKey]`
 
 **Parameters**
 * `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
@@ -60,12 +58,11 @@ To use dynamic date in imported `contentObject.json` files use `{{date}}` functi
 
 ### Import data from Wordpress to Flotiq
 
-The `wordpress-import` command will:
+`flotiq wordpress-import [wordpressUrl] [flotiqApiKey]`
+
+This command will:
 - setup your Flotiq account to include required Content Type Definitions,
 - automatically pull tags, categories, media, posts and pages from the provided Wordpress URL into your Flotiq account.
-
-Execute:
-`flotiq wordpress-import [wordpressUrl] [flotiqApiKey]`
 
 **Parameters**
 * `wordpressUrl` - full link to WordPress site from which you wish to migrate content to Flotiq
@@ -73,10 +70,9 @@ Execute:
 
 ### Purge data in Flotiq account
 
-This command will remove all data from your account. Great for testing imports. Command require additional confirmation.
-
-Execute:
 `flotiq purge [flotiqApiKey] [options]`
+
+This command will remove all data from your account. Great for testing imports. Command require additional confirmation.
 
 **Parameters**
 * `flotiqApiKey` - read and write API key to your Flotiq account
@@ -85,10 +81,9 @@ Execute:
 
 ### Export data from Flotiq to json files
 
-This command exports data from the Flotiq account to local JSON files. If the key is limited to selected Content Types, then the data available for this key will be exported.
-
-Execute:
 `flotiq export [directory] [flotiqApiKey]`
+
+This command exports data from the Flotiq account to local JSON files. If the key is limited to selected Content Types, then the data available for this key will be exported.
 
 **Parameters**
 * `directory` - path to the directory where the files will be saved
@@ -96,7 +91,6 @@ Execute:
 
 ### Install Flotiq SDK
 
-Execute:
 `flotiq sdk install [language] [directory] [flotiqApiKey]`
 
 **Parameters**
@@ -106,12 +100,11 @@ Execute:
 
 ### Display stats
 
+`flotiq stats [flotiqApiKey]`
+
 This command displays your Flotiq API Key following statistics:
 * number of Content Type Definitions, Content Objects by CTD, total Content Objects, Media, Webhooks,
 * 10 recently modified objects.
-
-Execute:
-`flotiq stats [flotiqApiKey]`
 
 **Parameters**
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
