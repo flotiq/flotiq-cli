@@ -46,6 +46,11 @@ exports.develop = async (projectDirectory) => {
     await execShellCommand('cd ' + projectDirectory + ' && ' + createGatsbyCommand('develop'));
 }
 
+exports.nextjsDev = async (projectDirectory) => {
+    await execShellCommand('cd ' + projectDirectory + ' && ' + 'yarn install');
+    await execShellCommand('cd ' + projectDirectory + ' && ' + 'yarn dev');
+}
+
 function runGatsbyProcess(action, projectDirectory = '', starterUrl = '') {
     let cmd = createGatsbyCommand(action, projectDirectory, starterUrl);
     return execShellCommand(cmd);
@@ -53,7 +58,6 @@ function runGatsbyProcess(action, projectDirectory = '', starterUrl = '') {
 
 function createGatsbyCommand(action, projectDirectory = '', starterUrl = '') {
     let cmd = path.resolve(__dirname, '..', '..', config.gatsbyCli);
-
     return cmd + ' ' + action + ' ' + projectDirectory + ' ' + starterUrl;
 }
 
