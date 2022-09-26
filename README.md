@@ -139,37 +139,19 @@ Clone this repository:
 
 Enter the directory:
 
-` cd flotiq-cli`
+`cd flotiq-cli`
 
 Install dependencies:
 
-` npm install`
+`npm install`
 
-**Usage**
-`node bin/flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey]`
+Usage
 
-**Import example data**
-`node bin/flotiq import [projectName] [flotiqApiKey]`
-
-**Import from wordpress**
-`node bin/flotiq wordpress-import [wordpressUrl] [flotiqApiKey]`
-
-**Purge data**
-`node bin/flotiq purge [flotiqApiKey] [options]`
-
-**Export data to JSON file**
-`node bin/flotiq export [directory] [flotiqApiKey]`
-
-**Install Flotiq SDK**
-`node bin/flotiq sdk install [language] [directory] [flotiqApiKey]`
-
-**Display Stats**
-`node bin/flotiq stats [flotiqApiKey]`
-
+`node bin/flotiq [command]`, for example `node bin/flotiq stats [flotiqApiKey]`
 
 ## Collaboration
 
-If you wish to talk with us about this project, feel free to hop on [![Discord Chat](https://img.shields.io/discord/682699728454025410.svg)](https://discord.gg/FwXcHnX)  .
+If you wish to talk with us about this project, feel free to hop on [![Discord Chat](https://img.shields.io/discord/682699728454025410.svg)](https://discord.gg/FwXcHnX).
    
 If you found a bug, please report it in [issues](https://github.com/flotiq/flotiq-cli/issues).
 
