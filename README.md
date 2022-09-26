@@ -147,11 +147,11 @@ Install dependencies:
 
 Usage
 
-`node bin/flotiq [command from the list above]`
+`node bin/flotiq [command]`, for example `node bin/flotiq stats [flotiqApiKey]`
 
 ## Collaboration
 
-If you wish to talk with us about this project, feel free to hop on [![Discord Chat](https://img.shields.io/discord/682699728454025410.svg)](https://discord.gg/FwXcHnX)  .
+If you wish to talk with us about this project, feel free to hop on [![Discord Chat](https://img.shields.io/discord/682699728454025410.svg)](https://discord.gg/FwXcHnX).
    
 If you found a bug, please report it in [issues](https://github.com/flotiq/flotiq-cli/issues).
 
