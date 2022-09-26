@@ -118,7 +118,7 @@ async function notifyCo(response) {
     let warnings = [];
     for (let contentType in response) {
         co.contentType = await response[contentType].json();
-        if (!!co.contentType.batch_total_count) {
+        if (co.contentType.batch_total_count) {
             totalSuccess += co.contentType.batch_success_count;
             totalError += co.contentType.batch_error_count;
             notifyTable.push([contentType, co.contentType.batch_success_count, co.contentType.batch_error_count]);

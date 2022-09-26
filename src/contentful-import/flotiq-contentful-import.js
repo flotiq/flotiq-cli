@@ -6,7 +6,7 @@ const { resultNotify } = require('./notify');
 const { flotiqMedia, cfMediaToObject} = require('./media');
 const { flotiqCtdUpload, flotiqCoUploadByCtd, flotiqMediaUpload } = require('../flotiq-api/flotiq-api');
 
-module.exports = contentful = async (flotiqApiKey, contentfulSpaceId, contentfulContentManagementToken, translation = "en-US") => {
+module.exports = contentful = async (contentfulSpaceId, contentfulContentManagementToken, flotiqApiKey, translation = "en-US") => {
 
     const export_options = {
         spaceId: contentfulSpaceId,
@@ -218,11 +218,11 @@ async function importCo(data, media, trans, apiKey) {
             if (cont.nodeType === "asset-hyperlink") {
                 let image = getImageByCfId(cont.data.target.sys.id);
                 html = html.replace("type: asset-hyperlink id: " + cont.data.target.sys.id, "<a href=\"" + config.apiUrl + image.url + path.extname(image.fileName) + `\">` + cont.content[0].value + "</a>");
-                html = html.replace(`<a href=\"https://api.flotiq.com/api/v1/content/_media/`, `<a href=\"https://api.flotiq.com/image/0x0/`);
+                html = html.replace(`<a href=\"${config.apiUrl}/api/v1/content/_media/`, `<a href=\"${config.apiUrl}/image/0x0/`);
             } else if (cont.nodeType === "embedded-asset-block") {
                 let image = getImageByCfId(cont.data.target.sys.id);
                 html += "<img alt=\"\" src=\"" + config.apiUrl + image.url + path.extname(image.fileName) + `\"/>`;
-                html = html.replace(`src=\"https://api.flotiq.com/api/v1/content/_media/`, `src=\"https://api.flotiq.com/image/0x0/`);
+                html = html.replace(`src=\"${config.apiUrl}/api/v1/content/_media/`, `src=\"${config.apiUrl}/image/0x0/`);
             } else if (cont.hasOwnProperty("content")) {
                 html = cfImagesToHtml(html, cont.content);
             }

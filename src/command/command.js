@@ -90,19 +90,19 @@ yargs
             wordpressStart(argv.flotiqApiKey, argv.wordpressUrl, yargs.argv['json-output']);
         }
     })
-    .command('contentful-import [flotiqApiKey] [contentfulSpaceId] [contentfulContentManagementToken] [translation]', 'Import Contentful to Flotiq', (yargs) => {
+    .command('contentful-import [contentfulSpaceId] [contentfulContentManagementToken] [flotiqApiKey] [translation]', 'Import Contentful to Flotiq', (yargs) => {
     }, async (argv) => {
         const contentful = require('../contentful-import/flotiq-contentful-import.js');
         if (yargs.argv._.length < 3 || yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv()) {
             const answers = await askQuestions(questionsText.CONTENTFUL_IMPORT);
-            let { flotiqApiKey, contentfulSpaceId, contentfulApiKey } = answers;
-            await contentful(flotiqApiKey, contentfulSpaceId, contentfulApiKey);
+            let { contentfulSpaceId, contentfulApiKey, flotiqApiKey } = answers;
+            await contentful(contentfulSpaceId, contentfulApiKey, flotiqApiKey);
         } else if (yargs.argv._.length === 3 && apiKeyDefinedInDotEnv()) {
-            contentful(process.env.FLOTIQ_API_KEY, argv.contentfulSpaceId, argv.contentfulContentManagementToken);
+            await contentful(argv.contentfulSpaceId, argv.contentfulContentManagementToken, process.env.FLOTIQ_API_KEY);
         } else if (yargs.argv._.length === 4) {
-            contentful(argv.flotiqApiKey, argv.contentfulSpaceId, argv.contentfulContentManagementToken);
+            await contentful(argv.contentfulSpaceId, argv.contentfulContentManagementToken, argv.flotiqApiKey);
         } else if (yargs.argv._.length === 5) {
-            contentful(argv.flotiqApiKey, argv.contentfulSpaceId, argv.contentfulContentManagementToken, argv.translation);
+            await contentful(argv.contentfulSpaceId, argv.contentfulContentManagementToken, argv.flotiqApiKey, argv.translation);
         } else {
             yargs.showHelp();
             process.exit(1);

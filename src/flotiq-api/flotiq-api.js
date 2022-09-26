@@ -45,7 +45,7 @@ const flotiqCoUploadByCtd = async (data, apiKey) => {
         for (let j = 0; j < data[i].length; j += limit) {
             let page = data[i].slice(j, j + limit);
             result[i] = await fetch(
-                'https://api.flotiq.com/api/v1/content/' + i + '/batch?updateExisting=true', {
+                `${config.apiUrl}/api/v1/content/' + i + '/batch?updateExisting=true`, {
                 method: 'post',
                 body: JSON.stringify(page),
                 headers: { ...headers, 'Content-Type': 'application/json' }

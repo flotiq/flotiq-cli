@@ -136,11 +136,11 @@ or in development:
 The `contentful-import` command will automatically pull content types, assets and content objects from Contentful space to your Flotiq account.
 
 Execute:
-`flotiq contentful-import [flotiqApiKey] [contentfulSpaceId] [contentfulContentManagementToken] [translation]`
+`flotiq contentful-import [contentfulSpaceId] [contentfulContentManagementToken] [flotiqApiKey] [translation]`
 
 or in development:
 
-`node bin/flotiq contentful-import [flotiqApiKey] [contentfulSpaceId] [contentfulContentManagementToken] [translation]`
+`node bin/flotiq contentful-import [contentfulSpaceId] [contentfulContentManagementToken] [flotiqApiKey] [translation]`
 
 `[translation]` - selection of Contentful's locale. en-US by default.
 
