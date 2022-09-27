@@ -2,9 +2,9 @@ const config = require("../configuration/config");
 const contentfulExport = require('contentful-export');
 const path = require('path');
 const cfHtmlRenderer = require('@contentful/rich-text-html-renderer/dist/rich-text-html-renderer.es5');
-const { resultNotify } = require('./notify');
-const { flotiqMedia, cfMediaToObject} = require('./media');
-const { flotiqCtdUpload, flotiqCoUploadByCtd, flotiqMediaUpload } = require('../flotiq-api/flotiq-api');
+const {resultNotify} = require('./notify');
+const {flotiqMedia, cfMediaToObject} = require('./media');
+const {flotiqCtdUpload, flotiqCoUploadByCtd, flotiqMediaUpload} = require('../flotiq-api/flotiq-api');
 
 module.exports = contentful = async (contentfulSpaceId, contentfulContentManagementToken, flotiqApiKey, translation = "en-US") => {
 
@@ -20,7 +20,7 @@ module.exports = contentful = async (contentfulSpaceId, contentfulContentManagem
     let exportData;
     try {
         exportData = await contentfulExport(export_options)
-    } catch(err) {
+    } catch (err) {
         console.error('Some errors occurred!', err)
         return;
     }
@@ -73,7 +73,7 @@ async function importCtd(data, apiKey) {
     return ctd;
 
     function buildSchemaDefinition(field) {
-        
+
         let schemaDefinition = {
             type: findJsonType(field.type)
         };
@@ -104,7 +104,7 @@ async function importCtd(data, apiKey) {
 
         return schemaDefinition;
     }
-    
+
     function buildMetaDefinition(field, displayField) {
         let metaDefinition = {
             label: field.name,
@@ -113,7 +113,7 @@ async function importCtd(data, apiKey) {
             inputType: convertFieldType(field.type),
         }
         if (field.id === displayField) {
-            metaDefinition.isTitlePart = true;   
+            metaDefinition.isTitlePart = true;
         }
 
         field.validations.forEach((validation) => {
@@ -128,7 +128,7 @@ async function importCtd(data, apiKey) {
             if (field.linkType === "Asset") {
                 metaDefinition.validation.relationContenttype = "_media";
             }
-            
+
             if (field.linkType === "Entry") {
                 metaDefinition.validation.relationMultiple = true;
                 if (!!field.validations[0]?.linkContentType[0]) {
@@ -154,9 +154,10 @@ function findJsonType(type) {
     if (type === "Location") return "object";
     if (type === "Array" || type === "Link") return "array";
     if (type === "Boolean") return "boolean";
-    
+
     return "Unknown field type";
 }
+
 function convertFieldType(type) {
     let objTypes = {
         RichText: "richtext",
@@ -173,11 +174,12 @@ function convertFieldType(type) {
     }
     return objTypes[type];
 }
+
 async function importCo(data, media, trans, apiKey) {
     let co = {};
     await Promise.all(data.map(async (obj) => {
         if (!co[obj.sys.contentType.sys.id]) {
-            co[obj.sys.contentType.sys.id] = [];   
+            co[obj.sys.contentType.sys.id] = [];
         }
         let coRec = {
             id: obj.sys.contentType.sys.id + "-" + obj.sys.id,
@@ -191,7 +193,7 @@ async function importCo(data, media, trans, apiKey) {
                     coRec[i] = await cfHtmlRenderer.documentToHtmlString(field);
                     coRec[i] = cfImagesToHtml(coRec[i], field.content);
                 } else if (field.type === "Symbol") {
-                    coRec[i] = JSON.stringify(field, null, 2); 
+                    coRec[i] = JSON.stringify(field, null, 2);
                 } else {
                     coRec[i] = field;
                 }
@@ -235,8 +237,9 @@ async function importMedia(data, trans, apiKey) {
     let images = nameImages(await flotiqMedia(apiKey));
     data = cfMediaToObject(data, trans);
     let mediaRec = [];
-    let uploadedFiles = []; let uploaded = 0;
-    
+    let uploadedFiles = [];
+    let uploaded = 0;
+
     await Promise.all(data.map(async (file) => {
         mediaRec[file.cf_id] = await flotiqMediaUpload(apiKey, file, images);
         if (!mediaRec[file.cf_id].code) {
@@ -249,7 +252,7 @@ async function importMedia(data, trans, apiKey) {
         }
     }));
     return ([mediaRec, uploadedFiles]);
-        
+
     function nameImages(images) {
         let convertedImages = {};
         images.forEach(image => {
@@ -257,4 +260,4 @@ async function importMedia(data, trans, apiKey) {
         })
         return convertedImages;
     }
-};
+}

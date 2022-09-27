@@ -161,6 +161,7 @@ async function notifyCo(response) {
     }
     console.log(notifyTable.toString());
 }
+
 function typeOutWarnings(data, starting_line = "") {
     let text = "";
     text += starting_line;
@@ -174,4 +175,4 @@ function typeOutWarnings(data, starting_line = "") {
     return text;
 }
 
-module.exports = { resultNotify };
+module.exports = {resultNotify};

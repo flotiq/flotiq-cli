@@ -10,7 +10,7 @@ const flotiqMedia = async (apiKey) => {
     };
     headers['X-AUTH-TOKEN'] = apiKey;
     for (page; page <= totalPages; page++) {
-        let images = await fetch(config.apiUrl + '/api/v1/content/_media?limit=1000&page=' + page, {headers: headers})
+        let images = await fetch(`${config.apiUrl}/api/v1/content/_media?limit=1000&page=${page}`, {headers: headers})
         let imagesJson = await images.json();
         totalPages = imagesJson.total_pages;
         allImages = [...allImages, ...imagesJson.data];

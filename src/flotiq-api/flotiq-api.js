@@ -45,10 +45,10 @@ const flotiqCoUploadByCtd = async (contentObjects, apiKey) => {
             let page = contentObjects[contentObjectName].slice(j, j + limit);
             result[contentObjectName] = await fetch(
                 `${config.apiUrl}/api/v1/content/${contentObjectName}/batch?updateExisting=true`, {
-                method: 'post',
-                body: JSON.stringify(page),
-                headers: { ...headers, 'Content-Type': 'application/json' }
-            });
+                    method: 'post',
+                    body: JSON.stringify(page),
+                    headers: {...headers, 'Content-Type': 'application/json'}
+                });
         }
     }
     return result;
@@ -95,4 +95,11 @@ const flotiqMediaUpload = async (apiKey, contentObject, images) => {
     }
 }
 
-module.exports = {fetchContentTypeDefinitions, fetchContentObjects, fetchMedia, flotiqCtdUpload, flotiqCoUploadByCtd, flotiqMediaUpload}
+module.exports = {
+    fetchContentTypeDefinitions,
+    fetchContentObjects,
+    fetchMedia,
+    flotiqCtdUpload,
+    flotiqCoUploadByCtd,
+    flotiqMediaUpload
+}
