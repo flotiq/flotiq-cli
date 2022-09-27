@@ -78,16 +78,16 @@ yargs
         optionalParamFlotiqApiKey(yargs);
     }, async (argv) => {
 
-        const wordpressStart = require('flotiq-wordpress-import').start;
+        const wordpressStart = require('flotiq-wordpress-import');
         // overriding the console in this case is not required, custom console is build in wordpress-importer
         if (yargs.argv._.length < 2) {
             const answers = await askQuestions(questionsText.WORDPRESS_IMPORT_QUESTIONS);
             let {flotiqApiKey, wordpressUrl} = answers;
-            wordpressStart(flotiqApiKey, wordpressUrl, yargs.argv['json-output'])
+            await wordpressStart(flotiqApiKey, wordpressUrl, yargs.argv['json-output'])
         } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
-            wordpressStart(process.env.FLOTIQ_API_KEY, argv.wordpressUrl, yargs.argv['json-input']);
+            await wordpressStart.run(process.env.FLOTIQ_API_KEY, argv.wordpressUrl, yargs.argv['json-input']);
         } else if (yargs.argv._.length === 3) {
-            wordpressStart(argv.flotiqApiKey, argv.wordpressUrl, yargs.argv['json-output']);
+            await wordpressStart.run(argv.flotiqApiKey, argv.wordpressUrl, yargs.argv['json-output']);
         }
     })
     .command('contentful-import [contentfulSpaceId] [contentfulContentManagementToken] [flotiqApiKey] [translation]', 'Import Contentful to Flotiq', (yargs) => {
@@ -171,8 +171,8 @@ yargs
         }
         if (yargs.argv._.length < 3) {
             let answers = await askQuestions(questionsText.INSTALL_SDK);
-            let {language, directory, apiKey} = answers;
-            await sdk(language, directory, apiKey);
+            let {language, projectDirectory, apiKey} = answers;
+            await sdk(language, projectDirectory, apiKey);
         } else if (yargs.argv._.length === 4 && apiKeyDefinedInDotEnv()) {
             await sdk(argv.language, argv.directory, process.env.FLOTIQ_API_KEY);
         } else if (yargs.argv._.length === 5) {
