@@ -90,6 +90,24 @@ yargs
             await wordpressStart.run(argv.flotiqApiKey, argv.wordpressUrl, yargs.argv['json-output']);
         }
     })
+    .command('contentful-import [contentfulSpaceId] [contentfulContentManagementToken] [flotiqApiKey] [translation]', 'Import Contentful to Flotiq', (yargs) => {
+    }, async (argv) => {
+        const contentful = require('../contentful-import/flotiq-contentful-import.js');
+        if (yargs.argv._.length < 3 || yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv()) {
+            const answers = await askQuestions(questionsText.CONTENTFUL_IMPORT);
+            let { contentfulSpaceId, contentfulApiKey, flotiqApiKey } = answers;
+            await contentful(contentfulSpaceId, contentfulApiKey, flotiqApiKey);
+        } else if (yargs.argv._.length === 3 && apiKeyDefinedInDotEnv()) {
+            await contentful(argv.contentfulSpaceId, argv.contentfulContentManagementToken, process.env.FLOTIQ_API_KEY);
+        } else if (yargs.argv._.length === 4) {
+            await contentful(argv.contentfulSpaceId, argv.contentfulContentManagementToken, argv.flotiqApiKey);
+        } else if (yargs.argv._.length === 5) {
+            await contentful(argv.contentfulSpaceId, argv.contentfulContentManagementToken, argv.flotiqApiKey, argv.translation);
+        } else {
+            yargs.showHelp();
+            process.exit(1);
+        }
+    })
     .command(
         'purge [flotiqApiKey] [options]',
         'Purge Flotiq account, removes all objects to which the key has access',

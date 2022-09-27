@@ -98,6 +98,19 @@ This command exports data from the Flotiq account to local JSON files. If the ke
 * `directory` - path to the directory where the files will be saved
 * `flotiqApiKey` - read and write API key to your Flotiq account
 
+### Import data from Contentful to Flotiq
+
+The `contentful-import` command will automatically pull content types, assets and content objects from Contentful space to your Flotiq account.
+
+Execute:
+`flotiq contentful-import [contentfulSpaceId] [contentfulContentManagementToken] [flotiqApiKey] [translation]`
+
+or in development:
+
+`node bin/flotiq contentful-import [contentfulSpaceId] [contentfulContentManagementToken] [flotiqApiKey] [translation]`
+
+`[translation]` - selection of Contentful's locale. en-US by default.
+
 ### Display stats
 
 `flotiq stats [flotiqApiKey]`
