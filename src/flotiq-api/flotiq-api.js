@@ -28,24 +28,23 @@ const fetchMedia = async (apiKey, page = 1, limit = 10) => {
 const flotiqCtdUpload = async (data, apiKey) => {
     headers['X-AUTH-TOKEN'] = apiKey;
 
-    let result = await fetch(config.apiUrl + '/api/v1/internal/contenttype', {
+    return fetch(`${config.apiUrl}/api/v1/internal/contenttype`, {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {...headers, 'Content-Type': 'application/json'},
     })
-    return result;
 }
 
-const flotiqCoUploadByCtd = async (data, apiKey) => {
+const flotiqCoUploadByCtd = async (contentObjects, apiKey) => {
     headers['X-AUTH-TOKEN'] = apiKey;
 
     let result = [];
     const limit = 100;
-    for (let i in data) {
-        for (let j = 0; j < data[i].length; j += limit) {
-            let page = data[i].slice(j, j + limit);
-            result[i] = await fetch(
-                `${config.apiUrl}/api/v1/content/' + i + '/batch?updateExisting=true`, {
+    for (let contentObjectName in contentObjects) {
+        for (let j = 0; j < contentObjects[contentObjectName].length; j += limit) {
+            let page = contentObjects[contentObjectName].slice(j, j + limit);
+            result[contentObjectName] = await fetch(
+                `${config.apiUrl}/api/v1/content/${contentObjectName}/batch?updateExisting=true`, {
                 method: 'post',
                 body: JSON.stringify(page),
                 headers: { ...headers, 'Content-Type': 'application/json' }
@@ -57,7 +56,7 @@ const flotiqCoUploadByCtd = async (data, apiKey) => {
 
 const flotiqMediaUpload = async (apiKey, contentObject, images) => {
     headers['X-AUTH-TOKEN'] = apiKey;
-    
+
     if (!images[contentObject.fileName]) {
         let file = await fetch(encodeURI(contentObject.url));
         if (file.status === 200) {
@@ -70,7 +69,7 @@ const flotiqMediaUpload = async (apiKey, contentObject, images) => {
                 form.append('type', 'file');
             }
             form.append('save', '1');
-            let response = await fetch(config.apiUrl + '/api/media', {
+            let response = await fetch(`${config.apiUrl}/api/media`, {
                 method: 'POST',
                 body: form,
                 headers: headers,
