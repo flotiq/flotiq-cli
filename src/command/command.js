@@ -250,6 +250,7 @@ async function checkAllParameters(answer, questions) {
 }
 
 function start(flotiqApiKey, directory, url, framework = null, isJson) {
+    framework = framework.toLowerCase();
 
     function startSetup(type) {
         projectSetup.setup(directory, url, type, isJson).then(async () => {
