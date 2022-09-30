@@ -3,7 +3,7 @@ require('dotenv').config();
 const questionsText = require('./questions');
 const importer = require('../importer/importer');
 const exporter = require('../exporter/exporter');
-const gatsbySetup = require('../gatsby/gatsbySetup');
+const projectSetup = require('../start/projectSetup');
 const custom = require('../console/console');
 const inquirer = require("inquirer");
 const yargs = require('yargs');
@@ -252,11 +252,11 @@ async function checkAllParameters(answer, questions) {
 function start(flotiqApiKey, directory, url, framework = null, isJson) {
 
     function startSetup(type) {
-        gatsbySetup.setup(directory, url, type, isJson).then(async () => {
+        projectSetup.setup(directory, url, type, isJson).then(async () => {
             let path = getObjectDataPath(directory);
             await importer.importer(flotiqApiKey, path, false);
-            await gatsbySetup.init(directory, flotiqApiKey, framework);
-            await gatsbySetup.develop(directory, framework);
+            await projectSetup.init(directory, flotiqApiKey, framework);
+            await projectSetup.develop(directory, framework);
         });
     }
 
