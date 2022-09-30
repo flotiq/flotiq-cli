@@ -255,8 +255,8 @@ function start(flotiqApiKey, directory, url, framework = null, isJson) {
         projectSetup.setup(directory, url, type, isJson).then(async () => {
             let path = getObjectDataPath(directory);
             await importer.importer(flotiqApiKey, path, false);
-            await projectSetup.init(directory, flotiqApiKey, framework);
-            await projectSetup.develop(directory, framework);
+            await projectSetup.init(directory, flotiqApiKey, type);
+            await projectSetup.develop(directory, type);
         });
     }
 
