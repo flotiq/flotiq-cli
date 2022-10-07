@@ -20,6 +20,9 @@ yargs
     .boolean('json-output')
     .alias('json-output', ['j'])
     .describe('json-output', ' Whether to save results as JSON')
+    .string('framework')
+    .alias('framework', ['fw'])
+    .describe('framework', ' Determines which framework should be used (gatsby, nextjs)')
     .command('start [directory] [url] [flotiqApiKey] [framework]', 'Start the project', (yargs) => {
         yargs.positional('directory', {
             describe: 'Directory to create project in.',
@@ -36,6 +39,7 @@ yargs
         });
     }, async (argv) => {
         console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
+        let isJson = !!yargs.argv['json-output']
         if (yargs.argv.help) {
             yargs.showHelp();
             process.exit(1);
@@ -43,23 +47,15 @@ yargs
         if (yargs.argv._.length < 3) {
             let answers = await askQuestions(questionsText.START_QUESTIONS);
             let { flotiqApiKey, projectDirectory, url } = answers;
-            start(flotiqApiKey, projectDirectory, url, yargs.argv['json-output']);
+            start(flotiqApiKey, projectDirectory, url, isJson);
         } else if (yargs.argv._.length === 3 && apiKeyDefinedInDotEnv()) {
-            if (yargs.argv['json-output']) {
-                start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, null, yargs.argv['json-output']);
-            } else {
-                start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, argv.framework);
-            }
+            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, isJson, yargs.argv['framework']);
         } else if (yargs.argv._.length === 4 && argv.flotiqApiKey) {
-            if (yargs.argv['json-output']) {
-                start(argv.flotiqApiKey, argv.directory, argv.url, null, yargs.argv['json-output']);
-            } else {
-                start(argv.flotiqApiKey, argv.directory, argv.url, argv.framework);
-            }
+            start(argv.flotiqApiKey, argv.directory, argv.url, isJson, yargs.argv['framework']);
         } else if (yargs.argv._.length === 4 && apiKeyDefinedInDotEnv()) {
-            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, argv.framework, yargs.argv['json-output']);
+            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, isJson, yargs.argv['framework']);
         } else if (yargs.argv._.length === 5) {
-            start(argv.flotiqApiKey, argv.directory, argv.url, argv.framework, yargs.argv['json-output']);
+            start(argv.flotiqApiKey, argv.directory, argv.url, isJson, yargs.argv['framework']);
         } else {
             yargs.showHelp();
             process.exit(1);
@@ -249,11 +245,13 @@ async function checkAllParameters(answer, questions) {
     return newAnswer;
 }
 
-function start(flotiqApiKey, directory, url, framework = null, isJson) {
-    framework = framework.toLowerCase();
+function start(flotiqApiKey, directory, url, isJson, framework = null) {
+    if (framework) {
+        framework = framework.toLowerCase();
+    }
 
     function startSetup(type) {
-        projectSetup.setup(directory, url, type, isJson).then(async () => {
+        projectSetup.setup(directory, url, type).then(async () => {
             let path = getObjectDataPath(directory);
             await importer.importer(flotiqApiKey, path, false);
             await projectSetup.init(directory, flotiqApiKey, type);
@@ -269,7 +267,8 @@ function start(flotiqApiKey, directory, url, framework = null, isJson) {
             startSetup("nextjs");
             break;
         case null:
-            if (url.includes("nextjs")) { //url may cause issues, only when framework param is not defined
+            //url may cause issues, only when framework param is not defined
+            if (url.includes("nextjs")) {
                 startSetup("nextjs");
             } else {
                 startSetup("gatsby");
