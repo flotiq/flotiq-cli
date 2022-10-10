@@ -4,28 +4,31 @@ const fs = require('fs');
 const path = require('path');
 
 const ERROR_COLOR  ='\x1b[36m%s\x1b[0m';
+const FRAMEWORK_NEXTJS = 'nextjs';
+const FRAMEWORK_GATSBY = 'gatsby';
 
 exports.setup = async (projectDirectory, starterUrl, framework) => {
-    if (framework === "nextjs") {
+    if (framework === FRAMEWORK_NEXTJS) {
         console.log("Starting Nextjs setup");
-        await execShellCommand('git clone ' + starterUrl + '.git ' + projectDirectory);
+        await execShellCommand(`git clone ${starterUrl}.git ${projectDirectory}`);
     } else if (framework === "gatsby") {
         console.log('Starting Gatsby setup');
         await runGatsbyProcess('new', projectDirectory, starterUrl);
     } else {
-        console.error("Invalid framework!");
+        console.error(ERROR_COLOR, "Invalid framework!");
+        process.exit(1);
     }
 }
 
 exports.init = async (projectDirectory, apiKey, framework) => {
-    if (framework === "nextjs") {
+    if (framework === FRAMEWORK_NEXTJS) {
 
         let file = fs.readFileSync(projectDirectory + '/.env.dist', 'utf-8');
         file = file.replace('FLOTIQ_API_KEY=', 'FLOTIQ_API_KEY=' + apiKey);
         fs.writeFileSync(projectDirectory + '/.env.local', file);
         console.log('Configuration is created successfully: ' + projectDirectory + '/.env');
 
-    } else if (framework === "gatsby") {
+    } else if (framework === FRAMEWORK_GATSBY) {
 
         try {
             let configPath =  projectDirectory + '/.env';
@@ -51,22 +54,21 @@ exports.init = async (projectDirectory, apiKey, framework) => {
                 }
             });
         }
-        console.log('Configuration is created successfully: ' + projectDirectory + '/.env');
+        console.log(`Configuration is created successfully: ${projectDirectory} /.env`);
 
     } else {
-        console.error("Invalid framework!");
+        console.error(ERROR_COLOR, 'Invalid framework!');
     }
 }
 
 exports.develop = async (projectDirectory, framework) => {
-    if (framework === "nextjs") {
-        await execShellCommand('cd ' + projectDirectory + ' && ' + 'yarn install');
-        // await execShellCommand('cd ' + projectDirectory + ' && ' + ' yarn next dev'); // command doesnt work and is being replaced by the console log below.
-        console.log("Building starter complete!\nYou can now run: \n\ncd " + projectDirectory + "\nyarn dev\n\nto start your server on localhost.");
-    } else if (framework === "gatsby") {
-        await execShellCommand('cd ' + projectDirectory + ' && ' + createGatsbyCommand('develop'));
+    if (framework === FRAMEWORK_NEXTJS) {
+        await execShellCommand(`cd ${projectDirectory} && yarn install`);
+        await execShellCommand(`cd ${projectDirectory} && yarn next dev`);
+    } else if (framework === FRAMEWORK_GATSBY) {
+        await execShellCommand(`cd ${projectDirectory} && ${createGatsbyCommand('develop')}`);
     } else {
-        console.error("Invalid framework!");
+        console.error(ERROR_COLOR, "Invalid framework!3");
     }
 }
 
@@ -80,7 +82,7 @@ function createGatsbyCommand(action, projectDirectory = '', starterUrl = '') {
     return cmd + ' ' + action + ' ' + projectDirectory + ' ' + starterUrl;
 }
 
-function execShellCommand(cmd) {
+execShellCommand = async (cmd) => {
     return new Promise((resolve, reject) => {
         let commandProcess = exec(cmd, (error, stdout, stderr) => {
             if (error) {
@@ -97,7 +99,5 @@ function execShellCommand(cmd) {
         commandProcess.stdout.on('data', function (data) {
             console.log(data);
         });
-
-
     });
 }

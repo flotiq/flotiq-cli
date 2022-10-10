@@ -248,6 +248,12 @@ async function checkAllParameters(answer, questions) {
 function start(flotiqApiKey, directory, url, isJson, framework = null) {
     if (framework) {
         framework = framework.toLowerCase();
+    } else {
+        if (url.includes('nextjs')) {
+            framework = 'nextjs';
+        } else {
+            framework = 'gatsby';
+        }
     }
 
     function startSetup(type) {
@@ -259,22 +265,5 @@ function start(flotiqApiKey, directory, url, isJson, framework = null) {
         });
     }
 
-    switch (framework) {
-        case "gatsby":
-            startSetup("gatsby");
-            break;
-        case "nextjs":
-            startSetup("nextjs");
-            break;
-        case null:
-            //url may cause issues, only when framework param is not defined
-            if (url.includes("nextjs")) {
-                startSetup("nextjs");
-            } else {
-                startSetup("gatsby");
-            }
-            break;
-        default:
-            console.error("Invalid framework!");
-    }
+    startSetup(framework);
 }
