@@ -15,10 +15,10 @@ const PROJECT_DIRECTORY = {
     type: "input",
     message: "Project directory path:"
 };
-const GATSBY_STARTER_URL = {
+const STARTER_URL = {
     name: "url",
     type: "input",
-    message: "Gatsby starter repository url:"
+    message: "Starter repository url:"
 };
 const WORDPRESS_PAGE_URL = {
     name: "wordpressUrl",
@@ -50,7 +50,7 @@ const LANGUAGE = {
 const START_QUESTIONS = [
     FLOTIQ_RW_API_KEY,
     PROJECT_DIRECTORY,
-    GATSBY_STARTER_URL,
+    STARTER_URL,
 ]
 
 const IMPORT_QUESTIONS = [
@@ -91,7 +91,7 @@ const STATS = [
 module.exports = {
     FLOTIQ_RW_API_KEY,
     PROJECT_DIRECTORY,
-    GATSBY_STARTER_URL,
+    STARTER_URL,
     WORDPRESS_PAGE_URL,
     START_QUESTIONS,
     IMPORT_QUESTIONS,

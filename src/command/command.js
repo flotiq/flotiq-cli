@@ -3,7 +3,7 @@ require('dotenv').config();
 const questionsText = require('./questions');
 const importer = require('../importer/importer');
 const exporter = require('../exporter/exporter');
-const gatsbySetup = require('../gatsby/gatsbySetup');
+const projectSetup = require('../start/projectSetup');
 const custom = require('../console/console');
 const inquirer = require("inquirer");
 const yargs = require('yargs');
@@ -20,30 +20,42 @@ yargs
     .boolean('json-output')
     .alias('json-output', ['j'])
     .describe('json-output', ' Whether to save results as JSON')
-    .command('start [directory] [url] [flotiqApiKey]', 'Start the project', (yargs) => {
+    .string('framework')
+    .alias('framework', ['fw'])
+    .describe('framework', ' Determines which framework should be used (gatsby, nextjs)')
+    .command('start [directory] [url] [flotiqApiKey] [framework]', 'Start the project', (yargs) => {
         yargs.positional('directory', {
             describe: 'Directory to create project in.',
             type: 'string',
         })
         yargs.positional('url', {
-            describe: 'Url to git repository with Gatbsy starter.',
+            describe: 'Url to git repository with starter.',
             type: 'string',
         });
         optionalParamFlotiqApiKey(yargs);
+        yargs.positional('framework', {
+            describe: 'Framework determining if the starter is nextjs or gatsby.',
+            type: 'string',
+        });
     }, async (argv) => {
         console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
+        let isJson = !!yargs.argv['json-output']
         if (yargs.argv.help) {
             yargs.showHelp();
             process.exit(1);
         }
         if (yargs.argv._.length < 3) {
             let answers = await askQuestions(questionsText.START_QUESTIONS);
-            let {flotiqApiKey, projectDirectory, url} = answers;
-            start(flotiqApiKey, projectDirectory, url, yargs.argv['json-output']);
+            let { flotiqApiKey, projectDirectory, url } = answers;
+            start(flotiqApiKey, projectDirectory, url, isJson);
         } else if (yargs.argv._.length === 3 && apiKeyDefinedInDotEnv()) {
-            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, yargs.argv['json-output']);
-        } else if (yargs.argv._.length === 4) {
-            start(argv.flotiqApiKey, argv.directory, argv.url, yargs.argv['json-output']);
+            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, isJson, yargs.argv['framework']);
+        } else if (yargs.argv._.length === 4 && argv.flotiqApiKey) {
+            start(argv.flotiqApiKey, argv.directory, argv.url, isJson, yargs.argv['framework']);
+        } else if (yargs.argv._.length === 4 && apiKeyDefinedInDotEnv()) {
+            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, isJson, yargs.argv['framework']);
+        } else if (yargs.argv._.length === 5) {
+            start(argv.flotiqApiKey, argv.directory, argv.url, isJson, yargs.argv['framework']);
         } else {
             yargs.showHelp();
             process.exit(1);
@@ -251,11 +263,25 @@ async function checkAllParameters(answer, questions) {
     return newAnswer;
 }
 
-function start(flotiqApiKey, directory, url, isJson) {
-    gatsbySetup.setup(directory, url, isJson).then(async () => {
-        let path = getObjectDataPath(directory);
-        await importer.importer(flotiqApiKey, path, false);
-        await gatsbySetup.init(directory, flotiqApiKey);
-        await gatsbySetup.develop(directory);
-    });
+function start(flotiqApiKey, directory, url, isJson, framework = null) {
+    if (framework) {
+        framework = framework.toLowerCase();
+    } else {
+        if (url.includes('nextjs')) {
+            framework = 'nextjs';
+        } else {
+            framework = 'gatsby';
+        }
+    }
+
+    function startSetup(type) {
+        projectSetup.setup(directory, url, type).then(async () => {
+            let path = getObjectDataPath(directory);
+            await importer.importer(flotiqApiKey, path, false);
+            await projectSetup.init(directory, flotiqApiKey, type);
+            await projectSetup.develop(directory, type);
+        });
+    }
+
+    startSetup(framework);
 }
