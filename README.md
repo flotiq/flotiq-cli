@@ -17,7 +17,7 @@ Currently supports importing data from WordPress into Flotiq and seeding example
 
 ### Launch a Gatsby starter project
 
-`flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey] [framework]`
+`flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey]`
 
 This command will:
 - clone the Flotiq Gatsby or Nextjs starter,
@@ -29,7 +29,9 @@ This command will:
 * `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
 * `flotiqStarterUrl` - full link to the starter, the list below
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
-* `framework` - framework of the starter i.e. `--framework=nextjs` or `--fw=gatsby`. If no framework parameter is given, the url will be serched for phrases i.e. Set to `gatsby` by default
+
+**Flags**
+* `--framework` - framework of the starter i.e. `--framework=nextjs` or `--fw=gatsby`. If no framework parameter is given, the url will be serched for phrases i.e. Set to `gatsby` by default
 
 
 ### Import example data for a Gatsby starter
