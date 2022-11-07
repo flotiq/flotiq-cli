@@ -153,7 +153,7 @@ yargs
                 type: 'string',
             });
             yargs.boolean('only-definitions')
-                .describe('Export only content type definitions, ignore content objects')
+                .describe('only-definitions', 'Export only content type definitions, ignore content objects')
             optionalParamFlotiqApiKey(yargs);
         }, async (argv) => {
             let onlyDefinitions = yargs.argv['only-definitions'];
