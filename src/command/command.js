@@ -156,15 +156,16 @@ yargs
                 .describe('Export only content type definitions, ignore content objects')
             optionalParamFlotiqApiKey(yargs);
         }, async (argv) => {
+            let onlyDefinitions = yargs.argv['only-definitions'];
             console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
             if (yargs.argv._.length < 2) {
                 const answers = await askQuestions(questionsText.EXPORT_QUESTIONS);
                 let {flotiqApiKey, projectDirectory} = answers;
-                await exporter.export(flotiqApiKey, projectDirectory, yargs.argv['only-definitions']);
+                await exporter.export(flotiqApiKey, projectDirectory, onlyDefinitions);
             } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
-                await exporter.export(process.env.FLOTIQ_API_KEY, argv.directory, yargs.argv['only-definitions']);
+                await exporter.export(process.env.FLOTIQ_API_KEY, argv.directory, onlyDefinitions);
             } else if (yargs.argv._.length === 3) {
-                await exporter.export(argv.flotiqApiKey, argv.directory, yargs.argv['only-definitions']);
+                await exporter.export(argv.flotiqApiKey, argv.directory, onlyDefinitions);
             }
         })
     .command('sdk install [language] [directory] [flotiqApiKey]', 'Install Flotiq SDK', (yargs) => {
