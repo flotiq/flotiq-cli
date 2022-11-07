@@ -152,17 +152,19 @@ yargs
                 describe: 'Directory path to save data.',
                 type: 'string',
             });
+            yargs.boolean('only-definitions')
+                .describe('Export only content type definitions, ignore content objects')
             optionalParamFlotiqApiKey(yargs);
         }, async (argv) => {
             console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
             if (yargs.argv._.length < 2) {
                 const answers = await askQuestions(questionsText.EXPORT_QUESTIONS);
                 let {flotiqApiKey, projectDirectory} = answers;
-                await exporter.export(flotiqApiKey, projectDirectory, true);
+                await exporter.export(flotiqApiKey, projectDirectory, yargs.argv['only-definitions']);
             } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
-                await exporter.export(process.env.FLOTIQ_API_KEY, argv.directory, true);
+                await exporter.export(process.env.FLOTIQ_API_KEY, argv.directory, yargs.argv['only-definitions']);
             } else if (yargs.argv._.length === 3) {
-                await exporter.export(argv.flotiqApiKey, argv.directory, true);
+                await exporter.export(argv.flotiqApiKey, argv.directory, yargs.argv['only-definitions']);
             }
         })
     .command('sdk install [language] [directory] [flotiqApiKey]', 'Install Flotiq SDK', (yargs) => {
