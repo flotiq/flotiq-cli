@@ -92,7 +92,7 @@ const saveImage = async (data, imagesPath) => {
 }
 
 const saveObjects = async (apiKey, ctdName, directoryPath, directoryNumber) => {
-    let contentObjectsResponse = await fetchContentObjects(apiKey, ctdName)
+    let contentObjectsResponse = await fetchContentObjects(apiKey, ctdName, 1, 1000)
     let contentObjectsResponseJson = await contentObjectsResponse.json();
     let totalPages = contentObjectsResponseJson.total_pages;
     let coDirectoryNumber = 1;
@@ -109,7 +109,7 @@ const saveObjects = async (apiKey, ctdName, directoryPath, directoryNumber) => {
         }
         pageCo++;
         if (pageCo <= totalPages) {
-            contentObjectsResponse = await fetchContentObjects(apiKey, ctdName, pageCo);
+            contentObjectsResponse = await fetchContentObjects(apiKey, ctdName, pageCo, 1000);
             contentObjectsResponseJson = await contentObjectsResponse.json();
         }
     }
