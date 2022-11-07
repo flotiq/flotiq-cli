@@ -93,7 +93,7 @@ This command exports data from the Flotiq account to local JSON files. If the ke
 * `flotiqApiKey` - read only or read and write API key to your Flotiq account
 
 **Flags**
-* `--onlyDefinitions` - use this flag to run export only for Content Type Definitions, ignore Content Objects
+* `--only-definitions` - use this flag to run export only for Content Type Definitions, ignore Content Objects
 
 ### Install Flotiq SDK
 
