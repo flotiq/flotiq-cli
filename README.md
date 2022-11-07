@@ -92,6 +92,9 @@ This command exports data from the Flotiq account to local JSON files. If the ke
 * `directory` - path to the directory where the files will be saved
 * `flotiqApiKey` - read only or read and write API key to your Flotiq account
 
+**Flags**
+* `--only-definitions` - use this flag to run export only for Content Type Definitions, ignore Content Objects
+
 ### Install Flotiq SDK
 
 `flotiq sdk install [language] [directory] [flotiqApiKey]`

@@ -7,10 +7,11 @@ const fs = require('fs');
 const config = require("../configuration/config");
 const Stream = require('stream').Transform;
 const https = require('https');
+const ERROR_COLOR  ='\x1b[36m%s\x1b[0m';
 
-exports.export = async (apiKey, directoryPath) => {
+exports.export = async (apiKey, directoryPath, onlyDefinitions = false) => {
 
-    let contentTypedDefinitionsResponse = await getContentTypeDefinitionsData(apiKey)
+    let contentTypedDefinitionsResponse = await getContentTypeDefinitionsData(apiKey);
     let directoryNumber = 1;
     let totalObjects = 0;
     let totalPages = contentTypedDefinitionsResponse.total_pages;
@@ -20,14 +21,17 @@ exports.export = async (apiKey, directoryPath) => {
         console.log(`CTD Page: ${page}/${totalPages}`);
         for (let i = 0; i < contentTypedDefinitionsResponse.data.length; i++) {
             let ctd = await clearCtd(contentTypedDefinitionsResponse.data[i]);
-            await saveSchema(ctd, directoryPath, directoryNumber);
-            let countSavedObjects = await saveObjects(
-                apiKey,
-                contentTypedDefinitionsResponse.data[i].name,
-                directoryPath,
-                directoryNumber
-            );
-            totalObjects = totalObjects + countSavedObjects;
+            const directoryName = `${directoryNumber}_${ctd.name}`;
+            await saveSchema(ctd, directoryPath, directoryName);
+            if(!onlyDefinitions) {
+                let countSavedObjects = await saveObjects(
+                    apiKey,
+                    contentTypedDefinitionsResponse.data[i].name,
+                    directoryPath,
+                    directoryName
+                );
+                totalObjects = totalObjects + countSavedObjects;
+            }
             directoryNumber++;
         }
         page++;
@@ -36,9 +40,13 @@ exports.export = async (apiKey, directoryPath) => {
         }
     }
 
-    let totalTypesDefinition = directoryNumber - 1
-    let media = await fetchMedia(apiKey);
-    let mediaSummary = await saveMedia(media, apiKey, directoryPath);
+    let totalTypesDefinition = directoryNumber - 1;
+    let mediaSummary = {totalObjects: 0};
+
+    if(!onlyDefinitions) {
+        let media = await fetchMedia(apiKey);
+        mediaSummary = await saveMedia(media, apiKey, directoryPath);
+    }
 
     console.log('\x1b[32mSummary:');
     console.log(`\x1b[32mTotal content types definitions: ${totalTypesDefinition}`);
