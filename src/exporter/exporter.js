@@ -5,9 +5,7 @@ const {
 } = require('../flotiq-api/flotiq-api');
 const fs = require('fs');
 const config = require("../configuration/config");
-const Stream = require('stream').Transform;
-const https = require('https');
-const ERROR_COLOR  ='\x1b[36m%s\x1b[0m';
+const fetch = require('node-fetch');
 
 exports.export = async (apiKey, directoryPath, onlyDefinitions = false) => {
 
@@ -88,15 +86,12 @@ const saveMedia = async (response, apiKey, directoryPath) => {
 const saveImage = async (data, imagesPath) => {
     let imageUrl = `${config.apiUrl}/image/0x0/${data.id}.${data.extension}`;
     let filePath = `${imagesPath}/${data.id}.${data.extension}`;
-    https.request(imageUrl, (response) => {
-        let data = new Stream();
-        response.on('data', function (chunk) {
-            data.push(chunk);
+    fetch(imageUrl)
+        .then(response => {
+            response.body.pipe(
+                fs.createWriteStream(filePath)
+            );
         });
-        response.on('end', function () {
-            fs.writeFileSync(filePath, data.read());
-        });
-    }).end();
 }
 
 const saveObjects = async (apiKey, ctdName, directoryPath, directoryNumber) => {
