@@ -3,11 +3,12 @@ const config = require('../configuration/config');
 const {fetchContentTypeDefinitions, updateContentTypeDefinition} = require('../flotiq-api/flotiq-api');
 
 module.exports = purgeContentObjects = async (apiKey, internal = false, force = false) => {
+    let ctdsClearedOfRelations = 0;
+
     let contentTypeDefinitions = (await (await fetchContentTypeDefinitions(apiKey, 1, 100, internal))
         .json()).data;
 
     let i = 0;
-    let ctdsClearedOfRelations = 0;
     let ctdArrFormerLength = contentTypeDefinitions.length;
     while (contentTypeDefinitions.length) {
         if (contentTypeDefinitions[i]) {
@@ -31,11 +32,26 @@ module.exports = purgeContentObjects = async (apiKey, internal = false, force = 
                     console.log("Use `flotiq purge [apiKey] --force` or remove conflicting relations manually");
                     return;
                 } else {
+                    var loading = (function () {
+                        let h = ['|', '/', '-', '\\'];
+                        let i = 0;
+                        
+                            return setInterval(() => {
+                                i = (i > 3) ? 0 : i;
+                                console.clear();
+                                console.log(`Cleaning data of relation loops... ${h[i]}\nContent types cleared of looped relations: ${ctdsClearedOfRelations}\nPlease do not stop the command or close the terminal`);
+                                i++;
+                            }, 300);
+                    })();
                     await dropRelations(contentTypeDefinitions.slice(ctdsClearedOfRelations), apiKey);
                     ctdsClearedOfRelations++;
                 }
             }
         }
+    }
+    clearInterval(loading);
+    if (ctdsClearedOfRelations > 0) {
+        console.log(`I\'m finishing, all Content objects have been purged`);
     }
 }
 
