@@ -51,7 +51,7 @@ module.exports = purgeContentObjects = async (apiKey, internal = false, force = 
     }
     clearInterval(loading);
     if (ctdsClearedOfRelations > 0) {
-        console.log(`I\'m finishing, all Content objects have been purged`);
+        console.log(`I\'m finished, all Content objects have been purged`);
     }
 }
 
