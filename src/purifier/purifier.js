@@ -1,13 +1,14 @@
 const fetch = require('node-fetch');
 const config = require('../configuration/config');
-const {fetchContentTypeDefinitions} = require('../flotiq-api/flotiq-api');
+const {fetchContentTypeDefinitions, updateContentTypeDefinition} = require('../flotiq-api/flotiq-api');
 
-module.exports = purgeContentObjects = async (apiKey, internal = 0) => {
-
+module.exports = purgeContentObjects = async (apiKey, internal = false, force = false) => {
     let contentTypeDefinitions = (await (await fetchContentTypeDefinitions(apiKey, 1, 100, internal))
         .json()).data;
 
     let i = 0;
+    let ctdsClearedOfRelations = 0;
+    let ctdArrFormerLength = contentTypeDefinitions.length;
     while (contentTypeDefinitions.length) {
         if (contentTypeDefinitions[i]) {
             let notRemoved = await removeContentObjects(contentTypeDefinitions[i], apiKey);
@@ -17,10 +18,63 @@ module.exports = purgeContentObjects = async (apiKey, internal = 0) => {
                 i++;
             }
         } else {
-            i--;
+            i = 0;
+            if (contentTypeDefinitions.length !== ctdArrFormerLength) {
+                ctdArrFormerLength = contentTypeDefinitions.length
+            } else {
+                if (!force) {
+                    console.log("Purge command stumbled upon relation loop in CTDs:");
+                    while (i < contentTypeDefinitions.length) {
+                        console.log(contentTypeDefinitions[i].name)
+                        i++;
+                    }
+                    console.log("Use `flotiq purge [apiKey] --force` or remove conflicting relations manually");
+                    return;
+                } else {
+                    await dropRelations(contentTypeDefinitions.slice(ctdsClearedOfRelations), apiKey);
+                    ctdsClearedOfRelations++;
+                }
+            }
         }
     }
 }
+
+const dropRelations = (contentTypeDefinitions, apiKey) => {
+    const removeProperty = (ctd, property) => {
+        delete ctd.metaDefinition.propertiesConfig[property];
+        delete ctd.schemaDefinition.allOf[1].properties[property];
+        ctd.metaDefinition.order.splice(ctd.metaDefinition.order.indexOf(property), 1);
+        if (ctd.schemaDefinition.required.includes(property)) {
+            ctd.schemaDefinition.required.splice(ctd.schemaDefinition.required.indexOf(property), 1);
+        }
+        return ctd;
+    }
+
+    const cloneObject = (obj) => {
+        return JSON.parse(JSON.stringify(obj));
+    }
+
+    const clearContentType = async (ctd) => {
+        let ctdWithDroppedRelations = cloneObject(ctd);
+        for (let property in ctd.metaDefinition.propertiesConfig) {
+            if (ctd.metaDefinition.propertiesConfig[property]?.validation?.hasOwnProperty("relationContenttype")) {
+                ctdWithDroppedRelations = removeProperty(ctdWithDroppedRelations, property);
+            }
+        }
+        await updateContentTypeDefinition(ctdWithDroppedRelations, apiKey);
+        await updateContentTypeDefinition(ctd, apiKey);
+        return;
+    }
+    
+    for (let ctd in contentTypeDefinitions) {
+        for (let property in contentTypeDefinitions[ctd].metaDefinition.propertiesConfig) {
+            if (contentTypeDefinitions[ctd].metaDefinition.propertiesConfig[property]?.validation?.hasOwnProperty("relationContenttype")) {
+                return clearContentType(contentTypeDefinitions[ctd]);
+            }
+        }
+    }
+}
+
 
 const removeContentObjects = async (contentTypeDefinition, apiKey) => {
 

@@ -25,6 +25,15 @@ const fetchMedia = async (apiKey, page = 1, limit = 10) => {
     return await media.json();
 }
 
+const updateContentTypeDefinition = async (data, apiKey) => {
+    return fetch(`${config.apiUrl}/api/v1/internal/contenttype/${data.name}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json', 'X-AUTH-TOKEN': apiKey },
+        json: true
+    });
+}
+
 const flotiqCtdUpload = async (data, apiKey) => {
     headers['X-AUTH-TOKEN'] = apiKey;
 
@@ -99,6 +108,7 @@ module.exports = {
     fetchContentTypeDefinitions,
     fetchContentObjects,
     fetchMedia,
+    updateContentTypeDefinition,
     flotiqCtdUpload,
     flotiqCoUploadByCtd,
     flotiqMediaUpload
