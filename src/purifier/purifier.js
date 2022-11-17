@@ -12,7 +12,6 @@ module.exports = purgeContentObjects = async (apiKey, internal = false, force = 
 
     let i = 0;
     let ctdArrFormerLength = contentTypeDefinitions.length;
-    let spinnerStarted = false;
     let spinner;
     while (contentTypeDefinitions.length) {
         if (contentTypeDefinitions[i]) {
