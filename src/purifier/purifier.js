@@ -1,8 +1,10 @@
 const fetch = require('node-fetch');
 const config = require('../configuration/config');
-const {fetchContentTypeDefinitions, updateContentTypeDefinition} = require('../flotiq-api/flotiq-api');
+const { fetchContentTypeDefinitions, updateContentTypeDefinition } = require('../flotiq-api/flotiq-api');
+const ora = require('ora');
 
 module.exports = purgeContentObjects = async (apiKey, internal = false, force = false) => {
+    
     let ctdsClearedOfRelations = 0;
 
     let contentTypeDefinitions = (await (await fetchContentTypeDefinitions(apiKey, 1, 100, internal))
@@ -10,6 +12,8 @@ module.exports = purgeContentObjects = async (apiKey, internal = false, force = 
 
     let i = 0;
     let ctdArrFormerLength = contentTypeDefinitions.length;
+    let spinnerStarted = false;
+    let spinner;
     while (contentTypeDefinitions.length) {
         if (contentTypeDefinitions[i]) {
             let notRemoved = await removeContentObjects(contentTypeDefinitions[i], apiKey);
@@ -32,26 +36,13 @@ module.exports = purgeContentObjects = async (apiKey, internal = false, force = 
                     console.log("Use `flotiq purge [apiKey] --force` or remove conflicting relations manually");
                     return;
                 } else {
-                    var loading = (function () {
-                        let h = ['|', '/', '-', '\\'];
-                        let i = 0;
-                        
-                            return setInterval(() => {
-                                i = (i > 3) ? 0 : i;
-                                console.clear();
-                                console.log(`Cleaning data of relation loops... ${h[i]}\nContent types cleared of looped relations: ${ctdsClearedOfRelations}\nPlease do not stop the command or close the terminal`);
-                                i++;
-                            }, 300);
-                    })();
+                    spinner = ora(`Cleaning data of relation loops, please do not stop the command or close the terminal... Content Types cleared of looped relations: ${ctdsClearedOfRelations}\n`).start();
                     await dropRelations(contentTypeDefinitions.slice(ctdsClearedOfRelations), apiKey);
                     ctdsClearedOfRelations++;
+                    spinner.stop();
                 }
             }
         }
-    }
-    clearInterval(loading);
-    if (ctdsClearedOfRelations > 0) {
-        console.log(`I\'m finished, all Content objects have been purged`);
     }
 }
 
