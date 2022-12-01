@@ -47,6 +47,18 @@ const LANGUAGE = {
     message: "SDK language to install",
     defaultAnswer: 'javascript'
 }
+const CONTENT_TYPE_NAME = {
+    name: "ctdName",
+    type: "input",
+    message: "API Name of the Content Type Definition:"
+}
+
+const FILE_PATH = {
+    name: "filePath",
+    type: "input",
+    message: "File's directory path:"
+}
+
 const START_QUESTIONS = [
     FLOTIQ_RW_API_KEY,
     PROJECT_DIRECTORY,
@@ -84,6 +96,12 @@ const INSTALL_SDK = [
     FLOTIQ_API_KEY,
 ]
 
+const EXCEL_EXPORT = [
+    FLOTIQ_API_KEY,
+    CONTENT_TYPE_NAME,
+    FILE_PATH
+]
+
 const STATS = [
     FLOTIQ_API_KEY,
 ]
@@ -100,5 +118,6 @@ module.exports = {
     PURGE_QUESTION,
     EXPORT_QUESTIONS,
     INSTALL_SDK,
+    EXCEL_EXPORT,
     STATS
 }

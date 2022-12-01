@@ -71,7 +71,7 @@ yargs
         console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
         if (yargs.argv._.length < 2) {
             const answers = await askQuestions(questionsText.IMPORT_QUESTIONS);
-            let {flotiqApiKey, projectDirectory} = answers;
+            let { flotiqApiKey, projectDirectory } = answers;
             let directory = getObjectDataPath(projectDirectory);
             await importer.importer(flotiqApiKey, directory, true);
         } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
@@ -94,7 +94,7 @@ yargs
         // overriding the console in this case is not required, custom console is build in wordpress-importer
         if (yargs.argv._.length < 2) {
             const answers = await askQuestions(questionsText.WORDPRESS_IMPORT_QUESTIONS);
-            let {flotiqApiKey, wordpressUrl} = answers;
+            let { flotiqApiKey, wordpressUrl } = answers;
             await wordpressStart(flotiqApiKey, wordpressUrl, yargs.argv['json-output'])
         } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
             await wordpressStart.run(process.env.FLOTIQ_API_KEY, argv.wordpressUrl, yargs.argv['json-input']);
@@ -128,11 +128,11 @@ yargs
         }, async (argv) => {
             if (yargs.argv._.length < 2 && !apiKeyDefinedInDotEnv()) {
                 console.log('Api key not found')
-            } else if(yargs.argv._.length === 1 && apiKeyDefinedInDotEnv()) {
+            } else if (yargs.argv._.length === 1 && apiKeyDefinedInDotEnv()) {
                 await purgeContentObjects(argv.flotiqApiKey, argv.withInternal);
             } else if (yargs.argv._.length === 2) {
                 const answers = await askQuestions(questionsText.PURGE_QUESTION);
-                const {confirmation} = answers;
+                const { confirmation } = answers;
                 if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
                     argv.flotiqApiKey = process.env.FLOTIQ_API_KEY;
                 }
@@ -160,7 +160,7 @@ yargs
             console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
             if (yargs.argv._.length < 2) {
                 const answers = await askQuestions(questionsText.EXPORT_QUESTIONS);
-                let {flotiqApiKey, projectDirectory} = answers;
+                let { flotiqApiKey, projectDirectory } = answers;
                 await exporter.export(flotiqApiKey, projectDirectory, onlyDefinitions);
             } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
                 await exporter.export(process.env.FLOTIQ_API_KEY, argv.directory, onlyDefinitions);
@@ -186,7 +186,7 @@ yargs
         }
         if (yargs.argv._.length < 3) {
             let answers = await askQuestions(questionsText.INSTALL_SDK);
-            let {language, projectDirectory, apiKey} = answers;
+            let { language, projectDirectory, apiKey } = answers;
             await sdk(language, projectDirectory, apiKey);
         } else if (yargs.argv._.length === 4 && apiKeyDefinedInDotEnv()) {
             await sdk(argv.language, argv.directory, process.env.FLOTIQ_API_KEY);
@@ -197,6 +197,51 @@ yargs
             process.exit(1);
         }
     })
+    .command('excel-import [flotiqApiKey] [ctdName] [filePath]',
+        `Import Content Objects from excel file to Flotiq account`,
+        (yargs) => {
+            optionalParamFlotiqApiKey(yargs);
+            yargs
+                .boolean('logResults')
+                .alias('logResults', ['lr'])
+                .describe('logResults', 'whether to type out results into the console, default: false')
+                .boolean('updateExisting')
+                .alias('updateExisting', ['ue'])
+                .describe('updateExisting', 'wheather to update existing Content Objetcs, default: true')
+                .number('limit')
+                .alias('limit', ['l'])
+                .describe('number of Content Objects imported counting from the top row, default: 10 000')
+        }, async (argv) => {
+            // DEL
+            const test = (options) => {
+                console.log("options: ", options)
+            }
+            //
+            if (yargs.argv._.length < 3) {
+                const answers = await askQuestions(questionsText.EXCEL_EXPORT);
+                let { flotiqApiKey, ctdName, filePath } = answers;
+                test({
+                    apiKey: flotiqApiKey,
+                    ctdName: ctdName,
+                    filePath: filePath
+                });
+            } else if (yargs.argv._.length > 3 && yargs.argv._.length < 7) {
+                if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
+                    argv.flotiqApiKey === process.env.FLOTIQ_API_KEY;
+                }
+                test({
+                    apiKey: argv.flotiqApiKey,
+                    ctdName: argv.ctdName,
+                    filePath: argv.filePath,
+                    limit: yargs.argv['limit'],
+                    logResults: yargs.argv['logResults'],
+                    updateExisting: yargs.argv['updateExisting']
+                });
+            } else {
+                yargs.showHelp();
+                process.exit(1);
+            }
+        })
     .command('stats [flotiqApiKey]', 'Display Flotiq stats', (yargs) => {
     }, async (argv) => {
 
