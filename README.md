@@ -73,7 +73,7 @@ This command will:
 
 ### Purge data in Flotiq account
 
-`flotiq purge [flotiqApiKey] [flags]`
+`flotiq purge [flotiqApiKey]`
 
 This command will remove all data from your account. Great for testing imports. Command require additional confirmation.
 
