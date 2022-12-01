@@ -15,11 +15,11 @@ module.exports = purgeContentObjects = async (apiKey, internal = false, force = 
     let spinner;
     while (contentTypeDefinitions.length) {
         if (contentTypeDefinitions[i]) {
-            let notRemoved = await removeContentObjects(contentTypeDefinitions[i], apiKey);
-            if (!notRemoved) {
-                contentTypeDefinitions.splice(i, 1);
-            } else {
+            let objectsNotPurged = await removeContentObjects(contentTypeDefinitions[i], apiKey);
+            if (objectsNotPurged) {
                 i++;
+            } else {
+                contentTypeDefinitions.splice(i, 1);
             }
         } else {
             i = 0;
@@ -63,24 +63,24 @@ const dropRelations = (contentTypeDefinitions, apiKey) => {
     const clearContentType = async (ctd) => {
         let ctdWithDroppedRelations = cloneObject(ctd);
         for (let property in ctd.metaDefinition.propertiesConfig) {
-            if (ctd.metaDefinition.propertiesConfig[property]?.validation?.hasOwnProperty("relationContenttype")) {
+            const isRelationField = ctd.metaDefinition.propertiesConfig[property]?.validation?.hasOwnProperty("relationContenttype");
+            if (isRelationField) {
                 ctdWithDroppedRelations = removeProperty(ctdWithDroppedRelations, property);
             }
         }
         await updateContentTypeDefinition(ctdWithDroppedRelations, apiKey);
         await updateContentTypeDefinition(ctd, apiKey);
-        return;
     }
     
     for (let ctd in contentTypeDefinitions) {
         for (let property in contentTypeDefinitions[ctd].metaDefinition.propertiesConfig) {
-            if (contentTypeDefinitions[ctd].metaDefinition.propertiesConfig[property]?.validation?.hasOwnProperty("relationContenttype")) {
+            const isCtdWithRelations = contentTypeDefinitions[ctd].metaDefinition.propertiesConfig[property]?.validation?.hasOwnProperty("relationContenttype");
+            if (isCtdWithRelations) {
                 return clearContentType(contentTypeDefinitions[ctd]);
             }
         }
     }
 }
-
 
 const removeContentObjects = async (contentTypeDefinition, apiKey) => {
 

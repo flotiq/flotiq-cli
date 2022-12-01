@@ -121,7 +121,7 @@ yargs
         }
     })
     .command(
-        'purge [flotiqApiKey] [withInternal] [force]',
+        'purge [flotiqApiKey]',
         'Purge Flotiq account, removes all objects to which the key has access',
         (yargs) => {
             optionalParamFlotiqApiKey(yargs);
