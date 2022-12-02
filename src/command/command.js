@@ -203,6 +203,14 @@ yargs
         (yargs) => {
             optionalParamFlotiqApiKey(yargs);
             yargs
+                .positional('ctdName', {
+                    describe: 'API name of Content Type Definition you wish to export',
+                    type: 'string'
+                })
+                .positional('filePath', {
+                    describe: 'the directory to which the xlsx file is to be saved, type in "." if you want to save the file inside the current directory',
+                    type: 'string'
+                })
                 .boolean('hideResults')
                 .alias('hideResults', ['hr'])
                 .describe('hideResults', 'information about export process will not appear in the console')
@@ -241,6 +249,14 @@ yargs
         (yargs) => {
             optionalParamFlotiqApiKey(yargs);
             yargs
+                .positional('ctdName', {
+                    describe: 'API name of Content Type Definition you wish to import data to',
+                    type: 'string'
+                })
+                .positional('filePath', {
+                    describe: 'the directory to the xlsx file you wish to import data from',
+                    type: 'string'
+                })
                 .boolean('hideResults')
                 .alias('hideResults', ['hr'])
                 .describe('hideResults', 'information about export process will not appear in the console')
