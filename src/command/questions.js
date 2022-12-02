@@ -56,7 +56,7 @@ const CONTENT_TYPE_NAME = {
 const FILE_PATH = {
     name: "filePath",
     type: "input",
-    message: "File's directory path:"
+    message: "File's directory path ( `.` for current directory ):"
 }
 
 const START_QUESTIONS = [
@@ -96,7 +96,7 @@ const INSTALL_SDK = [
     FLOTIQ_API_KEY,
 ]
 
-const EXCEL_EXPORT = [
+const EXCEL_MIGRATION = [
     FLOTIQ_API_KEY,
     CONTENT_TYPE_NAME,
     FILE_PATH
@@ -118,6 +118,6 @@ module.exports = {
     PURGE_QUESTION,
     EXPORT_QUESTIONS,
     INSTALL_SDK,
-    EXCEL_EXPORT,
+    EXCEL_MIGRATION,
     STATS
 }
