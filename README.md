@@ -115,7 +115,7 @@ This command will automatically pull content types, assets and content objects f
 
 ### Export data from Flotiq to MS Excel
 
-`flotiq excel-import [ctdName] [filePath] [flotiqApiKey]`
+`flotiq excel-export [ctdName] [filePath] [flotiqApiKey]`
 
 This command will export Content Objects from the given Content Type to an MS Excel file in .xlsx format.
 
