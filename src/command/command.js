@@ -259,10 +259,10 @@ yargs
                 })
                 .boolean('hideResults')
                 .alias('hideResults', ['hr'])
-                .describe('hideResults', 'information about export process will not appear in the console')
+                .describe('hideResults', 'information about import process will not appear in the console')
                 .number('limit')
                 .alias('limit', ['l'])
-                .describe('number of Content Objects imported counting from the top row, default: 10 000')
+                .describe('number of Content Objects imported counting from the top row, default: 10.000')
         }, async (argv) => {
             if (yargs.argv._.length < 3 || (yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv())) {
                 const answers = await askQuestions(questionsText.EXCEL_MIGRATION);
