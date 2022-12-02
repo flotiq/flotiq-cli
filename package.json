@@ -12,8 +12,16 @@
   },
   "keywords": [
     "flotiq",
-    "gatsby"
+    "gatsby",
+    "cms",
+    "headless",
+    "content"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flotiq/flotiq-cli.git"
+  },
+  "homepage": "https://github.com/flotiq/flotiq-cli",
   "author": "Flotiq team <hello@flotiq.com>",
   "license": "MIT",
   "dependencies": {
