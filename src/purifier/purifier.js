@@ -1,23 +1,83 @@
 const fetch = require('node-fetch');
 const config = require('../configuration/config');
-const {fetchContentTypeDefinitions} = require('../flotiq-api/flotiq-api');
+const { fetchContentTypeDefinitions, updateContentTypeDefinition } = require('../flotiq-api/flotiq-api');
+const ora = require('ora');
 
-module.exports = purgeContentObjects = async (apiKey, internal = 0) => {
+module.exports = purgeContentObjects = async (apiKey, internal = false, force = false) => {
+    
+    let ctdsClearedOfRelations = 0;
 
     let contentTypeDefinitions = (await (await fetchContentTypeDefinitions(apiKey, 1, 100, internal))
         .json()).data;
 
     let i = 0;
+    let ctdArrFormerLength = contentTypeDefinitions.length;
+    let spinner;
     while (contentTypeDefinitions.length) {
         if (contentTypeDefinitions[i]) {
-            let notRemoved = await removeContentObjects(contentTypeDefinitions[i], apiKey);
-            if (!notRemoved) {
-                contentTypeDefinitions.splice(i, 1);
-            } else {
+            let objectsNotPurged = await removeContentObjects(contentTypeDefinitions[i], apiKey);
+            if (objectsNotPurged) {
                 i++;
+            } else {
+                contentTypeDefinitions.splice(i, 1);
             }
         } else {
-            i--;
+            i = 0;
+            if (contentTypeDefinitions.length !== ctdArrFormerLength) {
+                ctdArrFormerLength = contentTypeDefinitions.length
+            } else {
+                if (!force) {
+                    console.log("Purge command stumbled upon relation loop in CTDs:");
+                    while (i < contentTypeDefinitions.length) {
+                        console.log(contentTypeDefinitions[i].name)
+                        i++;
+                    }
+                    console.log("Use `flotiq purge [apiKey] --force` or remove conflicting relations manually");
+                    return;
+                } else {
+                    spinner = ora(`Cleaning data of relation loops, please do not stop the command or close the terminal... Content Types cleared of looped relations: ${ctdsClearedOfRelations}\n`).start();
+                    await dropRelations(contentTypeDefinitions.slice(ctdsClearedOfRelations), apiKey);
+                    ctdsClearedOfRelations++;
+                    spinner.stop();
+                }
+            }
+        }
+    }
+}
+
+const dropRelations = (contentTypeDefinitions, apiKey) => {
+    const removeProperty = (ctd, property) => {
+        delete ctd.metaDefinition.propertiesConfig[property];
+        delete ctd.schemaDefinition.allOf[1].properties[property];
+        ctd.metaDefinition.order.splice(ctd.metaDefinition.order.indexOf(property), 1);
+        if (ctd.schemaDefinition.required.includes(property)) {
+            ctd.schemaDefinition.required.splice(ctd.schemaDefinition.required.indexOf(property), 1);
+        }
+        return ctd;
+    }
+
+    const cloneObject = (obj) => {
+        return JSON.parse(JSON.stringify(obj));
+    }
+
+    const clearContentType = async (ctd) => {
+        let ctdWithDroppedRelations = cloneObject(ctd);
+        for (let property in ctd.metaDefinition.propertiesConfig) {
+            const isRelationField = ctd.metaDefinition.propertiesConfig[property]?.validation?.hasOwnProperty("relationContenttype");
+            if (isRelationField) {
+                ctdWithDroppedRelations = removeProperty(ctdWithDroppedRelations, property);
+            }
+        }
+        await updateContentTypeDefinition(ctdWithDroppedRelations, apiKey);
+        await updateContentTypeDefinition(ctd, apiKey);
+    }
+    
+    for (let ctd in contentTypeDefinitions) {
+        for (let property in contentTypeDefinitions[ctd].metaDefinition.propertiesConfig) {
+            const isCtdWithRelations = contentTypeDefinitions[ctd].metaDefinition.propertiesConfig[property]?.validation?.hasOwnProperty("relationContenttype");
+            if (isCtdWithRelations) {
+                return clearContentType(contentTypeDefinitions[ctd]);
+            }
         }
     }
 }

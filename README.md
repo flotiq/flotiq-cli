@@ -73,14 +73,16 @@ This command will:
 
 ### Purge data in Flotiq account
 
-`flotiq purge [flotiqApiKey] [options]`
+`flotiq purge [flotiqApiKey]`
 
 This command will remove all data from your account. Great for testing imports. Command require additional confirmation.
 
 **Parameters**
 * `flotiqApiKey` - read and write API key to your Flotiq account
-* `options` - additional options for command:
-  * `withInternal=1` - purge should remove also internal type objects (`_media`)
+
+**Flags**
+* `--withInternal` or `--internal` - purge will also remove internal type objects like (`_media`)
+* `--force` or `--f` - purge will remove data even if Content Types relations loop to each other.
 
 ### Export data from Flotiq to json files
 
