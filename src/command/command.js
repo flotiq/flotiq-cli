@@ -122,27 +122,41 @@ yargs
         }
     })
     .command(
-        'purge [flotiqApiKey] [options]',
+        'purge [flotiqApiKey]',
         'Purge Flotiq account, removes all objects to which the key has access',
         (yargs) => {
             optionalParamFlotiqApiKey(yargs);
-        }, async (argv) => {
-            if (yargs.argv._.length < 2 && !apiKeyDefinedInDotEnv()) {
-                console.log('Api key not found')
-            } else if (yargs.argv._.length === 1 && apiKeyDefinedInDotEnv()) {
-                await purgeContentObjects(argv.flotiqApiKey, argv.withInternal);
-            } else if (yargs.argv._.length === 2) {
+            yargs
+                .boolean('force')
+                .alias('force', ['f'])
+                .describe('force', 'force removing content objects when function gets stuck')
+                .boolean('withInternal')
+                .alias('withInternal', ['internal'])
+                .describe('withInternal', 'remove objects from internal CTD like _media')
+        }, (argv) => {
+            const purge = async (apiKey, withInternal, force) => {
                 const answers = await askQuestions(questionsText.PURGE_QUESTION);
                 const { confirmation } = answers;
-                if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
-                    argv.flotiqApiKey = process.env.FLOTIQ_API_KEY;
-                }
                 if (confirmation.toUpperCase() === 'Y') {
-                    await purgeContentObjects(argv.flotiqApiKey, argv.withInternal);
+                    await purgeContentObjects(apiKey, withInternal, force);
                 } else {
                     console.log('I\'m finishing, no data has been deleted');
                     process.exit(1);
                 }
+            }
+            
+            if (yargs.argv._.length < 2 && !apiKeyDefinedInDotEnv()) {
+                console.log('Api key not found')
+            } else if (yargs.argv._.length === 1 && apiKeyDefinedInDotEnv()) {
+                purge(process.env.FLOTIQ_API_KEY);
+            } else if (yargs.argv._.length <= 3 && apiKeyDefinedInDotEnv() || yargs.argv._.length <= 4) {
+                if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
+                    argv.flotiqApiKey = process.env.FLOTIQ_API_KEY;
+                }
+                purge(argv.flotiqApiKey, yargs.argv['withInternal'], yargs.argv['force'])
+            } else {
+                yargs.showHelp();
+                process.exit(1);
             }
         })
     .command(
