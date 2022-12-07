@@ -111,7 +111,7 @@ This command exports data from the Flotiq account to local JSON files. If the ke
 This command will automatically pull content types, assets and content objects from Contentful space to your Flotiq account.
 
 **Parameters**
-* `[translation]` - selection of Contentful's locale. en-US by default.
+* `[translation]` - selection of Contentful's locale. en-US by default
 
 ### Export data from Flotiq to MS Excel
 
@@ -120,13 +120,13 @@ This command will automatically pull content types, assets and content objects f
 This command will export Content Objects from the given Content Type to an MS Excel file in .xlsx format.
 
 **Parameters**
-* `ctdName` - API name of Content Type Definition you wish to export,
-* `filePath` - the directory to which the xlsx file is to be saved. Type in "." if you want to save the file inside the current directory,
-* `flotiqApiKey` - API key to your Flotiq account with read permission.
+* `ctdName` - API name of Content Type Definition you wish to export
+* `filePath` - the directory to which the xlsx file is to be saved. Type in "." if you want to save the file inside the current directory
+* `flotiqApiKey` - API key to your Flotiq account with read permission
 
 **Flags**
-* `--limit=[number]` or `--l=[number]` - number of Content Objects to export counting from the top row, default: 10.000,
-* `--hideResults` or `--hr` - information about the export process will not appear in the console.
+* `--limit=[number]` or `--l=[number]` - number of Content Objects to export counting from the top row, default: 10000
+* `--hideResults` or `--hr` - information about the export process will not appear in the console
 
 ### Import data to Flotiq from MS Excel
 
@@ -135,13 +135,13 @@ This command will export Content Objects from the given Content Type to an MS Ex
 This command will import Content Objects from an MS Excel file to the given Content Type.
 
 **Parameters**
-* `ctdName` - API name of Content Type Definition you wish to import data to,
-* `filePath` - the directory to the xlsx file you wish to import data from,
-* `flotiqApiKey` - API key to your Flotiq account with read and write permissions.
+* `ctdName` - API name of Content Type Definition you wish to import data to
+* `filePath` - the path to the xlsx file you wish to import data from
+* `flotiqApiKey` - API key to your Flotiq account with read and write permissions
 
 **Flags**
-* `--limit=[number]` or `--l=[number]` - number of Content Objects imported counting from the top row, default: 10 000,
-* `--hideResults` or `--hr` - information about the import process will not appear in the console.
+* `--limit=[number]` or `--l=[number]` - number of Content Objects imported counting from the top row, default: 10 000
+* `--hideResults` or `--hr` - information about the import process will not appear in the console
 
 ### Display stats
 
@@ -157,7 +157,7 @@ This command displays your Flotiq API Key following statistics:
 
 ## Flags
 
-`--json-output`, `-j` - Error and console output will be additionally written into json file named `output.json`.
+`--json-output`, `-j` - Error and console output will be additionally written into json file named `output.json`
 
 
 ## Gatsby Starters
