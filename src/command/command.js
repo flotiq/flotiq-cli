@@ -15,6 +15,7 @@ const oldConsole = console;
 const purgeContentObjects = require('../purifier/purifier')
 const sdk = require('../sdk/sdk');
 const stats = require('../stats/stats');
+const xlsxMigrator = require('flotiq-excel-migrator');
 
 yargs
     .boolean('json-output')
@@ -71,7 +72,7 @@ yargs
         console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
         if (yargs.argv._.length < 2) {
             const answers = await askQuestions(questionsText.IMPORT_QUESTIONS);
-            let {flotiqApiKey, projectDirectory} = answers;
+            let { flotiqApiKey, projectDirectory } = answers;
             let directory = getObjectDataPath(projectDirectory);
             await importer.importer(flotiqApiKey, directory, true);
         } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
@@ -94,7 +95,7 @@ yargs
         // overriding the console in this case is not required, custom console is build in wordpress-importer
         if (yargs.argv._.length < 2) {
             const answers = await askQuestions(questionsText.WORDPRESS_IMPORT_QUESTIONS);
-            let {flotiqApiKey, wordpressUrl} = answers;
+            let { flotiqApiKey, wordpressUrl } = answers;
             await wordpressStart(flotiqApiKey, wordpressUrl, yargs.argv['json-output'])
         } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
             await wordpressStart.run(process.env.FLOTIQ_API_KEY, argv.wordpressUrl, yargs.argv['json-input']);
@@ -174,7 +175,7 @@ yargs
             console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
             if (yargs.argv._.length < 2) {
                 const answers = await askQuestions(questionsText.EXPORT_QUESTIONS);
-                let {flotiqApiKey, projectDirectory} = answers;
+                let { flotiqApiKey, projectDirectory } = answers;
                 await exporter.export(flotiqApiKey, projectDirectory, onlyDefinitions);
             } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
                 await exporter.export(process.env.FLOTIQ_API_KEY, argv.directory, onlyDefinitions);
@@ -200,7 +201,7 @@ yargs
         }
         if (yargs.argv._.length < 3) {
             let answers = await askQuestions(questionsText.INSTALL_SDK);
-            let {language, projectDirectory, apiKey} = answers;
+            let { language, projectDirectory, apiKey } = answers;
             await sdk(language, projectDirectory, apiKey);
         } else if (yargs.argv._.length === 4 && apiKeyDefinedInDotEnv()) {
             await sdk(argv.language, argv.directory, process.env.FLOTIQ_API_KEY);
@@ -211,6 +212,98 @@ yargs
             process.exit(1);
         }
     })
+    .command('excel-export [ctdName] [filePath] [flotiqApiKey]',
+        `Export Content Objects from Flotiq account to the excel file`,
+        (yargs) => {
+            optionalParamFlotiqApiKey(yargs);
+            yargs
+                .positional('ctdName', {
+                    describe: 'API name of Content Type Definition you wish to export',
+                    type: 'string'
+                })
+                .positional('filePath', {
+                    describe: 'the directory to which the xlsx file is to be saved, type in "." if you want to save the file inside the current directory',
+                    type: 'string'
+                })
+                .boolean('hideResults')
+                .alias('hideResults', ['hr'])
+                .describe('hideResults', 'information about export process will not appear in the console')
+                .number('limit')
+                .alias('limit', ['l'])
+                .describe('number of Content Objects to export counting from the top row, default: 10.000')
+        }, async (argv) => {
+            if (yargs.argv._.length < 3 || (yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv())) {
+                const answers = await askQuestions(questionsText.EXCEL_MIGRATION);
+                let { flotiqApiKey, ctdName, filePath } = answers;
+                await xlsxMigrator.exportXlsx({
+                    apiKey: flotiqApiKey,
+                    ctdName: ctdName,
+                    filePath: filePath,
+                    limit: yargs.argv['limit'],
+                    logResults: !yargs.argv['hideResults']
+                });
+            } else if (yargs.argv._.length <= 4) {
+                if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
+                    argv.flotiqApiKey = process.env.FLOTIQ_API_KEY;
+                }
+                await xlsxMigrator.exportXlsx({
+                    apiKey: argv.flotiqApiKey,
+                    ctdName: argv.ctdName,
+                    filePath: argv.filePath,
+                    limit: yargs.argv['limit'],
+                    logResults: !yargs.argv['hideResults']
+                });
+            } else {
+                yargs.showHelp();
+                process.exit(1);
+            }
+        })
+    .command('excel-import [ctdName] [filePath] [flotiqApiKey]',
+        `Import Content Objects from excel file to Flotiq account`,
+        (yargs) => {
+            optionalParamFlotiqApiKey(yargs);
+            yargs
+                .positional('ctdName', {
+                    describe: 'API name of Content Type Definition you wish to import data to',
+                    type: 'string'
+                })
+                .positional('filePath', {
+                    describe: 'the directory to the xlsx file you wish to import data from',
+                    type: 'string'
+                })
+                .boolean('hideResults')
+                .alias('hideResults', ['hr'])
+                .describe('hideResults', 'information about import process will not appear in the console')
+                .number('limit')
+                .alias('limit', ['l'])
+                .describe('number of Content Objects imported counting from the top row, default: 10.000')
+        }, async (argv) => {
+            if (yargs.argv._.length < 3 || (yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv())) {
+                const answers = await askQuestions(questionsText.EXCEL_MIGRATION);
+                let { flotiqApiKey, ctdName, filePath } = answers;
+                await xlsxMigrator.importXlsx({
+                    apiKey: flotiqApiKey,
+                    ctdName: ctdName,
+                    filePath: filePath,
+                    limit: yargs.argv['limit'],
+                    logResults: !yargs.argv['hideResults']
+                });
+            } else if (yargs.argv._.length <= 4) {
+                if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
+                    argv.flotiqApiKey = process.env.FLOTIQ_API_KEY;
+                }
+                await xlsxMigrator.importXlsx({
+                    apiKey: argv.flotiqApiKey,
+                    ctdName: argv.ctdName,
+                    filePath: argv.filePath,
+                    limit: yargs.argv['limit'],
+                    logResults: !yargs.argv['hideResults']
+                });
+            } else {
+                yargs.showHelp();
+                process.exit(1);
+            }
+        })
     .command('stats [flotiqApiKey]', 'Display Flotiq stats', (yargs) => {
     }, async (argv) => {
 
