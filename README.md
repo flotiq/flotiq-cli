@@ -13,7 +13,16 @@ Flotiq CLI
 Flotiq is a modern and highly customizable headless CMS that offers a seamless content management experience for developers and content creators alike. With its intuitive API-first approach and flexible data model, Flotiq enables businesses to easily create, manage, and distribute content across multiple channels and platforms.
 
 CLI application for starting your next project with Flotiq fast. 
-Currently supports importing data from WordPress into Flotiq and seeding example data from our Gatsby starters, migrating data with MS Excel and more.
+Currently supports following commands:
+- [launching Flotiq starter projects](https://github.com/flotiq/flotiq-cli#launch-a-flotiq-starter-project)
+- [seeding example data from our Gatsby starters](https://github.com/flotiq/flotiq-cli#import-example-data-for-a-gatsby-starter)
+- [importing data from WordPress into Flotiq](https://github.com/flotiq/flotiq-cli#import-data-from-wordpress-to-flotiq)
+- [importing data from Contentful into Flotiq](https://github.com/flotiq/flotiq-cli#import-data-from-contentful-to-flotiq)
+- [exporting data from your Flotiq account into JSON](https://github.com/flotiq/flotiq-cli#export-data-from-flotiq-to-json-files)
+- [exporting data from your Flotiq account into Microsoft Excel format](https://github.com/flotiq/flotiq-cli#export-data-from-flotiq-to-ms-excel).
+- [purging data in your Flotiq account](https://github.com/flotiq/flotiq-cli#purge-data-in-flotiq-account)
+- [installing your SDK packages](https://github.com/flotiq/flotiq-cli#install-flotiq-sdk)
+- [displaying account stats](https://github.com/flotiq/flotiq-cli#display-stats)
 
 <a href="https://flotiq.com/docs/CLI/">See our docs :scroll:</a>
 
