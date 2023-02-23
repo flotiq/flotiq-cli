@@ -1,12 +1,21 @@
 <a href="https://flotiq.com/">
-    <img src="https://editor.flotiq.com/images/fq-logo.svg" alt="Flotiq logo" title="Flotiq" align="right" height="60" />
+    <img src="https://api.flotiq.com/image/0x0/_media-1c001012-6570-42e8-a43e-9045b44aa4ea.png" alt="Flotiq logo" title="Flotiq" align="right" height="70" />
 </a>
 
 Flotiq CLI
 ==================
 
+<p align="center">
+    [![Npm package version](https://badgen.net/npm/v/flotiq-cli)](https://npmjs.com/package/flotiq-cli)
+    [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/V8vcfReN3w) ![Terminal](https://badgen.net/badge/icon/terminal?icon=terminal&label)
+</p>
+
+Flotiq is a modern and highly customizable headless CMS that offers a seamless content management experience for developers and content creators alike. With its intuitive API-first approach and flexible data model, Flotiq enables businesses to easily create, manage, and distribute content across multiple channels and platforms.
+
 CLI application for starting your next project with Flotiq fast. 
-Currently supports importing data from WordPress into Flotiq and seeding example data from our Gatsby starters.
+Currently supports importing data from WordPress into Flotiq and seeding example data from our Gatsby starters, migrating data with MS Excel and more.
+
+<a href="https://flotiq.com/docs/CLI/">See our docs :scroll:</a>
 
 ## Setup
 
