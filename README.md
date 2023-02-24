@@ -1,5 +1,5 @@
 <a href="https://flotiq.com/">
-    <img src="https://api.flotiq.com/image/0x0/_media-1c001012-6570-42e8-a43e-9045b44aa4ea.png" alt="Flotiq logo" title="Flotiq" align="right" height="70" />
+    <img src="https://api.flotiq.com/image/0x0/_media-baefa473-6c64-43ef-bedf-bd3716831dd8.png" alt="Flotiq logo" title="Flotiq" align="right" height="70" />
 </a>
 
 Flotiq CLI
@@ -12,8 +12,8 @@ Flotiq CLI
 
 Flotiq is a modern and highly customizable headless CMS that offers a seamless content management experience for developers and content creators alike. With its intuitive API-first approach and flexible data model, Flotiq enables businesses to easily create, manage, and distribute content across multiple channels and platforms.
 
-CLI application for starting your next project with Flotiq fast. 
-Currently supports following commands:
+CLI application for starting your next project with Flotiq fast.
+Currently supports the following commands:
 - [launching Flotiq starter projects](https://github.com/flotiq/flotiq-cli#launch-a-flotiq-starter-project)
 - [seeding example data from our Gatsby starters](https://github.com/flotiq/flotiq-cli#import-example-data-for-a-gatsby-starter)
 - [importing data from WordPress into Flotiq](https://github.com/flotiq/flotiq-cli#import-data-from-wordpress-to-flotiq)
