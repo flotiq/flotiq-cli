@@ -280,6 +280,9 @@ yargs
                 .number('batchLimit')
                 .alias('batchLimit', ['bl'])
                 .describe('batchLimit', 'number of Content Objects imported per batch call, default: 100')
+                .boolean('updateExisting')
+                .alias('updateExisting', ['ue'])
+                .describe('If content objects with a given id already exist in the Flotiq account, they will be updated')
         }, async (argv) => {
             if (yargs.argv._.length < 3 || (yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv())) {
                 const answers = await askQuestions(questionsText.EXCEL_MIGRATION);
@@ -290,7 +293,8 @@ yargs
                     filePath: filePath,
                     limit: yargs.argv['limit'],
                     logResults: !yargs.argv['hideResults'],
-                    batchLimit: yargs.argv['batchLimit']
+                    batchLimit: yargs.argv['batchLimit'],
+                    updateExisting: yargs.argv['updateExisting']
                 });
             } else if (yargs.argv._.length <= 4) {
                 if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
@@ -302,7 +306,8 @@ yargs
                     filePath: argv.filePath,
                     limit: yargs.argv['limit'],
                     logResults: !yargs.argv['hideResults'],
-                    batchLimit: yargs.argv['batchLimit']
+                    batchLimit: yargs.argv['batchLimit'],
+                    updateExisting: yargs.argv['updateExisting']
                 });
             } else {
                 yargs.showHelp();
