@@ -277,6 +277,9 @@ yargs
                 .number('limit')
                 .alias('limit', ['l'])
                 .describe('number of Content Objects imported counting from the top row, default: 10.000')
+                .number('batchLimit')
+                .alias('batchLimit', ['bl'])
+                .describe('batchLimit', 'number of Content Objects imported per batch call, default: 100')
         }, async (argv) => {
             if (yargs.argv._.length < 3 || (yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv())) {
                 const answers = await askQuestions(questionsText.EXCEL_MIGRATION);
@@ -286,7 +289,8 @@ yargs
                     ctdName: ctdName,
                     filePath: filePath,
                     limit: yargs.argv['limit'],
-                    logResults: !yargs.argv['hideResults']
+                    logResults: !yargs.argv['hideResults'],
+                    batchLimit: yargs.argv['batchLimit']
                 });
             } else if (yargs.argv._.length <= 4) {
                 if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
@@ -297,7 +301,8 @@ yargs
                     ctdName: argv.ctdName,
                     filePath: argv.filePath,
                     limit: yargs.argv['limit'],
-                    logResults: !yargs.argv['hideResults']
+                    logResults: !yargs.argv['hideResults'],
+                    batchLimit: yargs.argv['batchLimit']
                 });
             } else {
                 yargs.showHelp();
