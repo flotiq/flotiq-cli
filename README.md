@@ -157,7 +157,9 @@ This command will import Content Objects from an MS Excel file to the given Cont
 **Flags**
 
 * `--limit=[number]` or `--l=[number]` - number of Content Objects imported counting from the top row, default: 10 000
+* `--batchLimit` or `--bl` - number of Content Objects imported per batch call, default: 100
 * `--hideResults` or `--hr` - information about the import process will not appear in the console
+* `--updateExisting` or `--ue` - if content objects with a given id already exist in the Flotiq account, they will be updated
 
 ### Display stats
 
