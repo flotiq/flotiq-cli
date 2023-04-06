@@ -28,7 +28,7 @@
     "@contentful/rich-text-html-renderer": "^15.13.1",
     "contentful-export": "^7.18.12",
     "dotenv": "^16.0.0",
-    "flotiq-excel-migrator": "^1.0.13",
+    "flotiq-excel-migrator": "^1.0.14",
     "flotiq-wordpress-import": "^1.1.7",
     "form-data": "^3.0.0",
     "gatsby-cli": "^4.2.0",
