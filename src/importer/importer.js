@@ -5,23 +5,28 @@ const FormData = require('form-data');
 const config = require('../configuration/config');
 const parser = require("./parser/parser");
 
+const CLI_GREEN = "\x1b[32m%s\x1b[0m";
+const CLI_BLUE = "\x1b[36m%s\x1b[0m"
+
 let headers = {
     accept: 'application/json',
 };
 
 exports.importer = async (apiKey, directoryPath, exit = true) => {
     directoryPath = path.resolve(directoryPath);
-    console.log('Importing contents to Flotiq');
+    console.log(`Importing contents to your Flotiq account`);
+    console.log(`Reading '${directoryPath}'...`);
     const directoryImagePath = path.join(directoryPath, 'images');
     headers['X-AUTH-TOKEN'] = apiKey;
     let imageImportData = await importImages(directoryImagePath, headers);
+    let nothingImported = false;
 
     let directories = [];
     try {
         directories = fs.readdirSync(directoryPath);
     } catch (e) {
         if (exit) {
-            console.error('\x1b[36m%s\x1b[0m', 'Incorrect import directory, cannot find .flotiq directory inside!');
+            console.error(CLI_BLUE, 'Incorrect import directory, cannot find .flotiq directory inside!');
             process.exit(1)
         } else {
             return
@@ -36,9 +41,15 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
                 await importContentObjects(path.join(directoryPath, directory), imageImportData, contentTypeName, headers);
             } else {
                 console.log('Nothing to import');
+                nothingImported = true;
             }
         }
     }
+
+    if(!nothingImported) {
+        console.log(CLI_GREEN, 'You can manage added content using Flotiq Dashboard: https://editor.flotiq.com');
+    }
+
 
     async function importContentTypedDefinitions(directoryPath, headers) {
         try {
@@ -48,7 +59,7 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
                 body: JSON.stringify(contentDefinition),
                 headers: {...headers, 'Content-Type': 'application/json'},
             });
-            resultNotify(result, 'Definition', contentDefinition.name);
+            resultNotify(result, '✔ Definition', contentDefinition.name);
             return contentDefinition.name;
         } catch(e) {
             return null;
@@ -89,7 +100,7 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
                         contentObject = await result.json();
                     }
 
-                    resultNotify(result, 'Image', contentObject.id);
+                    resultNotify(result, '✔ Image', contentObject.id);
                     imageForReplacing[fileId] = contentObject.id
                 }
             }))
@@ -129,22 +140,22 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
                     headers: {...headers, 'Content-Type': 'application/json'},
                 });
 
-                resultNotify(result, 'Object', contentObject.id);
+                resultNotify(result, '✔ Object', contentObject.id);
             }
         }))
     }
 
     function resultNotify(response, context, name) {
         if (response.status === 400) {
-            console.log(response.json().then((data) => {
+            console.log('Response from server: ' . response.json().then((data) => {
                 console.log(data);
             }));
-            console.log(context + ' : "' + name + '" existing, trying use it.');
+            console.log(context + ': "' + name + '" existing, trying use it.');
         } else if (response.status === 200) {
-            console.log(context + ' : "' + name + '" added');
+            console.log(context + ': "' + name + '" added.');
         } else {
             console.errorCode(300);
-            console.error(context + ' : "' + name + '" has not been added: ' + response.statusText);
+            console.error(context + ': "' + name + '" has not been added: ' + response.statusText);
             process.exit(1);
         }
     }
