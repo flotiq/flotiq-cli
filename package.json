@@ -25,13 +25,13 @@
   "author": "Flotiq team <hello@flotiq.com>",
   "license": "MIT",
   "dependencies": {
-    "@contentful/rich-text-html-renderer": "^15.13.1",
-    "contentful-export": "^7.18.12",
+    "@contentful/rich-text-html-renderer": "^16.6.8",
+    "contentful-export": "^7.19.147",
     "dotenv": "^16.0.0",
     "flotiq-excel-migrator": "^1.0.15",
-    "flotiq-wordpress-import": "^1.1.7",
+    "flotiq-wordpress-import": "^1.1.8",
     "form-data": "^3.0.0",
-    "gatsby-cli": "^4.2.0",
+    "gatsby-cli": "^5.13.3",
     "inquirer": "^7.2.0",
     "node-fetch": "^2.6.1",
     "ora": "^5.4.1",
@@ -40,6 +40,6 @@
   },
   "devDependencies": {
     "jest": "^27.4.7",
-    "jest-when": "^3.5.0"
+    "jest-when": "^3.6.0"
   }
 }
