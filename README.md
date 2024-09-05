@@ -58,10 +58,10 @@ This command will:
 `flotiq import [projectName] [flotiqApiKey]`
 
 This command imports Content Types and Content Objects from your starter to your Flotiq account using the API key.
-Gatsby starter must include directory `.flotiq` with `ContentType[0-9]` folders, each of them containing ContentTypeDefinition.json file, and contentObject[0-9].json files.
+Gatsby starter must include directory with `ContentType[0-9]` folders, each of them containing ContentTypeDefinition.json file, and contentObject[0-9].json files.
 
 The number at the end of the directory or file name defines the file import order. 
-The `.flotiq/images` directory in a particular starter stores images that will be imported into your Media Library.
+The `./images` directory in a particular starter stores images that will be imported into your Media Library.
 
 **Parameters**
 

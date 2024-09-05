@@ -73,14 +73,11 @@ yargs
         if (yargs.argv._.length < 2) {
             const answers = await askQuestions(questionsText.IMPORT_QUESTIONS);
             let { flotiqApiKey, projectDirectory } = answers;
-            let directory = getObjectDataPath(projectDirectory);
-            await importer.importer(flotiqApiKey, directory, true);
+            await importer.importer(flotiqApiKey, projectDirectory, true);
         } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
-            let directory = getObjectDataPath(argv.directory);
-            await importer.importer(process.env.FLOTIQ_API_KEY, directory, true);
+            await importer.importer(process.env.FLOTIQ_API_KEY, argv.directory, true);
         } else if (yargs.argv._.length === 3) {
-            let directory = getObjectDataPath(argv.directory);
-            await importer.importer(argv.flotiqApiKey, directory, true);
+            await importer.importer(argv.flotiqApiKey, argv.directory, true);
         }
     })
     .command('wordpress-import [wordpressUrl] [flotiqApiKey]', 'Import wordpress to Flotiq', (yargs) => {
@@ -348,10 +345,6 @@ function optionalParamFlotiqApiKey(yargs) {
     }
 }
 
-function getObjectDataPath(projectDirectory) {
-    return projectDirectory + '/.flotiq';
-}
-
 function checkCommand(yargs, numRequired) {
     if (yargs.argv._.length <= numRequired) {
         yargs.showHelp();
@@ -396,8 +389,7 @@ function start(flotiqApiKey, directory, url, isJson, framework = null) {
 
     function startSetup(type) {
         projectSetup.setup(directory, url, type).then(async () => {
-            let path = getObjectDataPath(directory);
-            await importer.importer(flotiqApiKey, path, false);
+            await importer.importer(flotiqApiKey, directory, false);
             await projectSetup.init(directory, flotiqApiKey, type);
             await projectSetup.develop(directory, type);
         });
