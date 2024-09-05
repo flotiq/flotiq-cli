@@ -33,21 +33,25 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
         }
     }
 
-    for (let i = 0; i < directories.length; i++) {
-        const directory = directories[i];
+    directories = directories.filter((element) => element !== 'images');
+
+    for (const directory of directories) {
         if (directory.indexOf(`ContentType`) === 0) {
             let contentTypeName = await importContentTypedDefinitions(path.join(directoryPath, directory), headers);
-            if(contentTypeName) {
+            if (contentTypeName) {
                 await importContentObjects(path.join(directoryPath, directory), imageImportData, contentTypeName, headers);
             } else {
-                console.log('Nothing to import');
                 nothingImported = true;
             }
+        } else {
+            nothingImported = true;
         }
     }
 
-    if(!nothingImported) {
+    if (!nothingImported) {
         console.log(CLI_GREEN, 'You can manage added content using Flotiq Dashboard: https://editor.flotiq.com');
+    } else {
+        console.log(CLI_BLUE, 'Nothing to import!');
     }
 
     async function importContentTypedDefinitions(directoryPath, headers) {
@@ -60,7 +64,7 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
             });
             resultNotify(result, '✔ Definition', contentDefinition.name);
             return contentDefinition.name;
-        } catch(e) {
+        } catch (e) {
             return null;
         }
     }
@@ -75,7 +79,7 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
         if (fs.existsSync(directoryImagePath)) {
             let files = fs.readdirSync(directoryImagePath);
             await Promise.all(files.map(async function (file) {
-                if(file === '.gitkeep') {
+                if (file === '.gitkeep') {
                     return;
                 }
                 const fileId = file.split('.')[0];
@@ -138,7 +142,6 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
                     body: contentObjectString,
                     headers: {...headers, 'Content-Type': 'application/json'},
                 });
-
                 resultNotify(result, '✔ Object', contentObject.id);
             }
         }))
@@ -146,7 +149,7 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
 
     function resultNotify(response, context, name) {
         if (response.status === 400) {
-            console.log('Response from server: ' . response.json().then((data) => {
+            console.log('Response from server: '.response.json().then((data) => {
                 console.log(data);
             }));
             console.log(context + ': "' + name + '" existing, trying use it.');
