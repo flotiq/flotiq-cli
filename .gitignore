@@ -50,3 +50,6 @@ output.json
 
 # environment variables
 /.env
+
+# Test results
+path

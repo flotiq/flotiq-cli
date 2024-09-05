@@ -345,10 +345,6 @@ function optionalParamFlotiqApiKey(yargs) {
     }
 }
 
-function getObjectDataPath(projectDirectory) {
-    return projectDirectory + '/.flotiq';
-}
-
 function checkCommand(yargs, numRequired) {
     if (yargs.argv._.length <= numRequired) {
         yargs.showHelp();
