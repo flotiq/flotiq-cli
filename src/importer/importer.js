@@ -26,7 +26,7 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
         directories = fs.readdirSync(directoryPath);
     } catch (e) {
         if (exit) {
-            console.error(CLI_BLUE, 'Incorrect import directory, cannot find .flotiq directory inside!');
+            console.error(CLI_BLUE, 'Failed to open import directory!');
             process.exit(1)
         } else {
             return
@@ -49,7 +49,6 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
     if(!nothingImported) {
         console.log(CLI_GREEN, 'You can manage added content using Flotiq Dashboard: https://editor.flotiq.com');
     }
-
 
     async function importContentTypedDefinitions(directoryPath, headers) {
         try {
