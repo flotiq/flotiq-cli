@@ -32,6 +32,42 @@ Currently supports the following commands:
 
 ## Usage
 
+### Export data from Flotiq to JSON files
+
+`flotiq export [directory] [flotiqApiKey]`
+
+This command exports data from the Flotiq account to local JSON files. If the key is limited to selected Content Types, then the data available for this key will be exported.
+
+**Parameters**
+
+* `directory` - path to the directory where the files will be saved
+* `flotiqApiKey` - read-only or read and write API key to your Flotiq account
+
+**Flags**
+
+* `--only-definitions` - use this flag to run export only for Content Type Definitions, ignore Content Objects
+
+### Import data from JSON files
+
+`flotiq import [projectName] [flotiqApiKey]`
+
+This command imports Content Types and Content Objects to your Flotiq account using the API key.
+Source directory must include directory with `ContentType[0-9]` folders, each of them containing ContentTypeDefinition.json file, and contentObject[0-9].json files.
+
+The number at the end of the directory or file name defines the file import order. 
+The `./images` directory in a particular starter stores images that will be imported into your Media Library.
+
+The command can import data output of the `flotiq export` command.
+
+**Parameters**
+
+* `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
+* `flotiqApiKey` - read and write API key to your Flotiq account
+
+#### Note
+
+It is also possible to perform the import and export manually, using the Flotiq API without relying on the CLI importer. However, when doing this, you need to ensure that image URLs are updated, as images will receive new IDs during the migration process. This requires careful handling to avoid broken links in your Content Objects. For more details on how to properly handle this, refer to the [Flotiq API documentation](https://flotiq.com/docs/).
+
 ### Launch a Flotiq starter project
 
 `flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey]`
@@ -51,22 +87,6 @@ This command will:
 **Flags**
 
 * `--framework` - framework of the starter i.e. `--framework=nextjs` or `--fw=gatsby`. If no framework parameter is given, the URL will be searched for phrases i.e. Set to `gatsby` by default
-
-
-### Import example data for a Gatsby starter
-
-`flotiq import [projectName] [flotiqApiKey]`
-
-This command imports Content Types and Content Objects from your starter to your Flotiq account using the API key.
-Gatsby starter must include directory with `ContentType[0-9]` folders, each of them containing ContentTypeDefinition.json file, and contentObject[0-9].json files.
-
-The number at the end of the directory or file name defines the file import order. 
-The `./images` directory in a particular starter stores images that will be imported into your Media Library.
-
-**Parameters**
-
-* `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
-* `flotiqApiKey` - read and write API key to your Flotiq account
 
 #### Import variables
 
@@ -107,21 +127,6 @@ This command will remove all data from your account. Great for testing imports. 
 
 * `--withInternal` or `--internal` - purge will also remove internal type objects like (`_media`)
 * `--force` or `--f` - purge will remove data even if Content Types relations loop to each other.
-
-### Export data from Flotiq to JSON files
-
-`flotiq export [directory] [flotiqApiKey]`
-
-This command exports data from the Flotiq account to local JSON files. If the key is limited to selected Content Types, then the data available for this key will be exported.
-
-**Parameters**
-
-* `directory` - path to the directory where the files will be saved
-* `flotiqApiKey` - read-only or read and write API key to your Flotiq account
-
-**Flags**
-
-* `--only-definitions` - use this flag to run export only for Content Type Definitions, ignore Content Objects
 
 ### Install Flotiq SDK
 
