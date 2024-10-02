@@ -42,8 +42,6 @@ yargs
             type: 'string',
         });
     }, async (argv) => {
-        console.log(yargs.argv);
-        console.log(argv);
         console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
         let isJson = !!yargs.argv['json-output']
         if (yargs.argv.help) {
