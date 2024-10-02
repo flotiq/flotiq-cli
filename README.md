@@ -87,6 +87,7 @@ This command will:
 **Flags**
 
 * `--framework` - framework of the starter i.e. `--framework=nextjs` or `--fw=gatsby`. If no framework parameter is given, the URL will be searched for phrases i.e. Set to `gatsby` by default
+* `--noi-import` - skip example data import
 
 #### Import variables
 

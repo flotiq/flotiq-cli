@@ -24,6 +24,9 @@ yargs
     .string('framework')
     .alias('framework', ['fw'])
     .describe('framework', ' Determines which framework should be used (gatsby, nextjs)')
+    .boolean('no-import')
+    .alias('no-import', ['n'])
+    .describe('no-import', 'skip importing example objects')
     .command('start [directory] [url] [flotiqApiKey] [framework]', 'Start the project', (yargs) => {
         yargs.positional('directory', {
             describe: 'Directory to create project in.',
@@ -39,6 +42,8 @@ yargs
             type: 'string',
         });
     }, async (argv) => {
+        console.log(yargs.argv);
+        console.log(argv);
         console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
         let isJson = !!yargs.argv['json-output']
         if (yargs.argv.help) {
@@ -50,13 +55,13 @@ yargs
             let { flotiqApiKey, projectDirectory, url } = answers;
             start(flotiqApiKey, projectDirectory, url, isJson);
         } else if (yargs.argv._.length === 3 && apiKeyDefinedInDotEnv()) {
-            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, isJson, yargs.argv['framework']);
+            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, isJson, yargs.argv['framework'], yargs.argv['import']);
         } else if (yargs.argv._.length === 4 && argv.flotiqApiKey) {
-            start(argv.flotiqApiKey, argv.directory, argv.url, isJson, yargs.argv['framework']);
+            start(argv.flotiqApiKey, argv.directory, argv.url, isJson, yargs.argv['framework'], yargs.argv['import']);
         } else if (yargs.argv._.length === 4 && apiKeyDefinedInDotEnv()) {
-            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, isJson, yargs.argv['framework']);
+            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, isJson, yargs.argv['framework'], yargs.argv['import']);
         } else if (yargs.argv._.length === 5) {
-            start(argv.flotiqApiKey, argv.directory, argv.url, isJson, yargs.argv['framework']);
+            start(argv.flotiqApiKey, argv.directory, argv.url, isJson, yargs.argv['framework'], yargs.argv['import']);
         } else {
             yargs.showHelp();
             process.exit(1);
@@ -376,7 +381,7 @@ async function checkAllParameters(answer, questions) {
     return newAnswer;
 }
 
-function start(flotiqApiKey, directory, url, isJson, framework = null) {
+function start(flotiqApiKey, directory, url, isJson, framework = null, importData = true) {
     if (framework) {
         framework = framework.toLowerCase();
     } else {
@@ -389,7 +394,9 @@ function start(flotiqApiKey, directory, url, isJson, framework = null) {
 
     function startSetup(type) {
         projectSetup.setup(directory, url, type).then(async () => {
-            await importer.importer(flotiqApiKey, directory, false);
+            if(importData) {
+                await importer.importer(flotiqApiKey, directory + '/.flotiq', false);
+            }
             await projectSetup.init(directory, flotiqApiKey, type);
             await projectSetup.develop(directory, type);
         });

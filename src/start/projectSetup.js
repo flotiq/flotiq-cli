@@ -68,7 +68,7 @@ exports.develop = async (projectDirectory, framework) => {
     } else if (framework === FRAMEWORK_GATSBY) {
         await execShellCommand(`cd ${projectDirectory} && ${createGatsbyCommand('develop')}`);
     } else {
-        console.error(ERROR_COLOR, "Invalid framework!3");
+        console.error(ERROR_COLOR, "Invalid framework!");
     }
 }
 
