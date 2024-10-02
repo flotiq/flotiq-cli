@@ -52,7 +52,7 @@ This command exports data from the Flotiq account to local JSON files. If the ke
 `flotiq import [projectName] [flotiqApiKey]`
 
 This command imports Content Types and Content Objects to your Flotiq account using the API key.
-Source directory must include directory with `ContentType[0-9]` folders, each of them containing ContentTypeDefinition.json file, and contentObject[0-9].json files.
+Source directory must include directory with `ContentType[0-9]` folders, each of them containing ContentTypeDefinition.json file, and `contentObject[0-9].json` files.
 
 The number at the end of the directory or file name defines the file import order. 
 The `./images` directory in a particular starter stores images that will be imported into your Media Library.
@@ -87,6 +87,7 @@ This command will:
 **Flags**
 
 * `--framework` - framework of the starter i.e. `--framework=nextjs` or `--fw=gatsby`. If no framework parameter is given, the URL will be searched for phrases i.e. Set to `gatsby` by default
+* `--no-import` - skip example data import
 
 #### Import variables
 
