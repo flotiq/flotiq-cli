@@ -149,7 +149,7 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
 
     function resultNotify(response, context, name) {
         if (response.status === 400) {
-            console.log('Response from server: '.response.json().then((data) => {
+            console.log('Response from server: ' + response.json().then((data) => {
                 console.log(data);
             }));
             console.log(context + ': "' + name + '" existing, trying use it.');
