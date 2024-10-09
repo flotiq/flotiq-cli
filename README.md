@@ -6,8 +6,8 @@ Flotiq CLI
 ==================
 
 <p align="center">
-    ![Npm package version](https://badgen.net/npm/v/flotiq-cli)](https://npmjs.com/package/flotiq-cli)
-    ![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/V8vcfReN3w)
+    ![Npm package version](https://npmjs.com/package/flotiq-cli)
+    ![Discord](https://discord.gg/V8vcfReN3w)
     ![Terminal](https://badgen.net/badge/icon/terminal?icon=terminal&label)
 </p>
 
