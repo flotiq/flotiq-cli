@@ -142,16 +142,15 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
                     body: contentObjectString,
                     headers: {...headers, 'Content-Type': 'application/json'},
                 });
-                resultNotify(result, '✔ Object', contentObject.id);
+                await resultNotify(result, '✔ Object', contentObject.id);
             }
         }))
     }
 
-    function resultNotify(response, context, name) {
+    async function resultNotify(response, context, name) {
         if (response.status === 400) {
-            console.log('Response from server: ' + response.json().then((data) => {
-                console.log(data);
-            }));
+            const json = await response.json();
+            console.log('Response from server: ' + json);
             console.log(context + ': "' + name + '" existing, trying use it.');
         } else if (response.status === 200) {
             console.log(context + ': "' + name + '" added.');

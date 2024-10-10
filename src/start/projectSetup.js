@@ -13,7 +13,7 @@ exports.setup = async (projectDirectory, starterUrl, framework) => {
         await execShellCommand(`git clone ${starterUrl}.git ${projectDirectory}`);
     } else if (framework === "gatsby") {
         console.log('Starting Gatsby setup');
-        await runGatsbyProcess('new', projectDirectory, starterUrl);
+        await execShellCommand(`git clone ${starterUrl}.git ${projectDirectory}`);
     } else {
         console.error(ERROR_COLOR, "Invalid framework!");
         process.exit(1);
@@ -66,15 +66,11 @@ exports.develop = async (projectDirectory, framework) => {
         await execShellCommand(`cd ${projectDirectory} && yarn install`);
         await execShellCommand(`cd ${projectDirectory} && yarn next dev`);
     } else if (framework === FRAMEWORK_GATSBY) {
+        await execShellCommand(`cd ${projectDirectory} && yarn install`);
         await execShellCommand(`cd ${projectDirectory} && ${createGatsbyCommand('develop')}`);
     } else {
         console.error(ERROR_COLOR, "Invalid framework!");
     }
-}
-
-function runGatsbyProcess(action, projectDirectory = '', starterUrl = '') {
-    let cmd = createGatsbyCommand(action, projectDirectory, starterUrl);
-    return execShellCommand(cmd);
 }
 
 function createGatsbyCommand(action, projectDirectory = '', starterUrl = '') {
