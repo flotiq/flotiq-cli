@@ -150,13 +150,13 @@ exports.importer = async (apiKey, directoryPath, exit = true) => {
     async function resultNotify(response, context, name) {
         if (response.status === 400) {
             const json = await response.json();
-            console.log('Response from server: ' + json);
-            console.log(context + ': "' + name + '" existing, trying use it.');
+            console.log('Response from server\n', json);
+            console.log(`${context}: ${name} existing, trying use it.`);
         } else if (response.status === 200) {
             console.log(context + ': "' + name + '" added.');
         } else {
             console.errorCode(300);
-            console.error(context + ': "' + name + '" has not been added: ' + response.statusText);
+            console.error(`${context}: ${name} has not been added.\n HTTP ${response.status}: ${response.statusText}`);
             process.exit(1);
         }
     }
