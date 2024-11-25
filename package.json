@@ -25,6 +25,7 @@
   "author": "Flotiq team <hello@flotiq.com>",
   "license": "MIT",
   "dependencies": {
+    "@cdwv/flotiq-cli-ng": "file:../importer/",
     "@contentful/rich-text-html-renderer": "^16.6.10",
     "contentful-export": "^7.19.155",
     "dotenv": "^16.4.5",
@@ -33,13 +34,16 @@
     "form-data": "^4.0.0",
     "gatsby-cli": "^5.13.3",
     "inquirer": "^7.0.0",
+    "loading-cli": "^1.1.2",
     "node-fetch": "^2.7.0",
     "ora": "^5.4.1",
     "unzipper": "^0.12.3",
+    "winston": "^3.17.0",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
     "jest": "^29.7.0",
     "jest-when": "^3.6.0"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
