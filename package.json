@@ -25,7 +25,6 @@
   "author": "Flotiq team <hello@flotiq.com>",
   "license": "MIT",
   "dependencies": {
-    "@cdwv/flotiq-cli-ng": "file:../importer/",
     "@contentful/rich-text-html-renderer": "^16.6.10",
     "contentful-export": "^7.19.155",
     "dotenv": "^16.4.5",
