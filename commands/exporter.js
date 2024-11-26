@@ -64,7 +64,7 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd)
 
   if (ContentTypeDefinitions.length === 0) {
     logger.info("Nothing to do");
-    process.exit();
+    return;
   }
 
   for (const contentTypeDefinition of ContentTypeDefinitions) {
