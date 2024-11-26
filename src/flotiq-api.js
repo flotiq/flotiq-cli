@@ -164,15 +164,6 @@ module.exports = class FlotiqApi {
    * End of general-purpose functions
    */
 
-
-
-
-
-
-
-
-
-
   // Used only by import-definitions
   async persistContentTypeObject(obj) {
     const uri = `${this.flotiqApiUrl}/internal/contenttype`;
