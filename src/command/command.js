@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 require('dotenv').config();
 const questionsText = require('./questions');
-const importer = require('../importer/importer');
-const exporter = require('../exporter/exporter');
 const projectSetup = require('../start/projectSetup');
 const custom = require('../console/console');
 const inquirer = require("inquirer");
@@ -16,6 +14,13 @@ const purgeContentObjects = require('../purifier/purifier')
 const sdk = require('../sdk/sdk');
 const stats = require('../stats/stats');
 const xlsxMigrator = require('flotiq-excel-migrator');
+
+yargs
+    .commandDir('../../commands')
+    .usage("flotiq [command]")
+    .help()
+    .alias("help", "h")
+    .parse();
 
 yargs
     .boolean('json-output')
@@ -63,24 +68,6 @@ yargs
         } else {
             yargs.showHelp();
             process.exit(1);
-        }
-    })
-    .command('import [directory] [flotiqApiKey]', 'Import objects from directory to Flotiq', (yargs) => {
-        yargs.positional('directory', {
-            describe: 'Directory path with Flotiq sample data (directory cannot be empty, if you wish to run command in current directory, insert . (dot)).',
-            type: 'string',
-        });
-        optionalParamFlotiqApiKey(yargs);
-    }, async (argv) => {
-        console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
-        if (yargs.argv._.length < 2) {
-            const answers = await askQuestions(questionsText.IMPORT_QUESTIONS);
-            let { flotiqApiKey, projectDirectory } = answers;
-            await importer.importer(flotiqApiKey, projectDirectory, true);
-        } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
-            await importer.importer(process.env.FLOTIQ_API_KEY, argv.directory, true);
-        } else if (yargs.argv._.length === 3) {
-            await importer.importer(argv.flotiqApiKey, argv.directory, true);
         }
     })
     .command('wordpress-import [wordpressUrl] [flotiqApiKey]', 'Import wordpress to Flotiq', (yargs) => {
@@ -157,30 +144,6 @@ yargs
             } else {
                 yargs.showHelp();
                 process.exit(1);
-            }
-        })
-    .command(
-        'export [directory] [flotiqApiKey]',
-        'Export objects from Flotiq to directory',
-        (yargs) => {
-            yargs.positional('directory', {
-                describe: 'Directory path to save data.',
-                type: 'string',
-            });
-            yargs.boolean('only-definitions')
-                .describe('only-definitions', 'Export only content type definitions, ignore content objects')
-            optionalParamFlotiqApiKey(yargs);
-        }, async (argv) => {
-            let onlyDefinitions = yargs.argv['only-definitions'];
-            console = custom.console(oldConsole, yargs.argv['json-output'], errors, stdOut, errorObject, fs);
-            if (yargs.argv._.length < 2) {
-                const answers = await askQuestions(questionsText.EXPORT_QUESTIONS);
-                let { flotiqApiKey, projectDirectory } = answers;
-                await exporter.export(flotiqApiKey, projectDirectory, onlyDefinitions);
-            } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
-                await exporter.export(process.env.FLOTIQ_API_KEY, argv.directory, onlyDefinitions);
-            } else if (yargs.argv._.length === 3) {
-                await exporter.export(argv.flotiqApiKey, argv.directory, onlyDefinitions);
             }
         })
     .command('sdk install [language] [directory] [flotiqApiKey]', 'Install Flotiq SDK', (yargs) => {

@@ -1,4 +1,4 @@
-module.exports.ctds = {
+module.exports.ctos = {
     "total_pages": 2,
     "total_count": 20,
     "data": [
