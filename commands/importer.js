@@ -96,10 +96,7 @@ async function checkIfClear(flotiqApiUrl, headers, CTDs) {
     return true
 }
 
-async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, skipContent, updateDefinitions, disableWebhooks, fixDefinitions,
-                        ctd,
-                        skipCtd,
-                        batch)
+async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, skipContent, updateDefinitions, disableWebhooks, fixDefinitions, ctd, skipCtd, batch)
 {
     if (fixDefinitions) {
         updateDefinitions = true;
@@ -114,11 +111,6 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
     const flotiqApi = new FlotiqApi(flotiqApiUrl, flotiqApiKey, {
         batchSize: BATCH_SIZE,
     });
-
-    if (!directory || !flotiqApiUrl || !flotiqApiKey) {
-        console.error(`Usage: ${__filename} <import_dir> <api_url> <api_key>`)
-        return false;
-    }
 
     try {
         await fs.stat(path.resolve(directory))
@@ -464,6 +456,11 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
     }
 }
 async function main(argv) {
+    if (!argv.directory || !argv.flotiqApiKey) {
+        console.error(`Usage: ${__filename} <import_dir> <api_key>`)
+        return false;
+    }
+
     await importer(
         argv.directory,
         `${config.apiUrl}/api/v1`,
