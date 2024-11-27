@@ -28,13 +28,6 @@ exports.builder = {
 
 async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd) {
   try {
-    const dirStat = await fs.lstat(directory);
-
-    if (!dirStat.isDirectory()) {
-      logger.error(`${directory} exists, but isn't directory`);
-      return false;
-    }
-
     const files = await fs.readdir(directory);
 
     if (files.length > 0) {
@@ -135,6 +128,14 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd)
   return true;
 }
 async function main(argv) {
+
+  const dirStat = await fs.lstat(argv.directory);
+
+  if (!dirStat.isDirectory()) {
+    logger.error(`${argv.directory} exists, but isn't directory`);
+    return false;
+  }
+
   await exporter(
       argv.directory,
       `${config.apiUrl}/api/v1`,
