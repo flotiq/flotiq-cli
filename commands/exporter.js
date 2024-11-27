@@ -32,14 +32,14 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd)
 
     if (!dirStat.isDirectory()) {
       logger.error(`${directory} exists, but isn't directory`);
-      process.exit(1);
+      return false;
     }
 
     const files = await fs.readdir(directory);
 
     if (files.length > 0) {
       logger.error(`${directory} exists, but isn't empty`);
-      process.exit(1);
+      return false;
     }
   } catch (e) {
     // Skip
@@ -64,7 +64,7 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd)
 
   if (ContentTypeDefinitions.length === 0) {
     logger.info("Nothing to do");
-    return;
+    return true;
   }
 
   for (const contentTypeDefinition of ContentTypeDefinitions) {
@@ -132,6 +132,7 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd)
       }
     }
   }
+  return true;
 }
 async function main(argv) {
   await exporter(
