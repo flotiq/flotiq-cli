@@ -117,14 +117,15 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
 
     if (!directory || !flotiqApiUrl || !flotiqApiKey) {
         console.error(`Usage: ${__filename} <import_dir> <api_url> <api_key>`)
-        process.exit(1)
+        return false;
     }
 
     try {
         await fs.stat(path.resolve(directory))
+
     } catch (e) {
         logger.error(`Cannot open import dir ${directory}`)
-        process.exit(1)
+        return false;
     }
 
     const headers = {
@@ -496,5 +497,5 @@ module.exports = {
             })
     },
     handler: main,
-    exporter: importer
+    importer: importer
 }

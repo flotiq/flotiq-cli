@@ -36,6 +36,7 @@
     "loading-cli": "^1.1.2",
     "node-fetch": "^2.7.0",
     "ora": "^5.4.1",
+    "traverse": "^0.6.10",
     "unzipper": "^0.12.3",
     "winston": "^3.17.0",
     "yargs": "^17.7.2"
