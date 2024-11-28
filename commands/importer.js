@@ -112,17 +112,19 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
         batchSize: BATCH_SIZE,
     });
 
-    try {
-        await fs.stat(path.resolve(directory))
-
-    } catch (e) {
-        logger.error(`Cannot open import dir ${directory}`)
-        return false;
-    }
-
     const headers = {
         'Content-type': 'application/json;charset=utf-8',
         'X-Auth-Token': flotiqApiKey
+    }
+
+    let existingWebhooks = [];
+    if (disableWebhooks) {
+        let existingWebhooks = await flotiqApi.fetchContentObjects('_webhooks');
+        logger.info(`Pass 1a - disable webhooks`);
+        await flotiqApi.patchContentObjectBatch('_webhooks', existingWebhooks.map(webhook => ({
+            id: webhook.id,
+            enabled: false
+        })));
     }
 
     const CTDFiles = await glob(`${directory}/**/ContentTypeDefinition.json`)
@@ -221,16 +223,6 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
                 throw new Error(util.format(`${response.statusText}:`, responseJson))
             }
         }
-    }
-
-    const existingWebhooks = await flotiqApi.fetchContentObjects('_webhooks');
-
-    if (disableWebhooks) {
-        logger.info(`Pass 1a - disable webhooks`);
-        await flotiqApi.patchContentObjectBatch('_webhooks', existingWebhooks.map(webhook => ({
-            id: webhook.id,
-            enabled: false
-        })));
     }
 
     if (skipContent) {
@@ -458,6 +450,14 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
 async function main(argv) {
     if (!argv.directory || !argv.flotiqApiKey) {
         console.error(`Usage: ${__filename} <import_dir> <api_key>`)
+        return false;
+    }
+
+    try {
+        await fs.stat(path.resolve(argv.directory))
+
+    } catch (e) {
+        logger.error(`Cannot open import dir ${argv.directory}`)
         return false;
     }
 

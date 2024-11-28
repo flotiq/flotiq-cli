@@ -1,5 +1,4 @@
 const fs = require('fs/promises');
-const path = require('path');
 const glob = require('glob');
 const fetch = require('node-fetch');
 const FlotiqApi = require('./../../src/flotiq-api');
@@ -57,8 +56,7 @@ describe('importer', () => {
             importer(mockDirectory, mockApiUrl, mockApiKey, false, false, true, false, false)
         ).resolves.not.toThrow();
 
-        // Assertions
-        expect(fs.stat).toHaveBeenCalledWith(path.resolve(mockDirectory));
+
         expect(fetch).toHaveBeenCalled();
         expect(FlotiqApi).toHaveBeenCalledWith(mockApiUrl, mockApiKey, expect.any(Object));
     });
