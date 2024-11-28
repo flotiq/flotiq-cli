@@ -447,7 +447,7 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
         }
     }
 }
-async function main(argv) {
+async function handler(argv) {
     if (!argv.directory || !argv.flotiqApiKey) {
         console.error(`Usage: ${__filename} <import_dir> <api_key>`)
         return false;
@@ -493,6 +493,6 @@ module.exports = {
                 demandOption: false,
             })
     },
-    handler: main,
-    importer: importer
+    handler,
+    importer
 }
