@@ -53,10 +53,7 @@ This command exports data from the Flotiq account to local JSON files. If the ke
 `flotiq import [projectName] [flotiqApiKey]`
 
 This command imports Content Types and Content Objects to your Flotiq account using the API key.
-Source directory must include directory with `ContentType[0-9]` folders, each of them containing ContentTypeDefinition.json file, and `contentObject[0-9].json` files.
-
-The number at the end of the directory or file name defines the file import order. 
-The `./images` directory in a particular starter stores images that will be imported into your Media Library.
+Source directory must include directory with `ContentType[Name]` folders, each of them containing ContentTypeDefinition.json file, and `contentObject[Name].json` files.
 
 The command can import data output of the `flotiq export` command.
 
@@ -64,10 +61,6 @@ The command can import data output of the `flotiq export` command.
 
 * `projectName` - project name or project path (if you wish to start or import data from the directory you are in, use `.`)
 * `flotiqApiKey` - read and write API key to your Flotiq account
-
-#### Note
-
-It is also possible to perform the import and export manually, using the Flotiq API without relying on the CLI importer. However, when doing this, you need to ensure that image URLs are updated, as images will receive new IDs during the migration process. This requires careful handling to avoid broken links in your Content Objects. For more details on how to properly handle this, refer to the [Flotiq API documentation](https://flotiq.com/docs/).
 
 ### Launch a Flotiq starter project
 
