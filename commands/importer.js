@@ -330,7 +330,7 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
                 continue;
             }
 
-            if (ContentObjects[contentTypeDefinition.name] === '_webhooks') {
+            if (contentTypeDefinition.name === '_webhooks') {
                 continue;
             }
 
@@ -357,7 +357,7 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
                 continue;
             }
 
-            if (ContentObjects[contentTypeDefinition.name] === '_webhooks') {
+            if (contentTypeDefinition.name === '_webhooks') {
                 continue;
             }
 
@@ -468,7 +468,7 @@ async function main(argv) {
         false,
         false,
         true,
-        false,
+        true,
         false
     )
 }
