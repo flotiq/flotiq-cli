@@ -127,7 +127,8 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd)
   }
   return true;
 }
-async function main(argv) {
+
+async function handler(argv) {
 
   const dirStat = await fs.lstat(argv.directory);
 
@@ -171,6 +172,6 @@ module.exports = {
           demandOption: false,
         })
   },
-  handler: main,
-  exporter: exporter
+  handler,
+  exporter
 }
