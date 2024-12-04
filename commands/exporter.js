@@ -141,7 +141,7 @@ async function handler(argv) {
       argv.directory,
       `${config.apiUrl}/api/v1`,
       argv.flotiqApiKey,
-      false
+      argv['only-definitions']
   )
 }
 
