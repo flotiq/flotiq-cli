@@ -7,7 +7,6 @@ const FlotiqApi = require("./flotiq-api");
 const { Blob } = require('buffer');
 
 async function mediaImporter (directory, flotiqApiUrl, flotiqApiKey, batchSize = 100, checkIfMediaUsed = true) {
-    logger.info(`Start import media files!!!!!!!!!!!!`)
     const flotiqApi = new FlotiqApi(flotiqApiUrl, flotiqApiKey, {
         batchSize: batchSize,
     });
