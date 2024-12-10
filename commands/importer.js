@@ -10,6 +10,7 @@ const fetch = require('node-fetch')
 const FlotiqApi = require("./../src/flotiq-api");
 const config = require("./../src/configuration/config");
 const {mediaImporter} = require("./../src/media");
+const WEBHOOKS_MESSAGE_403 = 'It looks like the api key does not have access to webhooks, it continues without deactivating webhooks';
 
 exports.command = 'import'
 exports.description = 'Import flotiq entities from JSON structure'
@@ -120,12 +121,16 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
 
     let existingWebhooks = [];
     if (disableWebhooks) {
-        let existingWebhooks = await flotiqApi.fetchContentObjects('_webhooks');
-        logger.info(`Pass 1a - disable webhooks`);
-        await flotiqApi.patchContentObjectBatch('_webhooks', existingWebhooks.map(webhook => ({
-            id: webhook.id,
-            enabled: false
-        })));
+        try {
+            let existingWebhooks = await flotiqApi.fetchContentObjects('_webhooks');
+            logger.info(`Pass 1a - disable webhooks`);
+            await flotiqApi.patchContentObjectBatch('_webhooks', existingWebhooks.map(webhook => ({
+                id: webhook.id,
+                enabled: false
+            })));
+        } catch (e) {
+            logger.warn(WEBHOOKS_MESSAGE_403);
+        }
     }
 
     const CTDFiles = await glob(`${directory}/**/ContentTypeDefinition.json`)
@@ -417,12 +422,16 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
     if (disableWebhooks && existingWebhooks.length > 0) {
         // We should restore our webhooks even if we're importing webhooks,
         // so any webhooks not imported are restored correctly.
-        logger.info('Pass 5a - Restoring webhooks')
-        await flotiqApi
-            .persistContentObjectBatch(
-                '_webhooks',
-                existingWebhooks
-            );
+        logger.info('Pass 5a - Restoring webhooks');
+        try {
+            await flotiqApi
+                .persistContentObjectBatch(
+                    '_webhooks',
+                    existingWebhooks
+                );
+        } catch (e) {
+            logger.warn(WEBHOOKS_MESSAGE_403);
+        }
     }
 
     if (CTDs.map(c => c.name).includes('_webhooks')) {
