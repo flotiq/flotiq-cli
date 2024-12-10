@@ -9,6 +9,7 @@ const logger = require('./../src/logger')
 const fetch = require('node-fetch')
 const FlotiqApi = require("./../src/flotiq-api");
 const config = require("./../src/configuration/config");
+const {mediaImporter} = require("./../src/media");
 
 exports.command = 'import'
 exports.description = 'Import flotiq entities from JSON structure'
@@ -205,8 +206,7 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
                 `${remoteCtd ? 'Updating' : 'Persisting'} contentTypeDefinition ${contentTypeDefinition.name}`
             )
 
-            // console.log('new ctd', contentTypeDefinition)
-
+            contentTypeDefinition.featuredImage = [];
             const response = await fetch(uri, {
                 method,
                 body: JSON.stringify(contentTypeDefinition),
@@ -438,6 +438,11 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
 
             if (contentTypeDefinition.name === '_webhooks') {
                 logger.info(`Persisting ${contentTypeDefinition.name} (${ContentObjects[contentTypeDefinition.name].length} items)`);
+                if (disableWebhooks) {
+                    ContentObjects[contentTypeDefinition.name].map(webhook => {
+                        webhook.enabled = false;
+                    });
+                }
                 await flotiqApi
                     .persistContentObjectBatch(
                         contentTypeDefinition.name,
@@ -448,21 +453,21 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
     }
 }
 async function handler(argv) {
-    if (!argv.directory || !argv.flotiqApiKey) {
+    let directory = argv.directory;
+    if (!directory || !argv.flotiqApiKey) {
         console.error(`Usage: ${__filename} <import_dir> <api_key>`)
         return false;
     }
 
     try {
-        await fs.stat(path.resolve(argv.directory))
-
+        await fs.stat(path.resolve(directory))
     } catch (e) {
-        logger.error(`Cannot open import dir ${argv.directory}`)
+        logger.error(`Cannot open import dir ${directory}`)
         return false;
     }
 
     await importer(
-        argv.directory,
+        directory,
         `${config.apiUrl}/api/v1`,
         argv.flotiqApiKey,
         false,
@@ -470,7 +475,13 @@ async function handler(argv) {
         true,
         true,
         false
-    )
+    );
+    await mediaImporter(
+        directory,
+        `${config.apiUrl}/api/v1`,
+        argv.flotiqApiKey
+    );
+
 }
 
 module.exports = {
