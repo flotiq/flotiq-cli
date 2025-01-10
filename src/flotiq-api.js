@@ -2,6 +2,7 @@ const fetch = require("node-fetch");
 const axios = require('axios');
 const assert = require('node:assert/strict');
 const ProgressBar = require('progress');
+const logger = require("./logger");
 
 module.exports = class FlotiqApi {
   timeout = 60000;
@@ -32,10 +33,11 @@ module.exports = class FlotiqApi {
     });
   }
 
-  async fetchContentTypeObject(name) {
+  async fetchContentTypeDefinition(name) {
     return this.middleware
       .get(`/internal/contenttype/${name}`)
-      .then(response => response.data);
+      .then(response => response.data)
+      .catch(() => {});
   }
 
   async fetchContentType(internal) {
@@ -224,4 +226,64 @@ module.exports = class FlotiqApi {
       return response.json();
     });
   }
+
+  async checkIfClear(CTDs) {
+    let remoteContentTypeDefinitions = await fetch(
+        `${this.flotiqApiUrl}/internal/contenttype?internal=0&limit=100000`,
+        this.headers
+    )
+        .then(async response => await response.json())
+        .then(response => response.data)
+
+    const _webhookContentTypeDefinition = await fetch(
+        `${this.flotiqApiUrl}/internal/contenttype/_webhooks?internal=1&limit=100000`,
+        this.headers
+    ).then(async response => await response.json())
+
+    remoteContentTypeDefinitions.push(_webhookContentTypeDefinition)
+
+    if (remoteContentTypeDefinitions.length > 0) {
+      logger.warn('Target not clear')
+
+      const remoteCtdNames = remoteContentTypeDefinitions.map(({name}) => name)
+      const overlap = CTDs
+          .filter(el => remoteCtdNames.includes(el.name))
+          .filter(el => el.internal !== true);
+
+      if (
+          overlap.length > 0 &&
+          overlap.length !== 1 &&
+          overlap[0] !== '_webhooks'
+      ) {
+        logger.error(
+            `There's overlap between imported CTDs and CTDs already in Flotiq: "${overlap.map(el => el.name).join(
+                '", "'
+            )}"; use either --skip-definitions or --update-definitions to continue`
+        )
+        return false
+      }
+    }
+
+    return true
+  }
+
+  async createOrUpdate(remoteCtd, contentTypeDefinition) {
+    const method = remoteCtd?.id ? 'PUT' : 'POST'
+
+    const uri = remoteCtd?.id
+        ? `${this.flotiqApiUrl}/internal/contenttype/${remoteCtd.name}`
+        : `${this.flotiqApiUrl}/internal/contenttype`
+
+    logger.info(
+        `${remoteCtd ? 'Updating' : 'Persisting'} contentTypeDefinition ${contentTypeDefinition.name}`
+    )
+    let headers = this.headers;
+    contentTypeDefinition.featuredImage = [];
+    return  await fetch(uri, {
+      method,
+      body: JSON.stringify(contentTypeDefinition),
+      headers
+    })
+  }
+
 };

@@ -43,21 +43,39 @@ describe('importer', () => {
 
         // Mock FlotiqApi
         FlotiqApi.mockImplementation(() => ({
+            fetchContentTypeDefinition: jest.fn().mockResolvedValue([]),
             fetchContentTypeDefs: jest.fn().mockResolvedValue([]),
             updateContentTypeDefinition: jest.fn(),
             fetchContentObjects: jest.fn().mockResolvedValue([]),
             patchContentObjectBatch: jest.fn(),
             persistContentObjectBatch: jest.fn(),
+            createOrUpdate: jest.fn().mockResolvedValue({
+                ok: true,
+                json: jest.fn().mockResolvedValue({success:true})
+            }),
         }));
     });
 
     it('should complete successfully with valid inputs', async () => {
-        await expect(
-            importer(mockDirectory, mockApiUrl, mockApiKey, false, false, true, false, false)
-        ).resolves.not.toThrow();
+        const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`,  mockApiKey, {
+            batchSize: 100,
+        });
+        const expectedResult = [
+            [{ctdName: "mockContentType", featuredImage: undefined}],
+            [{name: "mockContentType"}]]
+        ;
+        const result = await importer(
+            mockDirectory,
+            flotiqApi,
+            false,
+            false,
+            true,
+            false,
+            false
+        );
+        await expect(result).toEqual(expectedResult);
 
 
-        expect(fetch).toHaveBeenCalled();
-        expect(FlotiqApi).toHaveBeenCalledWith(mockApiUrl, mockApiKey, expect.any(Object));
+        expect(FlotiqApi).toHaveBeenCalledWith('https://dummy-api.flotiq.com/api/v1', mockApiKey, expect.any(Object));
     });
 });
