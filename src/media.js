@@ -1,24 +1,13 @@
-const axios = require('axios');
 const fs = require('fs/promises')
-const path = require('path')
 const traverse = require('traverse')
 const logger = require('./logger')
-const FlotiqApi = require("./flotiq-api");
 const { Blob } = require('buffer');
+const {readCTDs, shouldUpdate } = require("./util");
 
-async function mediaImporter (directory, flotiqApiUrl, flotiqApiKey, batchSize = 100, checkIfMediaUsed = true) {
-    const flotiqApi = new FlotiqApi(flotiqApiUrl, flotiqApiKey, {
-        batchSize: batchSize,
-    });
+async function mediaImporter (directory, flotiqApi, mediaApi) {
+    const checkIfMediaUsed = true;
 
-    const mediaApi = axios.create({
-        baseURL: `${(new URL(flotiqApiUrl)).origin}/api/media`,
-        timeout: flotiqApi.timeout,
-        headers: flotiqApi.headers,
-    });
-
-    const flotiqDefinitions = await flotiqApi.fetchContentTypeDefs()
-
+    const flotiqDefinitions = await flotiqApi.fetchContentTypeDefs();
     const mediaRelationships = flotiqDefinitions.filter(definition => {
         return traverse(definition).reduce((acc, node) => {
             if(node?.inputType === "datasource" && node.validation.relationContenttype === '_media'
@@ -41,7 +30,7 @@ async function mediaImporter (directory, flotiqApiUrl, flotiqApiKey, batchSize =
     const missingFiles = []
 
     for (const mediaFile of contentObjects) {
-        const mediaFileUrl = `${(new URL(flotiqApiUrl)).origin}${mediaFile.url}`
+        const mediaFileUrl = `${(new URL(flotiqApi.flotiqApiUrl)).origin}${mediaFile.url}`
         const response = await fetch(mediaFileUrl)
 
         if (response.status === 404) {
@@ -54,26 +43,16 @@ async function mediaImporter (directory, flotiqApiUrl, flotiqApiKey, batchSize =
     logger.info(`Will import ${missingFiles.length} missing media file(s)`)
 
     for (const file of missingFiles) {
-        let isUsed = false;
+        let isUsed = checkIsUsedIn(file.id, mediaRelationshipContentObjects);
 
-        for (const relatedContentObject of mediaRelationshipContentObjects) {
-            isUsed = isUsed || traverse(relatedContentObject).reduce(function (acc, node) {
-                if(this.key === 'dataUrl') {
-                    const [,,,, ctd, id ] = node.split('/')
-                    if (ctd === '_media' && id === file.id) {
-                        return true;
-                    }
-                }
-                return acc;
-            }, false)
-        }
+        const CTDs = await readCTDs(directory);
+        let isUsedInCtd = checkIsUsedIn(file.id, CTDs);
 
         if (checkIfMediaUsed) {
-            if (!isUsed) {
+            if (!isUsed && !isUsedInCtd) {
                 continue;
             }
         }
-
         const buffer = await fs.readFile(`${directory}/InternalContentTypeMedia/${file.id}.${file.extension}`)
 
         const form = new FormData();
@@ -101,22 +80,7 @@ async function mediaImporter (directory, flotiqApiUrl, flotiqApiKey, batchSize =
 
     for (const relatedContentObject of mediaRelationshipContentObjects) {
 
-        const shouldUpdate = traverse(relatedContentObject).reduce(function (acc, node) {
-            if(this.key === 'dataUrl') {
-                const [,,,, ctd, id ] = node.split('/')
-                if (ctd === '_media') {
-                    let haveReplacement = false;
-                    for (const [ originalFile, replacementFile ] of replacements) {
-                        if (id === originalFile.id) {
-                            this.update(`/api/v1/content/${ctd}/${replacementFile.id}`)
-                            haveReplacement = true;
-                        }
-                    }
-                    return acc || haveReplacement;
-                }
-            }
-            return acc;
-        }, false)
+        const shouldUpdate = shouldUpdate(relatedContentObject, replacements)
 
         if (shouldUpdate) {
             logger.info(`Replacing ${relatedContentObject.id}`)
@@ -133,6 +97,23 @@ async function mediaImporter (directory, flotiqApiUrl, flotiqApiKey, batchSize =
 
     for (const file of missingFiles) {
         await flotiqApi.middleware.delete(`/content/_media/${file.id}`).catch(() => {})
+    }
+
+    return replacements;
+}
+
+async function checkIsUsedIn(fileId, objects) {
+    let isUsed = false;
+    for (const relatedContentObject of objects) {
+        isUsed = isUsed || traverse(relatedContentObject).reduce(function (acc, node) {
+            if(this.key === 'dataUrl') {
+                const [,,,, ctd, id ] = node.split('/')
+                if (ctd === '_media' && id === fileId) {
+                    return true;
+                }
+            }
+            return acc;
+        }, false)
     }
 }
 

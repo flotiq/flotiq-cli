@@ -6,10 +6,13 @@ const fs = require('fs/promises')
 const path = require('path')
 const traverse = require('traverse')
 const logger = require('./../src/logger')
-const fetch = require('node-fetch')
 const FlotiqApi = require("./../src/flotiq-api");
 const config = require("./../src/configuration/config");
 const {mediaImporter} = require("./../src/media");
+const axios = require("axios");
+const {shouldUpdate } = require("./../src/util");
+const {readCTDs} = require("../src/util");
+
 const WEBHOOKS_MESSAGE_403 = 'It looks like the api key does not have access to webhooks, it continues without deactivating webhooks';
 
 exports.command = 'import'
@@ -53,52 +56,7 @@ exports.builder = {
         description: "Shortcut for --update-definitions --skip-content",
     }
 }
-
-async function checkIfClear(flotiqApiUrl, headers, CTDs) {
-    let remoteContentTypeDefinitions = await fetch(
-        `${flotiqApiUrl}/internal/contenttype?internal=0&limit=100000`,
-        {
-            headers
-        }
-    )
-        .then(async response => await response.json())
-        .then(response => response.data)
-
-    const _webhookContentTypeDefinition = await fetch(
-        `${flotiqApiUrl}/internal/contenttype/_webhooks?internal=1&limit=100000`,
-        {
-            headers
-        }
-    ).then(async response => await response.json())
-
-    remoteContentTypeDefinitions.push(_webhookContentTypeDefinition)
-
-    if (remoteContentTypeDefinitions.length > 0) {
-        logger.warn('Target not clear')
-
-        const remoteCtdNames = remoteContentTypeDefinitions.map(({name}) => name)
-        const overlap = CTDs
-            .filter(el => remoteCtdNames.includes(el.name))
-            .filter(el => el.internal !== true);
-
-        if (
-            overlap.length > 0 &&
-            overlap.length !== 1 &&
-            overlap[0] !== '_webhooks'
-        ) {
-            logger.error(
-                `There's overlap between imported CTDs and CTDs already in Flotiq: "${overlap.map(el => el.name).join(
-                    '", "'
-                )}"; use either --skip-definitions or --update-definitions to continue`
-            )
-            return false
-        }
-    }
-
-    return true
-}
-
-async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, skipContent, updateDefinitions, disableWebhooks, fixDefinitions, ctd, skipCtd, batch)
+async function importer(directory, flotiqApi, skipDefinitions, skipContent, updateDefinitions, disableWebhooks, fixDefinitions, ctd, skipCtd)
 {
     if (fixDefinitions) {
         updateDefinitions = true;
@@ -106,17 +64,6 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
         if (ctd || skipCtd) {
             throw new Error(`Cannot use --ctd or --skip-ctd with --fix-definitions`);
         }
-    }
-
-    const BATCH_SIZE = batch || 100;
-
-    const flotiqApi = new FlotiqApi(flotiqApiUrl, flotiqApiKey, {
-        batchSize: BATCH_SIZE,
-    });
-
-    const headers = {
-        'Content-type': 'application/json;charset=utf-8',
-        'X-Auth-Token': flotiqApiKey
     }
 
     let existingWebhooks = [];
@@ -133,11 +80,7 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
         }
     }
 
-    const CTDFiles = await glob(`${directory}/**/ContentTypeDefinition.json`)
-
-    let CTDs = await Promise.all(
-        CTDFiles.map(fn => fs.readFile(fn, 'utf-8').then(JSON.parse))
-    )
+    let CTDs = await readCTDs(directory);
 
     if (ctd) {
         const flatCtds = (Array.isArray(ctd) ? ctd : [ctd])
@@ -172,11 +115,11 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
 
     if (
         !(skipDefinitions || updateDefinitions) &&
-        !(await checkIfClear(flotiqApiUrl, headers, CTDs))
+        !(await flotiqApi.checkIfClear(CTDs))
     ) {
         process.exit(1)
     }
-
+    let featuredImages = [];
     if (skipDefinitions) {
         logger.info('Pass 1 – import content type definitions [skipped]')
     } else {
@@ -187,43 +130,29 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
                 logger.info(`Not importing internal CTD ${contentTypeDefinition.name}`);
                 continue;
             }
-
-            const remoteCtd = await fetch(
-                `${flotiqApiUrl}/internal/contenttype/${contentTypeDefinition.name}`,
-                {headers}
-            )
-                .then(response => response.json())
-                .catch(() => {
-                })
-
-            // console.log('existing ctd', remoteCtd)
+            const remoteCtd = await flotiqApi.fetchContentTypeDefinition(contentTypeDefinition.name)
             if (remoteCtd?.id && !updateDefinitions) {
                 throw new Error(`CTD exists and we are not updating`)
             }
-
-            const method = remoteCtd?.id ? 'PUT' : 'POST'
-
-            const uri = remoteCtd?.id
-                ? `${flotiqApiUrl}/internal/contenttype/${remoteCtd.name}`
-                : `${flotiqApiUrl}/internal/contenttype`
 
             logger.info(
                 `${remoteCtd ? 'Updating' : 'Persisting'} contentTypeDefinition ${contentTypeDefinition.name}`
             )
 
+            featuredImages.push(
+                {
+                    "ctdName": contentTypeDefinition.name,
+                    "featuredImage": contentTypeDefinition.featuredImage
+                }
+            );
             contentTypeDefinition.featuredImage = [];
-            const response = await fetch(uri, {
-                method,
-                body: JSON.stringify(contentTypeDefinition),
-                headers
-            })
+            const response = await flotiqApi.createOrUpdate(remoteCtd, contentTypeDefinition);
 
             if (response.ok) {
                 logger.info(
                     `${remoteCtd ? 'Updated' : 'Persisted'} contentTypeDefinition ${contentTypeDefinition.name} ${(await response.json()).id}`
                 )
             } else {
-                console.log({response})
                 let responseJson = await response.json()
                 throw new Error(util.format(`${response.statusText}:`, responseJson))
             }
@@ -460,7 +389,30 @@ async function importer(directory, flotiqApiUrl, flotiqApiKey, skipDefinitions, 
             }
         }
     }
+
+    return [featuredImages, CTDs];
 }
+
+async function featuredImagesImport(flotiqApi, contentTypeDefinitions, featuredImages, replacements ) {
+    for (let contentTypeDefinition of contentTypeDefinitions) {
+        for (const featuredImage of featuredImages) {
+            if (contentTypeDefinition.name === featuredImage.ctdName) {
+                contentTypeDefinition.featuredImage = featuredImage.featuredImage;
+                if (replacements.length) {
+                         await shouldUpdate(contentTypeDefinition, replacements)
+                }
+                let response = await flotiqApi.updateContentTypeDefinition(contentTypeDefinition.name, contentTypeDefinition)
+                    .catch((e)=>{return e.response});
+                if (response.status === 200) {
+                    logger.info(`Feature image for CTD ${contentTypeDefinition.name} - updated`);
+                } else {
+                    logger.error(`Feature image for CTD ${contentTypeDefinition.name} - not updated`);
+                }
+            }
+        }
+    }
+}
+
 async function handler(argv) {
     let directory = argv.directory;
     if (!directory || !argv.flotiqApiKey) {
@@ -475,20 +427,37 @@ async function handler(argv) {
         return false;
     }
 
-    await importer(
+    const flotiqApi = new FlotiqApi(`${config.apiUrl}/api/v1`,  argv.flotiqApiKey, {
+        batchSize: 100,
+    });
+
+    let [featuredImages, CTDs] = await importer(
         directory,
-        `${config.apiUrl}/api/v1`,
-        argv.flotiqApiKey,
+        flotiqApi,
         false,
         false,
         true,
         true,
         false
     );
-    await mediaImporter(
+    const mediaApi = axios.create({
+        baseURL: `${(new URL(`${config.apiUrl}/api/v1`)).origin}/api/media`,
+        timeout: flotiqApi.timeout,
+        headers: flotiqApi.headers,
+    });
+
+    let replacements = await mediaImporter(
         directory,
-        `${config.apiUrl}/api/v1`,
-        argv.flotiqApiKey
+        flotiqApi,
+        mediaApi,
+        featuredImages
+    );
+
+    await featuredImagesImport(
+        flotiqApi,
+        CTDs,
+        featuredImages,
+        replacements
     );
 
 }
