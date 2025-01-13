@@ -1,3 +1,6 @@
+/**
+ * this api client is deprecated, please use src/flotiq-api
+ */
 const fetch = require("node-fetch");
 const config = require("../configuration/config");
 const FormData = require('form-data');
