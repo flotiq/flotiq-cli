@@ -80,9 +80,9 @@ async function mediaImporter (directory, flotiqApi, mediaApi) {
 
     for (const relatedContentObject of mediaRelationshipContentObjects) {
 
-        const shouldUpdate = shouldUpdate(relatedContentObject, replacements)
+        const shouldUpdateBeUpdated = shouldUpdate(relatedContentObject, replacements)
 
-        if (shouldUpdate) {
+        if (shouldUpdateBeUpdated) {
             logger.info(`Replacing ${relatedContentObject.id}`)
             const response = await flotiqApi.middleware.put(
                 `/content/${relatedContentObject.internal.contentType}/${relatedContentObject.id}`, relatedContentObject)
