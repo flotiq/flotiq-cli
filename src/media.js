@@ -61,8 +61,7 @@ async function mediaImporter (directory, flotiqApi, mediaApi) {
             type: file.mimeType
         });
 
-        form.append('type', 'file');
-        form.append('save', 1);
+        form.append('type', file.type);
         form.append('file', blob, file.fileName);
 
         const mediaEntity = await mediaApi
