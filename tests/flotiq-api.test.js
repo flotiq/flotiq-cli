@@ -19,7 +19,7 @@ describe('FlotiqApi', () => {
 
         const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`, mockApiKey, {
             batchSize: 100,
-            internalWPSLimit: 5,
+            internalWpsLimit: 5,
         });
 
         const obj = new Array(100).fill({});
@@ -28,6 +28,29 @@ describe('FlotiqApi', () => {
         // Expect first call to be 429, then after retry: success
         expect(postMock).toHaveBeenCalledTimes(2);
         expect(postMock).toHaveBeenCalledWith(expect.anything(), expect.arrayContaining([{}]));
+    });
+
+    it('method patchContentObjectBatch should retry when receiving a 429 status', async () => {
+        // Mock first response from Axios as 429, seconds as 200
+        const patchMock = jest.fn()
+            .mockRejectedValueOnce({ response: { status: 429 } })
+            .mockResolvedValueOnce({ ok: true });
+
+        axios.create.mockReturnValue({
+            patch: patchMock,
+        });
+
+        const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`, mockApiKey, {
+            batchSize: 100,
+            internalWpsLimit: 5,
+        });
+
+        const obj = new Array(100).fill({});
+        await flotiqApi.patchContentObjectBatch('mockContentType', obj);
+
+        // Expect first call to be 429, then after retry: success
+        expect(patchMock).toHaveBeenCalledTimes(2);
+        expect(patchMock).toHaveBeenCalledWith(expect.anything(), expect.arrayContaining([{}]));
     });
 });
   
