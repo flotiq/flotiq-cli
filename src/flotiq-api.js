@@ -141,7 +141,7 @@ module.exports = class FlotiqApi {
   
     const bar = new ProgressBar(`Updating ${ctd} [:bar] :percent ETA :etas`, { total: obj.length });
     const uri = `/content/${ctd}/batch`;
-  
+
     for (let i = 0; i < obj.length; i += this.batchSize) {
       const batch = obj.slice(i, i + this.batchSize);
       await this._sendRequest(uri, batch, 'PATCH');
