@@ -20,12 +20,14 @@ module.exports = class FlotiqApi {
     this.flotiqApiKey = flotiqApiKey;
     this.batchSizeRead = options.batchSizeRead || options.batchSize || 1000;
     this.batchSize = options.batchSize || 100;
-    this.internalWPSLimit = options.internalWPSLimit || 10;
+    this.internalWpsLimit = options.internalWpsLimit || 10;
 
     this.headers = {
       "Content-type": "application/json;charset=utf-8",
       "X-Auth-Token": this.flotiqApiKey,
     };
+
+    this.tooManyRequestsMessage = `\nReceived status 429 (Too Many Requests), retrying in 1 second...`;
 
     this.middleware = axios.create({
       baseURL: this.flotiqApiUrl,
@@ -116,67 +118,52 @@ module.exports = class FlotiqApi {
   async persistContentObjectBatch(ctd, obj) {
     assert(typeof ctd, 'string');
     assert(Array.isArray(obj));
-    const interval = 1000 / this.internalWPSLimit;
+    const interval = 1000 / this.internalWpsLimit;
 
     const bar = new ProgressBar(`Persisting ${ctd} [:bar] :percent ETA :etas`, { total: obj.length });
     const uri = `/content/${ctd}/batch?updateExisting=true`;
 
     for (let i = 0; i < obj.length; i += this.batchSize) {
       const batch = obj.slice(i, i + this.batchSize);
+      await this._sendRequest(uri, batch, 'POST');
 
-      const sendRequest = async () => {
-        try {
-          await this.middleware.post(uri, batch);
-        } catch (e) {
-          if (e.response && e.response.status === 429) {
-            logger.info(`\nReceived status 429 (Too Many Requests), retrying in 1 second...`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            return sendRequest();
-          } else {
-            console.dir(e.response.data.errors, { depth: undefined });
-            throw new Error(e.message);
-          }
-        }
-      };
-
-      await sendRequest();
       bar.tick(this.batchSize);
 
-      if (i + this.batchSize < obj.length) {
-        await new Promise(resolve => setTimeout(resolve, interval));
-      }
+      await new Promise(resolve => setTimeout(resolve, interval));
     }
   }
 
 
   async patchContentObjectBatch(ctd, obj) {
-    assert(typeof ctd, 'string');
+    assert(typeof ctd === 'string');
     assert(Array.isArray(obj));
-
+    const interval = 1000 / this.internalWpsLimit;
+  
     const bar = new ProgressBar(`Updating ${ctd} [:bar] :percent ETA :etas`, { total: obj.length });
     const uri = `/content/${ctd}/batch`;
-
+  
     for (let i = 0; i < obj.length; i += this.batchSize) {
       const batch = obj.slice(i, i + this.batchSize);
-      await this.middleware.patch(uri, batch).catch(e =>{
-        console.log(e.response.data.errors)
-        throw new Error(e.message);
-      });
+      await this._sendRequest(uri, batch, 'PATCH');
+
       bar.tick(this.batchSize);
+
+      await new Promise(resolve => setTimeout(resolve, interval));
     }
   }
 
   async deleteContentObjectBatch(ctd, obj) {
-    assert(typeof ctd, 'string');
+    assert(typeof ctd === 'string');
     assert(Array.isArray(obj));
-
-    const uri = `/content/${ctd}/batch-delete`
-
+    const interval = 1000 / this.internalWpsLimit;
+  
+    const uri = `/content/${ctd}/batch-delete`;
+  
     for (let i = 0; i < obj.length; i += this.batchSize) {
-      const batch = obj
-        .slice(i, i + this.batchSize)
-        .map(item => item.id);
-      await this.middleware.post(uri, batch)
+      const batch = obj.slice(i, i + this.batchSize).map(item => item.id);
+      await this._sendRequest(uri, batch, 'DELETE');
+
+      await new Promise(resolve => setTimeout(resolve, interval));
     }
   }
 
@@ -305,4 +292,25 @@ module.exports = class FlotiqApi {
     })
   }
 
+  async _sendRequest(uri, batch, method) {
+    try {
+      switch (method) {
+        case 'POST':
+          return await this.middleware.post(uri, batch);
+        case 'PATCH':
+          return await this.middleware.patch(uri, batch);
+        case 'DELETE':
+          return await this.middleware.post(uri, batch);
+      }
+    } catch (e) {
+      if (e.response && e.response.status === 429) {
+        logger.info(this.tooManyRequestsMessage);
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Retry after 1 second
+        return this._sendRequest(uri, batch, method); // Retry request
+      } else {
+        console.dir(e.response.data.errors, { depth: undefined });
+        throw new Error(e.message);
+      }
+    }
+  }
 };
