@@ -53,4 +53,3 @@ describe('FlotiqApi', () => {
         expect(patchMock).toHaveBeenCalledWith(expect.anything(), expect.arrayContaining([{}]));
     });
 });
-  

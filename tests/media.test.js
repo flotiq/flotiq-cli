@@ -1,7 +1,4 @@
 const fs = require('fs/promises');
-const fetch = require('node-fetch');
-const axios = require('axios');
-const logger = require('./../src/logger');
 const FlotiqApi = require('./../src/flotiq-api');
 const { mediaImporter } = require('./../src/media');
 
