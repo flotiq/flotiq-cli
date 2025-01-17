@@ -20,6 +20,7 @@ module.exports = class FlotiqApi {
     this.flotiqApiKey = flotiqApiKey;
     this.batchSizeRead = options.batchSizeRead || options.batchSize || 1000;
     this.batchSize = options.batchSize || 100;
+    this.internalWPSLimit = options.internalWPSLimit || 10;
 
     this.headers = {
       "Content-type": "application/json;charset=utf-8",
@@ -115,17 +116,35 @@ module.exports = class FlotiqApi {
   async persistContentObjectBatch(ctd, obj) {
     assert(typeof ctd, 'string');
     assert(Array.isArray(obj));
+    const interval = 1000 / this.internalWPSLimit;
 
     const bar = new ProgressBar(`Persisting ${ctd} [:bar] :percent ETA :etas`, { total: obj.length });
     const uri = `/content/${ctd}/batch?updateExisting=true`;
 
     for (let i = 0; i < obj.length; i += this.batchSize) {
       const batch = obj.slice(i, i + this.batchSize);
-      await this.middleware.post(uri, batch).catch(e =>{
-        console.dir(e.response.data.errors, { depth: undefined })
-        throw new Error(e.message);
-      });
-      bar.tick(this.batchSize)
+
+      const sendRequest = async () => {
+        try {
+          await this.middleware.post(uri, batch);
+        } catch (e) {
+          if (e.response && e.response.status === 429) {
+            logger.info(`\nReceived status 429 (Too Many Requests), retrying in 1 second...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return sendRequest();
+          } else {
+            console.dir(e.response.data.errors, { depth: undefined });
+            throw new Error(e.message);
+          }
+        }
+      };
+
+      await sendRequest();
+      bar.tick(this.batchSize);
+
+      if (i + this.batchSize < obj.length) {
+        await new Promise(resolve => setTimeout(resolve, interval));
+      }
     }
   }
 

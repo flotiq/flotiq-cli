@@ -429,6 +429,7 @@ async function handler(argv) {
 
     const flotiqApi = new FlotiqApi(`${config.apiUrl}/api/v1`,  argv.flotiqApiKey, {
         batchSize: 100,
+        internalWPSLimit: 10
     });
 
     let [featuredImages, CTDs] = await importer(
