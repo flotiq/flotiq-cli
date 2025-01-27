@@ -20,11 +20,14 @@ module.exports = class FlotiqApi {
     this.flotiqApiKey = flotiqApiKey;
     this.batchSizeRead = options.batchSizeRead || options.batchSize || 1000;
     this.batchSize = options.batchSize || 100;
+    this.interval = 1000 / (options.writePerSecondLimit || 10);
 
     this.headers = {
       "Content-type": "application/json;charset=utf-8",
       "X-Auth-Token": this.flotiqApiKey,
     };
+
+    this.tooManyRequestsMessage = `\nReceived status 429 (Too Many Requests), retrying in 1 second...`;
 
     this.middleware = axios.create({
       baseURL: this.flotiqApiUrl,
@@ -119,46 +122,27 @@ module.exports = class FlotiqApi {
     const bar = new ProgressBar(`Persisting ${ctd} [:bar] :percent ETA :etas`, { total: obj.length });
     const uri = `/content/${ctd}/batch?updateExisting=true`;
 
-    for (let i = 0; i < obj.length; i += this.batchSize) {
-      const batch = obj.slice(i, i + this.batchSize);
-      await this.middleware.post(uri, batch).catch(e =>{
-        console.dir(e.response.data.errors, { depth: undefined })
-        throw new Error(e.message);
-      });
-      bar.tick(this.batchSize)
-    }
+    await this._sendRequest(uri, obj, 'POST', bar);
   }
 
 
   async patchContentObjectBatch(ctd, obj) {
-    assert(typeof ctd, 'string');
+    assert(typeof ctd === 'string');
     assert(Array.isArray(obj));
-
+  
     const bar = new ProgressBar(`Updating ${ctd} [:bar] :percent ETA :etas`, { total: obj.length });
     const uri = `/content/${ctd}/batch`;
 
-    for (let i = 0; i < obj.length; i += this.batchSize) {
-      const batch = obj.slice(i, i + this.batchSize);
-      await this.middleware.patch(uri, batch).catch(e =>{
-        console.log(e.response.data.errors)
-        throw new Error(e.message);
-      });
-      bar.tick(this.batchSize);
-    }
+    await this._sendRequest(uri, obj, 'PATCH', bar);
   }
 
   async deleteContentObjectBatch(ctd, obj) {
-    assert(typeof ctd, 'string');
+    assert(typeof ctd === 'string');
     assert(Array.isArray(obj));
+  
+    const uri = `/content/${ctd}/batch-delete`;
 
-    const uri = `/content/${ctd}/batch-delete`
-
-    for (let i = 0; i < obj.length; i += this.batchSize) {
-      const batch = obj
-        .slice(i, i + this.batchSize)
-        .map(item => item.id);
-      await this.middleware.post(uri, batch)
-    }
+    await this._sendRequest(uri, obj, 'DELETE');
   }
 
 
@@ -286,4 +270,32 @@ module.exports = class FlotiqApi {
     })
   }
 
+  async _sendRequest(uri, obj, method, bar) {
+    for (let i = 0; i < obj.length; i += this.batchSize) {
+      const batch = obj.slice(i, i + this.batchSize);
+      const actions = {
+        POST: async () => await this.middleware.post(uri, batch),
+        PATCH: async () => await this.middleware.patch(uri, batch),
+        DELETE: async () => await this.middleware.post(uri, batch),
+      };
+
+      try {
+        await actions[method]();
+      } catch (e) {
+        if (e.response && e.response.status === 429) {
+          logger.info(this.tooManyRequestsMessage);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Retry after 1 second
+          return this._sendRequest(uri, batch, method); // Retry request
+        } else {
+          console.dir(e.response.data.errors, { depth: undefined });
+          throw new Error(e.message);
+        }
+      }
+      if (bar) {
+        bar.tick(this.batchSize);
+      }
+
+      await new Promise(resolve => setTimeout(resolve, this.interval));
+    }
+  }
 };

@@ -399,7 +399,7 @@ async function featuredImagesImport(flotiqApi, contentTypeDefinitions, featuredI
             if (contentTypeDefinition.name === featuredImage.ctdName) {
                 contentTypeDefinition.featuredImage = featuredImage.featuredImage;
                 if (replacements.length) {
-                         await shouldUpdate(contentTypeDefinition, replacements)
+                    await shouldUpdate(contentTypeDefinition, replacements)
                 }
                 let response = await flotiqApi.updateContentTypeDefinition(contentTypeDefinition.name, contentTypeDefinition)
                     .catch((e)=>{return e.response});
@@ -429,6 +429,7 @@ async function handler(argv) {
 
     const flotiqApi = new FlotiqApi(`${config.apiUrl}/api/v1`,  argv.flotiqApiKey, {
         batchSize: 100,
+        writePerSecondLimit: 10
     });
 
     let [featuredImages, CTDs] = await importer(
@@ -450,7 +451,7 @@ async function handler(argv) {
         directory,
         flotiqApi,
         mediaApi,
-        featuredImages
+        writePerSecondLimit = 10
     );
 
     await featuredImagesImport(
