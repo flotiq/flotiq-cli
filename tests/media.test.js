@@ -83,7 +83,7 @@ describe('mediaImporter', () => {
         expect(mockMediaApi.post).toHaveBeenCalledTimes(2);
     });
 
-    it('should respect internalWpsLimit and throttle uploads', async () => {
+    it('should respect writePerSecondLimit and throttle uploads', async () => {
         const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`,  mockApiKey, {
             batchSize: 100,
         });
@@ -97,7 +97,7 @@ describe('mediaImporter', () => {
         };
 
         const start = Date.now();
-        await mediaImporter(mockDirectory, flotiqApi, mockMediaApi, 1); // internalWpsLimit = 1
+        await mediaImporter(mockDirectory, flotiqApi, mockMediaApi, 1); // writePerSecondLimit = 1
 
         const end = Date.now();
         const elapsed = end - start;

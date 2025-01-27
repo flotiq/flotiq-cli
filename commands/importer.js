@@ -429,7 +429,7 @@ async function handler(argv) {
 
     const flotiqApi = new FlotiqApi(`${config.apiUrl}/api/v1`,  argv.flotiqApiKey, {
         batchSize: 100,
-        internalWpsLimit: 10
+        writePerSecondLimit: 10
     });
 
     let [featuredImages, CTDs] = await importer(
@@ -451,7 +451,7 @@ async function handler(argv) {
         directory,
         flotiqApi,
         mediaApi,
-        internalWpsLimit = 10
+        writePerSecondLimit = 10
     );
 
     await featuredImagesImport(

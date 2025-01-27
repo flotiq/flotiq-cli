@@ -20,7 +20,7 @@ module.exports = class FlotiqApi {
     this.flotiqApiKey = flotiqApiKey;
     this.batchSizeRead = options.batchSizeRead || options.batchSize || 1000;
     this.batchSize = options.batchSize || 100;
-    this.internalWpsLimit = options.internalWpsLimit || 10;
+    this.interval = 1000 / (options.writePerSecondLimit || 10);
 
     this.headers = {
       "Content-type": "application/json;charset=utf-8",
@@ -118,53 +118,31 @@ module.exports = class FlotiqApi {
   async persistContentObjectBatch(ctd, obj) {
     assert(typeof ctd, 'string');
     assert(Array.isArray(obj));
-    const interval = 1000 / this.internalWpsLimit;
 
     const bar = new ProgressBar(`Persisting ${ctd} [:bar] :percent ETA :etas`, { total: obj.length });
     const uri = `/content/${ctd}/batch?updateExisting=true`;
 
-    for (let i = 0; i < obj.length; i += this.batchSize) {
-      const batch = obj.slice(i, i + this.batchSize);
-      await this._sendRequest(uri, batch, 'POST');
-
-      bar.tick(this.batchSize);
-
-      await new Promise(resolve => setTimeout(resolve, interval));
-    }
+    await this._sendRequest(uri, obj, 'POST', bar);
   }
 
 
   async patchContentObjectBatch(ctd, obj) {
     assert(typeof ctd === 'string');
     assert(Array.isArray(obj));
-    const interval = 1000 / this.internalWpsLimit;
   
     const bar = new ProgressBar(`Updating ${ctd} [:bar] :percent ETA :etas`, { total: obj.length });
     const uri = `/content/${ctd}/batch`;
 
-    for (let i = 0; i < obj.length; i += this.batchSize) {
-      const batch = obj.slice(i, i + this.batchSize);
-      await this._sendRequest(uri, batch, 'PATCH');
-
-      bar.tick(this.batchSize);
-
-      await new Promise(resolve => setTimeout(resolve, interval));
-    }
+    await this._sendRequest(uri, obj, 'PATCH', bar);
   }
 
   async deleteContentObjectBatch(ctd, obj) {
     assert(typeof ctd === 'string');
     assert(Array.isArray(obj));
-    const interval = 1000 / this.internalWpsLimit;
   
     const uri = `/content/${ctd}/batch-delete`;
-  
-    for (let i = 0; i < obj.length; i += this.batchSize) {
-      const batch = obj.slice(i, i + this.batchSize).map(item => item.id);
-      await this._sendRequest(uri, batch, 'DELETE');
 
-      await new Promise(resolve => setTimeout(resolve, interval));
-    }
+    await this._sendRequest(uri, obj, 'DELETE');
   }
 
 
@@ -292,25 +270,32 @@ module.exports = class FlotiqApi {
     })
   }
 
-  async _sendRequest(uri, batch, method) {
-    try {
-      switch (method) {
-        case 'POST':
-          return await this.middleware.post(uri, batch);
-        case 'PATCH':
-          return await this.middleware.patch(uri, batch);
-        case 'DELETE':
-          return await this.middleware.post(uri, batch);
+  async _sendRequest(uri, obj, method, bar) {
+    for (let i = 0; i < obj.length; i += this.batchSize) {
+      const batch = obj.slice(i, i + this.batchSize);
+      const actions = {
+        POST: async () => await this.middleware.post(uri, batch),
+        PATCH: async () => await this.middleware.patch(uri, batch),
+        DELETE: async () => await this.middleware.post(uri, batch),
+      };
+
+      try {
+        await actions[method]();
+      } catch (e) {
+        if (e.response && e.response.status === 429) {
+          logger.info(this.tooManyRequestsMessage);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Retry after 1 second
+          return this._sendRequest(uri, batch, method); // Retry request
+        } else {
+          console.dir(e.response.data.errors, { depth: undefined });
+          throw new Error(e.message);
+        }
       }
-    } catch (e) {
-      if (e.response && e.response.status === 429) {
-        logger.info(this.tooManyRequestsMessage);
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Retry after 1 second
-        return this._sendRequest(uri, batch, method); // Retry request
-      } else {
-        console.dir(e.response.data.errors, { depth: undefined });
-        throw new Error(e.message);
+      if (bar) {
+        bar.tick(this.batchSize);
       }
+
+      await new Promise(resolve => setTimeout(resolve, this.interval));
     }
   }
 };

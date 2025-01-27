@@ -19,7 +19,7 @@ describe('FlotiqApi', () => {
 
         const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`, mockApiKey, {
             batchSize: 100,
-            internalWpsLimit: 5,
+            writePerSecondLimit: 5,
         });
 
         const obj = new Array(100).fill({});
@@ -42,7 +42,7 @@ describe('FlotiqApi', () => {
 
         const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`, mockApiKey, {
             batchSize: 100,
-            internalWpsLimit: 5,
+            writePerSecondLimit: 5,
         });
 
         const obj = new Array(100).fill({});
