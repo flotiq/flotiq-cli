@@ -56,6 +56,44 @@ exports.builder = {
         description: "Shortcut for --update-definitions --skip-content",
     }
 }
+
+function hasRelationshipConstraints(contentTypeDefinition) {
+    return traverse(contentTypeDefinition)
+        .reduce(function (haveConstraints, node) {
+            if (this.key === 'minItems') {
+                if (node > 0) {
+                    haveConstraints = true;
+                    this.update(0)
+                }
+            }
+
+            if (this.key === 'relationContenttype') {
+                if (node !== '') {
+                    this.update('');
+                    haveConstraints = true;
+                }
+            }
+
+            return haveConstraints;
+        }, false);
+}
+
+async function restoreDefinitions(remoteContentTypeDefinitions, brokenConstraints, flotiqApi, pass = '5') {
+    logger.info(`Pass ${pass} – restore relationships in definitions`)
+
+    for (const contentTypeDefinition of traverse.clone(remoteContentTypeDefinitions)) {
+        if (contentTypeDefinition.internal) {
+            continue;
+        }
+
+        if (brokenConstraints.includes(contentTypeDefinition.name)) {
+            logger.info(`Updating ${contentTypeDefinition.name}`)
+
+            await flotiqApi.updateContentTypeDefinition(contentTypeDefinition.name, contentTypeDefinition);
+        }
+    }
+}
+
 async function importer(directory, flotiqApi, skipDefinitions, skipContent, updateDefinitions, disableWebhooks, fixDefinitions, ctd, skipCtd)
 {
     if (fixDefinitions) {
@@ -110,16 +148,18 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
             }
         });
 
-        CTDs = CTDs.filter(def => !flatCtdsToSkip.includes(def.name))
+        CTDs = CTDs.filter(def => !flatCtdsToSkip.includes(def.name));
     }
 
     if (
         !(skipDefinitions || updateDefinitions) &&
         !(await flotiqApi.checkIfClear(CTDs))
     ) {
-        process.exit(1)
+        process.exit(1);
     }
     let featuredImages = [];
+
+    const brokenConstraints = [];
     if (skipDefinitions) {
         logger.info('Pass 1 – import content type definitions [skipped]')
     } else {
@@ -137,7 +177,7 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
 
             logger.info(
                 `${remoteCtd ? 'Updating' : 'Persisting'} contentTypeDefinition ${contentTypeDefinition.name}`
-            )
+            );
 
             featuredImages.push(
                 {
@@ -146,70 +186,58 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
                 }
             );
             contentTypeDefinition.featuredImage = [];
+            let haveRelationshipConstraints = hasRelationshipConstraints(contentTypeDefinition);
+            if (haveRelationshipConstraints) {
+                brokenConstraints.push(contentTypeDefinition.name);
+            }
             const response = await flotiqApi.createOrUpdate(remoteCtd, contentTypeDefinition);
 
             if (response.ok) {
                 logger.info(
                     `${remoteCtd ? 'Updated' : 'Persisted'} contentTypeDefinition ${contentTypeDefinition.name} ${(await response.json()).id}`
-                )
+                );
             } else {
-                let responseJson = await response.json()
-                throw new Error(util.format(`${response.statusText}:`, responseJson))
+                let responseJson = await response.json();
+                throw new Error(util.format(`${response.statusText}:`, responseJson));
             }
         }
     }
+    let remoteContentTypeDefinitions;
 
     if (skipContent) {
+        if(brokenConstraints.length) {
+            remoteContentTypeDefinitions = await flotiqApi.fetchContentTypeDefs();
+            await restoreDefinitions(remoteContentTypeDefinitions, brokenConstraints, flotiqApi, '2');
+        }
         logger.info('All done')
         return
     }
 
-    logger.info('Pass 2 – break relationships in content type definitions')
+    logger.info('Pass 2 – break relationships in content type definitions');
 
-    const breakDefinitions = true;
+    if(!remoteContentTypeDefinitions) {
+        remoteContentTypeDefinitions = await flotiqApi.fetchContentTypeDefs();
+    }
 
-    const remoteContentTypeDefinitions = await flotiqApi.fetchContentTypeDefs();
+    /**
+     * We need to clone this right now because we will be restoring them at the end.
+     */
+    for (const contentTypeDefinition of traverse.clone(remoteContentTypeDefinitions)) {
+        if (contentTypeDefinition.internal) {
+            continue;
+        }
 
-    const brokenConstraints = [];
+        let haveRelationshipConstraints = hasRelationshipConstraints(contentTypeDefinition);
 
-    if (breakDefinitions) {
-        /**
-         * We need to clone this right nowe because we will be restoring them at the end.
-         */
-        for (const contentTypeDefinition of traverse.clone(remoteContentTypeDefinitions)) {
-            if (contentTypeDefinition.internal) {
-                // logger.info(`Not breaking up internal CTD ${contentTypeDefinition.name}`)
-                continue;
-            }
-
-            let haveRelationshipConstraints = traverse(contentTypeDefinition)
-                .reduce(function (haveConstraints, node) {
-                    if (this.key === 'minItems') {
-                        if (node > 0) {
-                            haveConstraints = true;
-                            this.update(0)
-                        }
-                    }
-
-                    if (this.key === 'relationContenttype') {
-                        if (node !== '') {
-                            this.update('');
-                            haveConstraints = true;
-                        }
-                    }
-
-                    return haveConstraints;
-                }, false)
-
-            if (haveRelationshipConstraints) {
-                logger.info(`Breaking constraints for contentType ${contentTypeDefinition.name}`);
-                await flotiqApi.updateContentTypeDefinition(contentTypeDefinition.name, contentTypeDefinition);
-                brokenConstraints.push(contentTypeDefinition.name)
-            } else {
-                logger.info(`No constraints to break for contentType ${contentTypeDefinition.name}`);
-            }
+        if (haveRelationshipConstraints) {
+            logger.info(`Breaking constraints for contentType ${contentTypeDefinition.name}`);
+            await flotiqApi.updateContentTypeDefinition(contentTypeDefinition.name, contentTypeDefinition);
+            brokenConstraints.push(contentTypeDefinition.name);
+        } else {
+            logger.info(`No constraints to break for contentType ${contentTypeDefinition.name}`);
         }
     }
+
 
     const ContentObjectFiles = await glob(
         `${directory}/**/contentObject*.json`
@@ -330,23 +358,7 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
         }
     }
 
-    const restoreDefinitions = true;
-
-    if (restoreDefinitions) {
-        logger.info('Pass 5 – restore relationships in definitions')
-
-        for (const contentTypeDefinition of traverse.clone(remoteContentTypeDefinitions)) {
-            if (contentTypeDefinition.internal) {
-                continue;
-            }
-
-            if (brokenConstraints.includes(contentTypeDefinition.name)) {
-                logger.info(`Updating ${contentTypeDefinition.name}`)
-
-                await flotiqApi.updateContentTypeDefinition(contentTypeDefinition.name, contentTypeDefinition);
-            }
-        }
-    }
+    await restoreDefinitions(remoteContentTypeDefinitions, brokenConstraints, flotiqApi);
 
     if (disableWebhooks && existingWebhooks.length > 0) {
         // We should restore our webhooks even if we're importing webhooks,

@@ -287,7 +287,7 @@ module.exports = class FlotiqApi {
           await new Promise(resolve => setTimeout(resolve, 1000)); // Retry after 1 second
           return this._sendRequest(uri, batch, method); // Retry request
         } else {
-          console.dir(e.response.data.errors, { depth: undefined });
+          console.dir(e.response?.data?.errors, { depth: undefined });
           throw new Error(e.message);
         }
       }
