@@ -94,6 +94,16 @@ async function restoreDefinitions(remoteContentTypeDefinitions, brokenConstraint
     }
 }
 
+function fixRelationsInCTDs(remoteContentTypeDefinitions, CTDs) {
+    return remoteContentTypeDefinitions.map(rCTD => {
+        const newCTD = CTDs.find(ctd => ctd.name === rCTD.name);
+        if (newCTD) {
+            return newCTD;
+        }
+        return rCTD;
+    });
+}
+
 async function importer(directory, flotiqApi, skipDefinitions, skipContent, updateDefinitions, disableWebhooks, fixDefinitions, ctd, skipCtd)
 {
     if (fixDefinitions) {
@@ -207,6 +217,7 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
     if (skipContent) {
         if(brokenConstraints.length) {
             remoteContentTypeDefinitions = await flotiqApi.fetchContentTypeDefs();
+            remoteContentTypeDefinitions = fixRelationsInCTDs(remoteContentTypeDefinitions, CTDs)
             await restoreDefinitions(remoteContentTypeDefinitions, brokenConstraints, flotiqApi, '2');
         }
         logger.info('All done')
@@ -217,6 +228,7 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
 
     if(!remoteContentTypeDefinitions) {
         remoteContentTypeDefinitions = await flotiqApi.fetchContentTypeDefs();
+        remoteContentTypeDefinitions = fixRelationsInCTDs(remoteContentTypeDefinitions, CTDs)
     }
 
     /**
