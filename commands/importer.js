@@ -89,7 +89,12 @@ async function restoreDefinitions(remoteContentTypeDefinitions, brokenConstraint
         if (brokenConstraints.includes(contentTypeDefinition.name)) {
             logger.info(`Updating ${contentTypeDefinition.name}`)
 
-            await flotiqApi.updateContentTypeDefinition(contentTypeDefinition.name, contentTypeDefinition);
+            try {
+                await flotiqApi.updateContentTypeDefinition(contentTypeDefinition.name, contentTypeDefinition);
+            } catch (e) {
+                contentTypeDefinition.featuredImage = [];
+                await flotiqApi.updateContentTypeDefinition(contentTypeDefinition.name, contentTypeDefinition);
+            }
         }
     }
 }
@@ -98,6 +103,7 @@ function fixRelationsInCTDs(remoteContentTypeDefinitions, CTDs) {
     return remoteContentTypeDefinitions.map(rCTD => {
         const newCTD = CTDs.find(ctd => ctd.name === rCTD.name);
         if (newCTD) {
+            newCTD.featuredImage = [];
             return newCTD;
         }
         return rCTD;
@@ -184,10 +190,6 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
             if (remoteCtd?.id && !updateDefinitions) {
                 throw new Error(`CTD exists and we are not updating`)
             }
-
-            logger.info(
-                `${remoteCtd ? 'Updating' : 'Persisting'} contentTypeDefinition ${contentTypeDefinition.name}`
-            );
 
             featuredImages.push(
                 {

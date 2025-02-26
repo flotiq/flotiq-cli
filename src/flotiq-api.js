@@ -251,7 +251,7 @@ module.exports = class FlotiqApi {
     return true
   }
 
-  async createOrUpdate(remoteCtd, contentTypeDefinition) {
+  async createOrUpdate(remoteCtd, contentTypeDefinition, ret = 0) {
     const method = remoteCtd?.id ? 'PUT' : 'POST'
 
     const uri = remoteCtd?.id
@@ -263,11 +263,20 @@ module.exports = class FlotiqApi {
     )
     let headers = this.headers;
     contentTypeDefinition.featuredImage = [];
-    return  await fetch(uri, {
-      method,
-      body: JSON.stringify(contentTypeDefinition),
-      headers
-    })
+    try {
+      return await fetch(uri, {
+        method,
+        body: JSON.stringify(contentTypeDefinition),
+        headers
+      });
+    } catch (e) {
+      if(ret < 10) {
+        logger.error(`Error ${e}, retrying ${ret + 1} time`);
+        return await this.createOrUpdate(remoteCtd, contentTypeDefinition, ++ret);
+      } else {
+        logger.error(`Error ${e}, retried ${ret} times`);
+      }
+    }
   }
 
   async _sendRequest(uri, obj, method, bar) {
