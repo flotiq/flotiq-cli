@@ -424,7 +424,7 @@ async function featuredImagesImport(flotiqApi, contentTypeDefinitions, featuredI
         for (const featuredImage of featuredImages) {
             if (contentTypeDefinition.name === featuredImage.ctdName) {
                 contentTypeDefinition.featuredImage = featuredImage.featuredImage;
-                if (replacements.length) {
+                if (replacements?.length) {
                     await shouldUpdate(contentTypeDefinition, replacements)
                 }
                 let response = await flotiqApi.updateContentTypeDefinition(contentTypeDefinition.name, contentTypeDefinition)
