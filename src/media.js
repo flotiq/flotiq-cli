@@ -96,7 +96,7 @@ async function mediaImporter (directory, flotiqApi, mediaApi, writePerSecondLimi
 
         return replacements;
     } catch (e) {
-        if(e === "ENOENT: no such file or directory, open '.flotiq/InternalContentTypeMedia/contentObjectMedia.json'") {
+        if(/ENOENT: no such file or directory, open '.*\/InternalContentTypeMedia\/contentObjectMedia.json'/.test(e)) {
             logger.info('No media to import');
         } else {
             logger.error(e);
