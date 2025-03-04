@@ -20,79 +20,88 @@ async function mediaImporter (directory, flotiqApi, mediaApi, writePerSecondLimi
 
     const mediaRelationshipContentObjects = (await Promise.all(mediaRelationships.map(r => flotiqApi.fetchContentObjects(r)))).flat()
 
-    const contentObjects = await fs
-        .readFile(`${directory}/InternalContentTypeMedia/contentObjectMedia.json`, 'utf-8')
-        .then(f => f.split('\n'))
-        .then(f => f.filter(el => el !== ''))
-        .then(f => f.map(JSON.parse))
-        .then(f => f.flat())
+    try {
+        const contentObjects = await fs
+          .readFile(`${directory}/InternalContentTypeMedia/contentObjectMedia.json`, 'utf-8')
+          .then(f => f.split('\n'))
+          .then(f => f.filter(el => el !== ''))
+          .then(f => f.map(JSON.parse))
+          .then(f => f.flat())
 
-    const missingFiles = []
+        const missingFiles = []
 
-    for (const mediaFile of contentObjects) {
-        const mediaFileUrl = `${(new URL(flotiqApi.flotiqApiUrl)).origin}${mediaFile.url}`
-        const response = await fetch(mediaFileUrl)
+        for (const mediaFile of contentObjects) {
+            const mediaFileUrl = `${(new URL(flotiqApi.flotiqApiUrl)).origin}${mediaFile.url}`
+            const response = await fetch(mediaFileUrl)
 
-        if (response.status === 404) {
-            missingFiles.push(mediaFile)
-        }
-    }
-
-    const replacements = [];
-
-    logger.info(`Will import ${missingFiles.length} missing media file(s)`)
-
-    for (const file of missingFiles) {
-        let isUsed = checkIsUsedIn(file.id, mediaRelationshipContentObjects);
-
-        const CTDs = await readCTDs(directory);
-        let isUsedInCtd = checkIsUsedIn(file.id, CTDs);
-
-        if (checkIfMediaUsed) {
-            if (!isUsed && !isUsedInCtd) {
-                continue;
+            if (response.status === 404) {
+                missingFiles.push(mediaFile)
             }
         }
-        const buffer = await fs.readFile(`${directory}/InternalContentTypeMedia/${file.id}.${file.extension}`)
 
-        const form = new FormData();
+        const replacements = [];
 
-        const blob = new Blob([buffer], {
-            type: file.mimeType
-        });
+        logger.info(`Will import ${missingFiles.length} missing media file(s)`)
 
-        form.append('type', file.type);
-        form.append('file', blob, file.fileName);
+        for (const file of missingFiles) {
+            let isUsed = checkIsUsedIn(file.id, mediaRelationshipContentObjects);
 
-        const mediaEntity = await postMedia('', form, mediaApi, writePerSecondLimit);
+            const CTDs = await readCTDs(directory);
+            let isUsedInCtd = checkIsUsedIn(file.id, CTDs);
 
-        replacements.push([file, mediaEntity]);
-    }
+            if (checkIfMediaUsed) {
+                if (!isUsed && !isUsedInCtd) {
+                    continue;
+                }
+            }
+            const buffer = await fs.readFile(`${directory}/InternalContentTypeMedia/${file.id}.${file.extension}`)
 
-    logger.info('Will replace media in content objects')
+            const form = new FormData();
 
-    for (const relatedContentObject of mediaRelationshipContentObjects) {
+            const blob = new Blob([buffer], {
+                type: file.mimeType
+            });
 
-        const shouldUpdateBeUpdated = shouldUpdate(relatedContentObject, replacements)
+            form.append('type', file.type);
+            form.append('file', blob, file.fileName);
 
-        if (shouldUpdateBeUpdated) {
-            logger.info(`Replacing ${relatedContentObject.id}`)
-            const response = await flotiqApi.middleware.put(
-                `/content/${relatedContentObject.internal.contentType}/${relatedContentObject.id}`, relatedContentObject)
-            if (response.status === 200) {
-                logger.info(`Updated content object ${relatedContentObject.internal.contentType}/${relatedContentObject.id}`)
+            const mediaEntity = await postMedia('', form, mediaApi, writePerSecondLimit);
+
+            replacements.push([file, mediaEntity]);
+        }
+
+        logger.info('Will replace media in content objects')
+
+        for (const relatedContentObject of mediaRelationshipContentObjects) {
+
+            const shouldUpdateBeUpdated = shouldUpdate(relatedContentObject, replacements)
+
+            if (shouldUpdateBeUpdated) {
+                logger.info(`Replacing ${relatedContentObject.id}`)
+                const response = await flotiqApi.middleware.put(
+                  `/content/${relatedContentObject.internal.contentType}/${relatedContentObject.id}`, relatedContentObject)
+                if (response.status === 200) {
+                    logger.info(`Updated content object ${relatedContentObject.internal.contentType}/${relatedContentObject.id}`)
+                }
             }
         }
+
+
+        logger.info(`Will delete ${missingFiles.length} broken media file(s)`)
+
+        for (const file of missingFiles) {
+            await flotiqApi.middleware.delete(`/content/_media/${file.id}`).catch(() => {
+            })
+        }
+
+        return replacements;
+    } catch (e) {
+        if(/ENOENT: no such file or directory, open '.*\/InternalContentTypeMedia\/contentObjectMedia.json'/.test(e)) {
+            logger.info('No media to import');
+        } else {
+            logger.error(e);
+        }
     }
-
-
-    logger.info(`Will delete ${missingFiles.length} broken media file(s)`)
-
-    for (const file of missingFiles) {
-        await flotiqApi.middleware.delete(`/content/_media/${file.id}`).catch(() => {})
-    }
-
-    return replacements;
 }
 
 const postMedia = async (url, form, mediaApi, writePerSecondLimit) => {
