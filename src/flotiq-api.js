@@ -7,7 +7,7 @@ const logger = require("./logger");
 module.exports = class FlotiqApi {
   timeout = 60000;
   batchSize = 100;
-  contentTypeDefLimit = 1024;
+  contentTypeDefLimit = 1000;
 
   EXPORTED_INTERNALS = [
     '_media',
@@ -213,14 +213,14 @@ module.exports = class FlotiqApi {
 
   async checkIfClear(CTDs) {
     let remoteContentTypeDefinitions = await fetch(
-        `${this.flotiqApiUrl}/internal/contenttype?internal=0&limit=100000`,
+        `${this.flotiqApiUrl}/internal/contenttype?internal=0&limit=1000`,
         this.headers
     )
         .then(async response => await response.json())
         .then(response => response.data)
 
     const _webhookContentTypeDefinition = await fetch(
-        `${this.flotiqApiUrl}/internal/contenttype/_webhooks?internal=1&limit=100000`,
+        `${this.flotiqApiUrl}/internal/contenttype/_webhooks?internal=1&limit=1000`,
         this.headers
     ).then(async response => await response.json())
 
