@@ -40,7 +40,7 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd)
 
   await fs.mkdir(directory, { recursive: true });
 
-  const flotiqApi = new FlotiqApi(flotiqApiUrl, flotiqApiKey);
+  const flotiqApi = new FlotiqApi(flotiqApiUrl, flotiqApiKey, { batchSizeRead: 1000 });
 
   let ContentTypeDefinitions = await flotiqApi.fetchContentTypeDefs();
 
