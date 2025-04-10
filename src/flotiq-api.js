@@ -12,7 +12,8 @@ module.exports = class FlotiqApi {
   EXPORTED_INTERNALS = [
     '_media',
     '_webhooks',
-    '_tag'
+    '_tag',
+    '_plugin_settings'
   ];
 
   constructor(flotiqApiUrl, flotiqApiKey, options = {}) {
