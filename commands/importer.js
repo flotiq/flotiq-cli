@@ -350,6 +350,7 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
 
             switch (contentTypeDefinition.name) {
                 case '_media':
+                case '_plugin_settings':
                     logger.info(`Persisting ${
                         contentTypeDefinition.name
                     } (${
@@ -361,9 +362,10 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
                             contentTypeDefinition.name,
                             ContentObjects[contentTypeDefinition.name]
                         );
-
-                    logger.warn(`Media content objects were uploaded into the database, but files were not.`)
-                    logger.warn(`Remember to ensure that media files are present at the target location.`)
+                    if (contentTypeDefinition.name === '_media') {
+                        logger.warn(`Media content objects were uploaded into the database, but files were not.`)
+                        logger.warn(`Remember to ensure that media files are present at the target location.`)
+                    }
                     break;
                 default:
                     logger.info(`Skipping ${contentTypeDefinition.name} (${ContentObjects[contentTypeDefinition.name].length} items)`);
