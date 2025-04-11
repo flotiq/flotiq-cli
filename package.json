@@ -1,6 +1,6 @@
 {
   "name": "flotiq-cli",
-  "version": "2.11.0",
+  "version": "2.11.1",
   "description": "Flotiq CLI",
   "main": "src/command/command.js",
   "private": false,
@@ -34,7 +34,7 @@
     "gatsby-cli": "^5.14.0",
     "inquirer": "^7.0.0",
     "loading-cli": "^1.1.2",
-    "node-fetch": "^3.3.2",
+    "node-fetch": "^2.7.0",
     "ora": "^5.4.1",
     "traverse": "^0.6.10",
     "unzipper": "^0.12.3",
