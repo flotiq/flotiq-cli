@@ -23,10 +23,13 @@ exports.builder = {
   },
   skipContent: {
     description: "Dump only CTD"
-  }
+  },
+  withInternal: {
+    description: "Export internal to ensure publication status"
+  },
 };
 
-async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd) {
+async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd, withInternal) {
   try {
     const files = await fs.readdir(directory);
 
@@ -104,7 +107,16 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd)
           `contentObject${camelize(contentTypeDefinition.name)}.json`
         ),
         ContentObjects
-          .map((obj) => ({ ...obj, internal: undefined }))
+          .map((obj) => ({
+            ...obj,
+            internal: withInternal ? {
+              status: obj.internal.status,
+              contentType: obj.internal.contentType,
+              createdAt: obj.internal.createdAt,
+              updatedAt: obj.internal.updatedAt,
+              deletedAt: obj.internal.deletedAt,
+            } : undefined
+          }))
           .sort((a, b) => a.id < b.id ? -1 : 1)
           .map(JSON.stringify).join("\n")
       );
@@ -138,10 +150,12 @@ async function handler(argv) {
   }
 
   await exporter(
-      argv.directory,
-      `${config.apiUrl}/api/v1`,
-      argv.flotiqApiKey,
-      argv['only-definitions']
+    argv.directory,
+    `${config.apiUrl}/api/v1`,
+    argv.flotiqApiKey,
+    argv['only-definitions'],
+    argv['ctd'],
+    argv['with-internal'],
   )
 }
 
@@ -150,27 +164,41 @@ module.exports = {
   describe: 'Export objects from Flotiq to directory',
   builder: (yargs) => {
     return yargs
-        .option("directory", {
-          description: "Directory path to import data.",
-          alias: "",
-          type: "string",
-          default: "",
-          demandOption: false,
-        })
-        .option("flotiqApiKey", {
-          description: "Flotiq Read and write API KEY.",
-          alias: "",
-          type: "string",
-          default: false,
-          demandOption: false,
-        })
-        .option("only-definitions", {
-          description: "Export only content type definitions, ignore content objects",
-          alias: "",
-          type: "boolean",
-          default: false,
-          demandOption: false,
-        })
+      .option("directory", {
+        description: "Directory path to import data.",
+        alias: "",
+        type: "string",
+        default: "",
+        demandOption: false,
+      })
+      .option("flotiqApiKey", {
+        description: "Flotiq Read and write API KEY.",
+        alias: "",
+        type: "string",
+        default: false,
+        demandOption: false,
+      })
+      .option("only-definitions", {
+        description: "Export only content type definitions, ignore content objects",
+        alias: "",
+        type: "boolean",
+        default: false,
+        demandOption: false,
+      })
+      .option("with-internal", {
+        description: "Export internal to ensure publication status",
+        alias: "",
+        type: "boolean",
+        default: false,
+        demandOption: false,
+      })
+      .option("ctd", {
+        description: "Coma-delimited list of CTD to export",
+        alias: "",
+        type: "string",
+        default: '',
+        demandOption: false,
+      })
   },
   handler,
   exporter
