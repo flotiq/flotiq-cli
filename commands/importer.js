@@ -287,6 +287,7 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
         ]
         return acc
     }, {});
+    const objectsToPublish = [];
 
     if (skipContent) {
         logger.info('Pass 3 – import content objects without relationship data [skipped]')
@@ -308,6 +309,9 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
                         this.update(node.filter(val => !(val && val.type === 'internal')))
                     }
                 });
+            if (!contentTypeDefinition.internal) {
+                objectsToPublish.push(...objectsToPersist.filter((obj) => obj.internal?.status === 'public'));
+            }
 
             logger.info(`Persisting ${contentTypeDefinition.name} without relationships (${ContentObjects[contentTypeDefinition.name].length} items)`);
 
@@ -418,7 +422,7 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
         }
     }
 
-    return [featuredImages, CTDs];
+    return [featuredImages, CTDs, objectsToPublish];
 }
 
 async function featuredImagesImport(flotiqApi, contentTypeDefinitions, featuredImages, replacements ) {
@@ -441,6 +445,17 @@ async function featuredImagesImport(flotiqApi, contentTypeDefinitions, featuredI
     }
 }
 
+async function publishObjects(flotiqApi, objectsToPublish) {
+    for (let object of objectsToPublish) {
+        try {
+            await flotiqApi.publishContentObject(object.internal.contentType, object);
+        } catch (e) {
+            logger.error(`Couldn't publish ${object.internal.contentType}/${object.id} object`);
+        }
+    }
+    logger.info('Objects published');
+}
+
 async function handler(argv) {
     let directory = argv.directory;
     if (!directory || !argv.flotiqApiKey) {
@@ -455,12 +470,14 @@ async function handler(argv) {
         return false;
     }
 
+    let writePerSecondLimit = 10;
     const flotiqApi = new FlotiqApi(`${config.apiUrl}/api/v1`,  argv.flotiqApiKey, {
         batchSize: 100,
-        writePerSecondLimit: 10
+        writePerSecondLimit,
     });
 
-    let [featuredImages, CTDs] = await importer(
+
+    let [featuredImages, CTDs, objectsToPublish] = await importer(
         directory,
         flotiqApi,
         false,
@@ -474,12 +491,11 @@ async function handler(argv) {
         timeout: flotiqApi.timeout,
         headers: flotiqApi.headers,
     });
-
     let replacements = await mediaImporter(
-        directory,
-        flotiqApi,
-        mediaApi,
-        writePerSecondLimit = 10
+      directory,
+      flotiqApi,
+      mediaApi,
+      writePerSecondLimit,
     );
 
     await featuredImagesImport(
@@ -488,6 +504,10 @@ async function handler(argv) {
         featuredImages,
         replacements
     );
+
+    if (argv.publish) {
+        await publishObjects(flotiqApi, objectsToPublish);
+    }
 
 }
 
@@ -507,6 +527,13 @@ module.exports = {
                 description: "Flotiq Read and write API KEY.",
                 alias: "",
                 type: "string",
+                default: false,
+                demandOption: false,
+            })
+            .option("publish", {
+                description: "Publish objects with public status in internal",
+                alias: "",
+                type: "boolean",
                 default: false,
                 demandOption: false,
             })

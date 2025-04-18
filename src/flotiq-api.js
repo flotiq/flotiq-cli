@@ -116,6 +116,12 @@ module.exports = class FlotiqApi {
     return this.middleware.post(uri, obj);
   }
 
+  async publishContentObject(type, obj) {
+    const uri = `/content/${type}/${obj.id}/publish`;
+
+    return this.middleware.post(uri, obj);
+  }
+
   async persistContentObjectBatch(ctd, obj) {
     assert(typeof ctd, 'string');
     assert(Array.isArray(obj));
