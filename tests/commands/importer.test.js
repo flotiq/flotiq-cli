@@ -62,7 +62,9 @@ describe('importer', () => {
         });
         const expectedResult = [
             [{ctdName: "mockContentType", featuredImage: undefined}],
-            [{name: "mockContentType"}]]
+            [{name: "mockContentType"}],
+            [],
+          ]
         ;
         const result = await importer(
             mockDirectory,
