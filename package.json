@@ -1,6 +1,6 @@
 {
   "name": "flotiq-cli",
-  "version": "2.12.0",
+  "version": "2.12.1",
   "description": "Flotiq CLI",
   "main": "src/command/command.js",
   "private": false,

@@ -471,7 +471,7 @@ async function handler(argv) {
     }
 
     let writePerSecondLimit = 10;
-    const flotiqApi = new FlotiqApi(`${config.apiUrl}/api/v1`,  argv.flotiqApiKey, {
+    const flotiqApi = new FlotiqApi(`${argv.flotiqApiUrl || config.apiUrl}/api/v1`,  argv.flotiqApiKey, {
         batchSize: 100,
         writePerSecondLimit,
     });

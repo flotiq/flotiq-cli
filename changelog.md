@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) (you find TL;DR at the end of this change log),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.12.1]
+### Added
+* possibility to put the flotiq api url into the importer handler args object
+
 ## [2.12.0]
 ### Added
 * `--publish` option to import command to publish automatically objects with status public
