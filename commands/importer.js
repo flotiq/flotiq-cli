@@ -469,9 +469,10 @@ async function handler(argv) {
         logger.error(`Cannot open import dir ${directory}`)
         return false;
     }
+    const flotiqApiUrl = argv.flotiqApiUrl || config.apiUrl;
 
     let writePerSecondLimit = 10;
-    const flotiqApi = new FlotiqApi(`${argv.flotiqApiUrl || config.apiUrl}/api/v1`,  argv.flotiqApiKey, {
+    const flotiqApi = new FlotiqApi(`${flotiqApiUrl}/api/v1`,  argv.flotiqApiKey, {
         batchSize: 100,
         writePerSecondLimit,
     });
@@ -487,7 +488,7 @@ async function handler(argv) {
         false
     );
     const mediaApi = axios.create({
-        baseURL: `${(new URL(`${config.apiUrl}/api/v1`)).origin}/api/media`,
+        baseURL: `${(new URL(flotiqApiUrl)).origin}/api/media`,
         timeout: flotiqApi.timeout,
         headers: flotiqApi.headers,
     });
