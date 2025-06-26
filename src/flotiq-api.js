@@ -26,6 +26,7 @@ module.exports = class FlotiqApi {
     this.headers = {
       "Content-type": "application/json;charset=utf-8",
       "X-Auth-Token": this.flotiqApiKey,
+      "x-mode": "preview"
     };
 
     this.tooManyRequestsMessage = `\nReceived status 429 (Too Many Requests), retrying in 1 second...`;
