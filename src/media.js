@@ -91,6 +91,7 @@ async function mediaImporter (directory, flotiqApi, mediaApi, writePerSecondLimi
 
         for (const file of missingFiles) {
             await flotiqApi.middleware.delete(`/content/_media/${file.id}`).catch(() => {
+                logger.error('File deletion error: ', file.id)
             })
         }
 
