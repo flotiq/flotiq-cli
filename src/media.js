@@ -4,7 +4,7 @@ const logger = require('./logger')
 const { Blob } = require('buffer');
 const {readCTDs, shouldUpdate } = require("./util");
 
-async function mediaImporter (directory, flotiqApi, mediaApi, writePerSecondLimit = 10) {
+async function mediaImporter (directory, flotiqApi, mediaApi) {
     const checkIfMediaUsed = true;
 
     const flotiqDefinitions = await flotiqApi.fetchContentTypeDefs();
@@ -65,7 +65,7 @@ async function mediaImporter (directory, flotiqApi, mediaApi, writePerSecondLimi
             form.append('type', file.type);
             form.append('file', blob, file.fileName);
 
-            const mediaEntity = await postMedia('', form, mediaApi, writePerSecondLimit);
+            const mediaEntity = await postMedia(form, mediaApi);
 
             replacements.push([file, mediaEntity]);
         }
@@ -105,26 +105,12 @@ async function mediaImporter (directory, flotiqApi, mediaApi, writePerSecondLimi
     }
 }
 
-const postMedia = async (url, form, mediaApi, writePerSecondLimit) => {
-    const interval = 1000 / writePerSecondLimit;
-
-    try {
-        await new Promise(resolve => setTimeout(resolve, interval));
-        const response = await mediaApi.post(url, form, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
-
-        return response.data;
-    } catch (e) {
-        if (e.response && e.response.status === 429) {
-            logger.info(`Received 429 on media upload, retrying after 1 second...`);
-            // Wait for 1 second before retrying
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            return postMedia(url, form, mediaApi, writePerSecondLimit);
-        } else {
-            throw new Error(e.message);
-        }
-    }
+const postMedia = async (form, mediaApi) => {
+    const response = await mediaApi.post('', form, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    
+    return response.data;
 }
 
 async function checkIsUsedIn(fileId, objects) {
