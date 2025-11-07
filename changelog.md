@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) (you find TL;DR at the end of this change log),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.13.0]
+### Changed
+* Rate limit retries and throttling now happen through interceptors. This way no api calls should fail due to 429 errors and media uploads can happen faster as first uploaded file doesn't trigger throttling.
+
 ## [2.12.2]
 ### Fixed
 * possibility to put the flotiq api url into the importer handler also applies to media
