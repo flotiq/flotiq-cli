@@ -10,7 +10,7 @@ const FlotiqApi = require("./../src/flotiq-api");
 const config = require("./../src/configuration/config");
 const {mediaImporter} = require("./../src/media");
 const axios = require("axios");
-const {shouldUpdate } = require("./../src/util");
+const {shouldUpdate, rateLimitInterceptor, throttleInterceptor } = require("./../src/util");
 const {readCTDs} = require("../src/util");
 
 const WEBHOOKS_MESSAGE_403 = 'It looks like the api key does not have access to webhooks, it continues without deactivating webhooks';
@@ -492,11 +492,12 @@ async function handler(argv) {
         timeout: flotiqApi.timeout,
         headers: flotiqApi.headers,
     });
+    rateLimitInterceptor(mediaApi, logger, 1000 / writePerSecondLimit);
+    throttleInterceptor(mediaApi, 1000 / writePerSecondLimit);
     let replacements = await mediaImporter(
       directory,
       flotiqApi,
       mediaApi,
-      writePerSecondLimit,
     );
 
     await featuredImagesImport(

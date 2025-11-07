@@ -1,21 +1,25 @@
 const axios = require('axios');
 const FlotiqApi = require('./../src/flotiq-api');
+const AxiosMockAdapter = require("axios-mock-adapter");
 
-jest.mock('axios');
+// This sets the mock adapter on the default instance
+const mock = new AxiosMockAdapter(axios);
 
 describe('FlotiqApi', () => {
     const mockApiUrl = 'https://dummy-api.flotiq.com';
     const mockApiKey = 'dummyApiKey';
+    
+    afterEach(() => {
+        mock.reset();
+    });
   
     it('method persistContentObjectBatch should retry when receiving a 429 status', async () => {
         // Mock first response from Axios as 429, seconds as 200
-        const postMock = jest.fn()
-            .mockRejectedValueOnce({ response: { status: 429 } })
-            .mockResolvedValueOnce({ ok: true });
-
-        axios.create.mockReturnValue({
-            post: postMock,
-        });
+        const url = new RegExp(`${mockApiUrl}/api/v1/content/mockContentType/batch.*`);
+        mock
+            .onPost(url).replyOnce(429)
+            .onPost(url).replyOnce(429)
+            .onPost(url).reply(200);
 
         const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`, mockApiKey, {
             batchSize: 100,
@@ -26,19 +30,16 @@ describe('FlotiqApi', () => {
         await flotiqApi.persistContentObjectBatch('mockContentType', obj);
 
         // Expect first call to be 429, then after retry: success
-        expect(postMock).toHaveBeenCalledTimes(2);
-        expect(postMock).toHaveBeenCalledWith(expect.anything(), expect.arrayContaining([{}]));
+        expect(mock.history.post.length).toBe(3);
+        expect(mock.history.post[1]._retryCount).toEqual(2);
     });
 
     it('method patchContentObjectBatch should retry when receiving a 429 status', async () => {
         // Mock first response from Axios as 429, seconds as 200
-        const patchMock = jest.fn()
-            .mockRejectedValueOnce({ response: { status: 429 } })
-            .mockResolvedValueOnce({ ok: true });
-
-        axios.create.mockReturnValue({
-            patch: patchMock,
-        });
+        const url = new RegExp(`${mockApiUrl}/api/v1/content/mockContentType/batch.*`);
+        mock
+            .onPatch(url).replyOnce(429)
+            .onPatch(url).reply(200);
 
         const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`, mockApiKey, {
             batchSize: 100,
@@ -49,7 +50,7 @@ describe('FlotiqApi', () => {
         await flotiqApi.patchContentObjectBatch('mockContentType', obj);
 
         // Expect first call to be 429, then after retry: success
-        expect(patchMock).toHaveBeenCalledTimes(2);
-        expect(patchMock).toHaveBeenCalledWith(expect.anything(), expect.arrayContaining([{}]));
+        expect(mock.history.patch.length).toBe(2);
+        expect(mock.history.patch[1]._retryCount).toEqual(1);
     });
 });
