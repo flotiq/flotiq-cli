@@ -1,6 +1,6 @@
 {
   "name": "flotiq-cli",
-  "version": "2.12.3",
+  "version": "2.13.0",
   "description": "Flotiq CLI",
   "main": "src/command/command.js",
   "private": false,
@@ -42,6 +42,7 @@
     "yargs": "^17.7.2"
   },
   "devDependencies": {
+    "axios-mock-adapter": "^2.1.0",
     "jest": "^29.7.0",
     "jest-when": "^3.6.0"
   },

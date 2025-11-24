@@ -3,6 +3,7 @@ const axios = require('axios');
 const assert = require('node:assert/strict');
 const ProgressBar = require('progress');
 const logger = require("./logger");
+const {rateLimitInterceptor} = require("./util");
 
 module.exports = class FlotiqApi {
   timeout = 60000;
@@ -36,6 +37,8 @@ module.exports = class FlotiqApi {
       timeout: this.timeout,
       headers: this.headers,
     });
+    
+    rateLimitInterceptor(this.middleware, logger, this.interval);
   }
 
   async fetchContentTypeDefinition(name) {
@@ -299,14 +302,8 @@ module.exports = class FlotiqApi {
       try {
         await actions[method]();
       } catch (e) {
-        if (e.response && e.response.status === 429) {
-          logger.info(this.tooManyRequestsMessage);
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Retry after 1 second
-          return this._sendRequest(uri, batch, method); // Retry request
-        } else {
-          console.dir(e.response?.data?.errors, { depth: undefined });
-          throw new Error(e.message);
-        }
+        console.dir(e.response?.data?.errors, { depth: undefined });
+        throw new Error(e.message);
       }
       if (bar) {
         bar.tick(this.batchSize);
