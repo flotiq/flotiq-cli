@@ -222,14 +222,14 @@ module.exports = class FlotiqApi {
   async checkIfClear(CTDs) {
     let remoteContentTypeDefinitions = await fetch(
         `${this.flotiqApiUrl}/internal/contenttype?internal=0&limit=1000`,
-        this.headers
+        {headers: this.headers}
     )
         .then(async response => await response.json())
         .then(response => response.data)
 
     const _webhookContentTypeDefinition = await fetch(
         `${this.flotiqApiUrl}/internal/contenttype/_webhooks?internal=1&limit=1000`,
-        this.headers
+        {headers: this.headers}
     ).then(async response => await response.json())
 
     remoteContentTypeDefinitions.push(_webhookContentTypeDefinition)
@@ -269,13 +269,12 @@ module.exports = class FlotiqApi {
     logger.info(
         `${remoteCtd ? 'Updating' : 'Persisting'} contentTypeDefinition ${contentTypeDefinition.name}`
     )
-    let headers = this.headers;
     contentTypeDefinition.featuredImage = [];
     try {
       return await fetch(uri, {
         method,
         body: JSON.stringify(contentTypeDefinition),
-        headers
+        headers: this.headers
       });
     } catch (e) {
       if(ret < 10) {
