@@ -112,6 +112,11 @@ function fixRelationsInCTDs(remoteContentTypeDefinitions, CTDs) {
 
 async function importer(directory, flotiqApi, skipDefinitions, skipContent, updateDefinitions, disableWebhooks, fixDefinitions, ctd, skipCtd)
 {
+    const stats = {
+        importedCtdCount: 0,
+        importedContentObjectsCount: 0,
+    };
+
     if (fixDefinitions) {
         updateDefinitions = true;
         skipContent = true;
@@ -205,6 +210,7 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
             const response = await flotiqApi.createOrUpdate(remoteCtd, contentTypeDefinition);
 
             if (response.ok) {
+                stats.importedCtdCount += 1;
                 logger.info(
                     `${remoteCtd ? 'Updated' : 'Persisted'} contentTypeDefinition ${contentTypeDefinition.name} ${(await response.json()).id}`
                 );
@@ -216,6 +222,8 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
     }
     let remoteContentTypeDefinitions;
 
+    const objectsToPublish = [];
+
     if (skipContent) {
         if(brokenConstraints.length) {
             remoteContentTypeDefinitions = await flotiqApi.fetchContentTypeDefs();
@@ -223,7 +231,7 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
             await restoreDefinitions(remoteContentTypeDefinitions, brokenConstraints, flotiqApi, '2');
         }
         logger.info('All done')
-        return
+        return [featuredImages, CTDs, objectsToPublish, stats];
     }
 
     logger.info('Pass 2 – break relationships in content type definitions');
@@ -287,8 +295,6 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
         ]
         return acc
     }, {});
-    const objectsToPublish = [];
-
     if (skipContent) {
         logger.info('Pass 3 – import content objects without relationship data [skipped]')
     } else {
@@ -339,6 +345,7 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
                     contentTypeDefinition.name,
                     ContentObjects[contentTypeDefinition.name]
                 );
+            stats.importedContentObjectsCount += ContentObjects[contentTypeDefinition.name].length;
         }
 
         logger.info('Pass 4a – import internals')
@@ -366,6 +373,7 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
                             contentTypeDefinition.name,
                             ContentObjects[contentTypeDefinition.name]
                         );
+                    stats.importedContentObjectsCount += ContentObjects[contentTypeDefinition.name].length;
                     if (contentTypeDefinition.name === '_media') {
                         logger.warn(`Media content objects were uploaded into the database, but files were not.`)
                         logger.warn(`Remember to ensure that media files are present at the target location.`)
@@ -418,11 +426,12 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
                         contentTypeDefinition.name,
                         ContentObjects[contentTypeDefinition.name]
                     );
+                stats.importedContentObjectsCount += ContentObjects[contentTypeDefinition.name].length;
             }
         }
     }
 
-    return [featuredImages, CTDs, objectsToPublish];
+    return [featuredImages, CTDs, objectsToPublish, stats];
 }
 
 async function featuredImagesImport(flotiqApi, contentTypeDefinitions, featuredImages, replacements ) {
@@ -478,7 +487,7 @@ async function handler(argv) {
     });
 
 
-    let [featuredImages, CTDs, objectsToPublish] = await importer(
+    let [featuredImages, CTDs, objectsToPublish, stats] = await importer(
         directory,
         flotiqApi,
         false,
@@ -510,6 +519,11 @@ async function handler(argv) {
     if (argv.publish) {
         await publishObjects(flotiqApi, objectsToPublish);
     }
+
+    return {
+        importedCtdCount: stats?.importedCtdCount ?? 0,
+        importedContentObjectsCount: stats?.importedContentObjectsCount ?? 0,
+    };
 
 }
 

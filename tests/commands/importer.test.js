@@ -64,6 +64,10 @@ describe('importer', () => {
             [{ctdName: "mockContentType", featuredImage: undefined}],
             [{name: "mockContentType"}],
             [],
+                        {
+                                importedCtdCount: 1,
+                                importedContentObjectsCount: 1,
+                        },
           ]
         ;
         const result = await importer(

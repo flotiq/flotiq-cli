@@ -35,10 +35,14 @@ describe("exporter", () => {
         fs.readdir.mockResolvedValue([]);
         fs.mkdir.mockResolvedValue();
 
-        await exporter(directory, flotiqApiUrl, flotiqApiKey, false, null);
+        const result = await exporter(directory, flotiqApiUrl, flotiqApiKey, false, null);
 
         expect(fs.writeFile).not.toHaveBeenCalled();
         expect(logger.info).toHaveBeenCalledWith("Nothing to do");
+        expect(result).toEqual({
+            exportedCtdCount: 0,
+            exportedContentObjectsCount: 0,
+        });
     });
 
     it("should export content type definitions and content objects correctly", async () => {
@@ -73,10 +77,14 @@ describe("exporter", () => {
             arrayBuffer: jest.fn().mockResolvedValue(Buffer.from("dummy-media-data")),
         });
 
-        await exporter(directory, flotiqApiUrl, flotiqApiKey, false, null);
+        const result = await exporter(directory, flotiqApiUrl, flotiqApiKey, false, null);
 
         expect(fs.mkdir).toHaveBeenCalled();
         expect(fs.writeFile).toHaveBeenCalled();
         expect(fetch).toHaveBeenCalledWith(expect.stringContaining("/media/test.jpg"));
+        expect(result).toEqual({
+            exportedCtdCount: 2,
+            exportedContentObjectsCount: 3,
+        });
     });
 });

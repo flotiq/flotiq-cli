@@ -30,6 +30,11 @@ exports.builder = {
 };
 
 async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd, withInternal) {
+  const stats = {
+    exportedCtdCount: 0,
+    exportedContentObjectsCount: 0,
+  };
+
   try {
     const files = await fs.readdir(directory);
 
@@ -60,7 +65,7 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd,
 
   if (ContentTypeDefinitions.length === 0) {
     logger.info("Nothing to do");
-    return true;
+    return stats;
   }
 
   for (const contentTypeDefinition of ContentTypeDefinitions) {
@@ -89,6 +94,7 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd,
       path.join(ctdPath, "ContentTypeDefinition.json"),
       JSON.stringify(contentTypeDefinitionToPersist, null, 2)
     );
+    stats.exportedCtdCount += 1;
 
     if (!skipContent) {
 
@@ -120,6 +126,7 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd,
           .sort((a, b) => a.id < b.id ? -1 : 1)
           .map(JSON.stringify).join("\n")
       );
+          stats.exportedContentObjectsCount += ContentObjects.length;
 
       if (contentTypeDefinition.name === '_media') {
         for (const mediaFile of ContentObjects) {
@@ -137,7 +144,7 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd,
       }
     }
   }
-  return true;
+  return stats;
 }
 
 async function handler(argv) {
@@ -149,7 +156,7 @@ async function handler(argv) {
     return false;
   }
 
-  await exporter(
+  return await exporter(
     argv.directory,
     `${config.apiUrl}/api/v1`,
     argv.flotiqApiKey,
