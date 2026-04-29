@@ -1,9 +1,9 @@
-const fetch = require("node-fetch");
 const axios = require('axios');
 const assert = require('node:assert/strict');
 const ProgressBar = require('progress');
+const FormData = require('form-data');
 const logger = require("./logger");
-const {rateLimitInterceptor} = require("./util");
+const {rateLimitInterceptor, throttleInterceptor} = require("./util");
 
 module.exports = class FlotiqApi {
   timeout = 60000;
@@ -39,6 +39,7 @@ module.exports = class FlotiqApi {
     });
     
     rateLimitInterceptor(this.middleware, logger, this.interval);
+    throttleInterceptor(this.middleware, this.interval);
   }
 
   async fetchContentTypeDefinition(name) {
@@ -114,10 +115,55 @@ module.exports = class FlotiqApi {
       return result.slice(0, limit);
   }
 
-  async persistContentObject(type, obj, updateExisting = false) {
-    const uri = `/content/${type}${updateExisting ? '?updateExisting=true' : ''}`;
+  async fetchMediaFile(mediaUrl) {
+    const apiOrigin = new URL(this.flotiqApiUrl).origin;
+    const response = await this.middleware.get(`${apiOrigin}${mediaUrl}`, {
+      responseType: 'arraybuffer',
+    });
 
-    return this.middleware.post(uri, obj);
+    return Buffer.from(response.data);
+  }
+
+  async uploadMedia(form) {
+    const apiOrigin = new URL(this.flotiqApiUrl).origin;
+    const response = await this.middleware.post(`${apiOrigin}/api/media`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
+    return response.data;
+  }
+
+  async uploadMediaFromUrl(contentObject, existingImages = {}) {
+    if (existingImages[contentObject.fileName]) {
+      return existingImages[contentObject.fileName];
+    }
+
+    const fileResponse = await axios.get(encodeURI(contentObject.url), { responseType: 'arraybuffer' });
+    if (fileResponse.status !== 200) {
+      return { code: fileResponse.status, reason: 'Download failed', message: contentObject.url };
+    }
+
+    const file = Buffer.from(fileResponse.data);
+    const form = new FormData();
+    form.append('file', file, contentObject.fileName);
+    form.append('type', this._isImageMimeType(contentObject.mime_type) ? 'image' : 'file');
+    form.append('save', '1');
+
+    return await this.uploadMedia(form);
+  }
+
+  _isImageMimeType(mimeType) {
+    return [
+      "image/jpeg",
+      "image/png",
+      "image/apng",
+      "image/bmp",
+      "image/gif",
+      "image/x-icon",
+      "image/svg+xml",
+      "image/tiff",
+      "image/webp"
+    ].includes(mimeType);
   }
 
   async publishContentObject(type, obj) {
@@ -156,84 +202,14 @@ module.exports = class FlotiqApi {
     await this._sendRequest(uri, obj, 'DELETE');
   }
 
-
-  /**
-   * End of general-purpose functions
-   */
-
-  // Used only by import-definitions
-  async persistContentTypeObject(obj) {
-    const uri = `${this.flotiqApiUrl}/internal/contenttype`;
-
-    const response = await fetch(uri, {
-      method: "POST",
-      headers: this.headers,
-      body: JSON.stringify(obj),
-    });
-
-    let jsonResponse = await response.json();
-
-    if (response.status >= 400) {
-      console.log({ jsonResponse });
-      console.dir({ persisted_object: obj }, { depth: 4 });
-      console.log("Profiler link", response.headers.get("x-debug-token-link"));
-      throw new Error(`${uri}, ${response.statusText}`);
-    }
-
-    return response.status;
-  }
-
-  // Used only by import-definitions; tread with care
-  async persistObject(ctd, object) {
-    const isBatch = Array.isArray(object);
-
-    const postUri = isBatch
-      ? `${this.flotiqApiUrl}/content/${ctd}/batch?updateExisting=true`
-      : `${this.flotiqApiUrl}/content/${ctd}`;
-
-    function objectReplacer(key, value) {
-      if (key === "_metadata") {
-        return undefined;
-      }
-      return value;
-    }
-
-    return fetch(postUri, {
-      method: "POST",
-      headers: this.headers,
-      body: JSON.stringify(
-        isBatch
-          ? object.map((o) => ({ ...o, _metadata: undefined }))
-          : { ...object, _metadata: undefined },
-        objectReplacer
-      ),
-    }).then(async (response) => {
-      if (!response.ok) {
-        let tokenLink = response.headers.get("x-debug-token-link");
-        let jsonResponse = await response.json();
-        console.dir(jsonResponse, { depth: null });
-        console.dir(object, { depth: null });
-        throw new Error(
-          `Error persisting ${ctd}: ${response.statusText}; details: ${tokenLink} (${response?.data})`
-        );
-      }
-
-      return response.json();
-    });
-  }
-
   async checkIfClear(CTDs) {
-    let remoteContentTypeDefinitions = await fetch(
-        `${this.flotiqApiUrl}/internal/contenttype?internal=0&limit=1000`,
-        this.headers
-    )
-        .then(async response => await response.json())
-        .then(response => response.data)
+    let remoteContentTypeDefinitions = await this.middleware
+        .get(`/internal/contenttype?internal=0&limit=1000`)
+        .then(response => response.data.data);
 
-    const _webhookContentTypeDefinition = await fetch(
-        `${this.flotiqApiUrl}/internal/contenttype/_webhooks?internal=1&limit=1000`,
-        this.headers
-    ).then(async response => await response.json())
+    const _webhookContentTypeDefinition = await this.middleware
+        .get(`/internal/contenttype/_webhooks?internal=1&limit=1000`)
+        .then(response => response.data);
 
     remoteContentTypeDefinitions.push(_webhookContentTypeDefinition)
 
@@ -263,23 +239,30 @@ module.exports = class FlotiqApi {
   }
 
   async createOrUpdate(remoteCtd, contentTypeDefinition, ret = 0) {
-    const method = remoteCtd?.id ? 'PUT' : 'POST'
+    const method = remoteCtd?.id ? 'put' : 'post';
 
     const uri = remoteCtd?.id
-        ? `${this.flotiqApiUrl}/internal/contenttype/${remoteCtd.name}`
-        : `${this.flotiqApiUrl}/internal/contenttype`
+        ? `/internal/contenttype/${remoteCtd.name}`
+        : `/internal/contenttype`;
 
     logger.info(
         `${remoteCtd ? 'Updating' : 'Persisting'} contentTypeDefinition ${contentTypeDefinition.name}`
     )
-    let headers = this.headers;
     contentTypeDefinition.featuredImage = [];
     try {
-      return await fetch(uri, {
+      const response = await this.middleware.request({
+        url: uri,
         method,
-        body: JSON.stringify(contentTypeDefinition),
-        headers
+        data: contentTypeDefinition,
+        validateStatus: () => true,
       });
+
+      return {
+        ok: response.status >= 200 && response.status < 300,
+        status: response.status,
+        statusText: response.statusText,
+        json: async () => response.data,
+      };
     } catch (e) {
       if(ret < 10) {
         logger.error(`Error ${e}, retrying ${ret + 1} time`);
@@ -308,8 +291,6 @@ module.exports = class FlotiqApi {
       if (bar) {
         bar.tick(this.batchSize);
       }
-
-      await new Promise(resolve => setTimeout(resolve, this.interval));
     }
   }
 };

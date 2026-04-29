@@ -9,8 +9,7 @@ const logger = require('./../src/logger')
 const FlotiqApi = require("./../src/flotiq-api");
 const config = require("./../src/configuration/config");
 const {mediaImporter} = require("./../src/media");
-const axios = require("axios");
-const {shouldUpdate, rateLimitInterceptor, throttleInterceptor } = require("./../src/util");
+const {shouldUpdate } = require("./../src/util");
 const {readCTDs} = require("../src/util");
 
 const WEBHOOKS_MESSAGE_403 = 'It looks like the api key does not have access to webhooks, it continues without deactivating webhooks';
@@ -110,7 +109,17 @@ function fixRelationsInCTDs(remoteContentTypeDefinitions, CTDs) {
     });
 }
 
-async function importer(directory, flotiqApi, skipDefinitions, skipContent, updateDefinitions, disableWebhooks, fixDefinitions, ctd, skipCtd)
+async function importer(
+    directory,
+    flotiqApi,
+    skipDefinitions,
+    skipContent,
+    updateDefinitions,
+    disableWebhooks,
+    fixDefinitions,
+    ctd,
+    skipCtd
+)
 {
     const stats = {
         importedCtdCount: 0,
@@ -212,7 +221,8 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
             if (response.ok) {
                 stats.importedCtdCount += 1;
                 logger.info(
-                    `${remoteCtd ? 'Updated' : 'Persisted'} contentTypeDefinition ${contentTypeDefinition.name} ${(await response.json()).id}`
+                    `${remoteCtd ? 'Updated' : 'Persisted'} contentTypeDefinition
+                     ${contentTypeDefinition.name} ${(await response.json()).id}`
                 );
             } else {
                 let responseJson = await response.json();
@@ -319,7 +329,10 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
                 objectsToPublish.push(...objectsToPersist.filter((obj) => obj.internal?.status === 'public'));
             }
 
-            logger.info(`Persisting ${contentTypeDefinition.name} without relationships (${ContentObjects[contentTypeDefinition.name].length} items)`);
+            logger.info(
+                `Persisting ${contentTypeDefinition.name}
+                 without relationships (${ContentObjects[contentTypeDefinition.name].length} items)`
+            );
 
             await flotiqApi
                 .persistContentObjectBatch(
@@ -339,7 +352,11 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
                 continue;
             }
 
-            logger.info(`Persisting ${contentTypeDefinition.name} with relationships (${ContentObjects[contentTypeDefinition.name].length} items)`);
+            logger.info(
+                `Persisting ${contentTypeDefinition.name}
+                 with relationships
+                  (${ContentObjects[contentTypeDefinition.name].length} items)`
+            );
             await flotiqApi
                 .persistContentObjectBatch(
                     contentTypeDefinition.name,
@@ -415,7 +432,10 @@ async function importer(directory, flotiqApi, skipDefinitions, skipContent, upda
             }
 
             if (contentTypeDefinition.name === '_webhooks') {
-                logger.info(`Persisting ${contentTypeDefinition.name} (${ContentObjects[contentTypeDefinition.name].length} items)`);
+                logger.info(
+                    `Persisting ${contentTypeDefinition.name}
+                     (${ContentObjects[contentTypeDefinition.name].length} items)`
+                );
                 if (disableWebhooks) {
                     ContentObjects[contentTypeDefinition.name].map(webhook => {
                         webhook.enabled = false;
@@ -442,7 +462,10 @@ async function featuredImagesImport(flotiqApi, contentTypeDefinitions, featuredI
                 if (replacements?.length) {
                     await shouldUpdate(contentTypeDefinition, replacements)
                 }
-                let response = await flotiqApi.updateContentTypeDefinition(contentTypeDefinition.name, contentTypeDefinition)
+                let response = await flotiqApi.updateContentTypeDefinition(
+                    contentTypeDefinition.name,
+                    contentTypeDefinition
+                )
                     .catch((e)=>{return e.response});
                 if (response.status === 200) {
                     logger.info(`Feature image for CTD ${contentTypeDefinition.name} - updated`);
@@ -496,17 +519,9 @@ async function handler(argv) {
         true,
         false
     );
-    const mediaApi = axios.create({
-        baseURL: `${(new URL(flotiqApiUrl)).origin}/api/media`,
-        timeout: flotiqApi.timeout,
-        headers: flotiqApi.headers,
-    });
-    rateLimitInterceptor(mediaApi, logger, 1000 / writePerSecondLimit);
-    throttleInterceptor(mediaApi, 1000 / writePerSecondLimit);
     let replacements = await mediaImporter(
       directory,
-      flotiqApi,
-      mediaApi,
+            flotiqApi,
     );
 
     await featuredImagesImport(
