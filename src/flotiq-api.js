@@ -298,7 +298,7 @@ module.exports = class FlotiqApi {
 const apiCache = new Map();
 
 function getFlotiqApi(apiUrl, apiKey, options = {}) {
-    const cacheKey = `${apiUrl}:${apiKey}`;
+    const cacheKey = `${apiUrl}:${apiKey}:${JSON.stringify(options)}`;
     if (!apiCache.has(cacheKey)) {
         apiCache.set(cacheKey, new (module.exports)(apiUrl, apiKey, options));
     }
