@@ -13,7 +13,7 @@ const oldConsole = console;
 const purgeContentObjects = require('../purifier/purifier')
 const sdk = require('../sdk/sdk');
 const stats = require('../stats/stats');
-const FlotiqApi = require('../flotiq-api');
+const { getFlotiqApi } = require('../flotiq-api');
 const config = require('../configuration/config');
 const xlsxMigrator = require('flotiq-excel-migrator');
 
@@ -127,7 +127,7 @@ yargs
                 const answers = await askQuestions(questionsText.PURGE_QUESTION);
                 const { confirmation } = answers;
                 if (confirmation.toUpperCase() === 'Y') {
-                    await purgeContentObjects(new FlotiqApi(`${config.apiUrl}/api/v1`, apiKey), withInternal, force);
+                    await purgeContentObjects(getFlotiqApi(`${config.apiUrl}/api/v1`, apiKey), withInternal, force);
                 } else {
                     console.log('I\'m finishing, no data has been deleted');
                     process.exit(1);
@@ -285,11 +285,11 @@ yargs
         if (yargs.argv._.length === 1 && !apiKeyDefinedInDotEnv()) {
             let answers = await askQuestions(questionsText.STATS);
             let {flotiqApiKey} = answers;
-            await stats(new FlotiqApi(`${config.apiUrl}/api/v1`, flotiqApiKey));
+            await stats(getFlotiqApi(`${config.apiUrl}/api/v1`, flotiqApiKey));
         } else if(yargs.argv._.length < 2 && apiKeyDefinedInDotEnv()) {
-            await stats(new FlotiqApi(`${config.apiUrl}/api/v1`, process.env.FLOTIQ_API_KEY));
+            await stats(getFlotiqApi(`${config.apiUrl}/api/v1`, process.env.FLOTIQ_API_KEY));
         } else if (yargs.argv._.length === 2) {
-            await stats(new FlotiqApi(`${config.apiUrl}/api/v1`, argv.flotiqApiKey));
+            await stats(getFlotiqApi(`${config.apiUrl}/api/v1`, argv.flotiqApiKey));
         } else {
             yargs.showHelp();
             process.exit(1);

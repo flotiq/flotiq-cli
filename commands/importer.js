@@ -6,7 +6,7 @@ const fs = require('fs/promises')
 const path = require('path')
 const traverse = require('traverse')
 const logger = require('./../src/logger')
-const FlotiqApi = require("./../src/flotiq-api");
+const { getFlotiqApi } = require("./../src/flotiq-api");
 const config = require("./../src/configuration/config");
 const {mediaImporter} = require("./../src/media");
 const {shouldUpdate } = require("./../src/util");
@@ -504,7 +504,7 @@ async function handler(argv) {
     const flotiqApiUrl = argv.flotiqApiUrl || config.apiUrl;
 
     let writePerSecondLimit = 10;
-    const flotiqApi = new FlotiqApi(`${flotiqApiUrl}/api/v1`,  argv.flotiqApiKey, {
+    const flotiqApi = getFlotiqApi(`${flotiqApiUrl}/api/v1`,  argv.flotiqApiKey, {
         batchSize: 100,
         writePerSecondLimit,
     });

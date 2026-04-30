@@ -294,3 +294,16 @@ module.exports = class FlotiqApi {
     }
   }
 };
+
+const apiCache = new Map();
+
+function getFlotiqApi(apiUrl, apiKey, options = {}) {
+    const cacheKey = `${apiUrl}:${apiKey}`;
+    if (!apiCache.has(cacheKey)) {
+        apiCache.set(cacheKey, new (module.exports)(apiUrl, apiKey, options));
+    }
+    return apiCache.get(cacheKey);
+}
+
+module.exports.getFlotiqApi = getFlotiqApi;
+

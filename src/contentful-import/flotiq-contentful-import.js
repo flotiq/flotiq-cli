@@ -4,10 +4,10 @@ const path = require('path');
 const cfHtmlRenderer = require('@contentful/rich-text-html-renderer/dist/rich-text-html-renderer.es5');
 const {resultNotify} = require('./notify');
 const {flotiqMedia, cfMediaToObject} = require('./media');
-const FlotiqApi = require('../flotiq-api');
+const { getFlotiqApi } = require('../flotiq-api');
 
 module.exports = contentful = async (contentfulSpaceId, contentfulContentManagementToken, flotiqApiKey, translation = "en-US") => {
-    const flotiqApi = new FlotiqApi(`${config.apiUrl}/api/v1`, flotiqApiKey);
+    const flotiqApi = getFlotiqApi(`${config.apiUrl}/api/v1`, flotiqApiKey);
 
     const export_options = {
         spaceId: contentfulSpaceId,

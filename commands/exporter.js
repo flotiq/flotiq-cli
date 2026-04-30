@@ -4,7 +4,7 @@ const fs = require("fs/promises");
 const path = require("path");
 const logger = require("./../src/logger");
 const { camelize } = require("./../src/util");
-const FlotiqApi = require('./../src/flotiq-api')
+const { getFlotiqApi } = require('./../src/flotiq-api')
 const config = require("../src/configuration/config");
 
 exports.command = "export";
@@ -47,7 +47,7 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd,
 
   await fs.mkdir(directory, { recursive: true });
 
-  const flotiqApi = new FlotiqApi(flotiqApiUrl, flotiqApiKey, { batchSizeRead: 1000 });
+  const flotiqApi = getFlotiqApi(flotiqApiUrl, flotiqApiKey, { batchSizeRead: 1000 });
 
   let ContentTypeDefinitions = await flotiqApi.fetchContentTypeDefs();
 
