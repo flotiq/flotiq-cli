@@ -4,7 +4,7 @@ const logger = require('./logger')
 const { Blob } = require('buffer');
 const {readCTDs, shouldUpdate } = require("./util");
 
-async function mediaImporter (directory, flotiqApi, mediaApi) {
+async function mediaImporter (directory, flotiqApi) {
     const checkIfMediaUsed = true;
 
     const flotiqDefinitions = await flotiqApi.fetchContentTypeDefs();
@@ -32,7 +32,7 @@ async function mediaImporter (directory, flotiqApi, mediaApi) {
 
         for (const mediaFile of contentObjects) {
             const mediaFileUrl = `${(new URL(flotiqApi.flotiqApiUrl)).origin}${mediaFile.url}`
-            const response = await fetch(mediaFileUrl)
+            const response = await flotiqApi.middleware.get(mediaFileUrl, { validateStatus: (s) => s < 500 })
 
             if (response.status === 404) {
                 missingFiles.push(mediaFile)
@@ -65,7 +65,7 @@ async function mediaImporter (directory, flotiqApi, mediaApi) {
             form.append('type', file.type);
             form.append('file', blob, file.fileName);
 
-            const mediaEntity = await postMedia(form, mediaApi);
+            const mediaEntity = await flotiqApi.uploadMedia(form);
 
             replacements.push([file, mediaEntity]);
         }
@@ -103,14 +103,6 @@ async function mediaImporter (directory, flotiqApi, mediaApi) {
             logger.error(e);
         }
     }
-}
-
-const postMedia = async (form, mediaApi) => {
-    const response = await mediaApi.post('', form, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    
-    return response.data;
 }
 
 async function checkIsUsedIn(fileId, objects) {

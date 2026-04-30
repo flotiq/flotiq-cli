@@ -1,21 +1,17 @@
-const fetch = require('node-fetch');
-const config = require('../configuration/config');
-const { fetchContentTypeDefinitions, updateContentTypeDefinition } = require('../flotiq-api/flotiq-api');
 const ora = require('ora');
 
-module.exports = purgeContentObjects = async (apiKey, internal = false, force = false) => {
+module.exports = purgeContentObjects = async (flotiqApi, internal = false, force = false) => {
     
     let ctdsClearedOfRelations = 0;
 
-    let contentTypeDefinitions = (await (await fetchContentTypeDefinitions(apiKey, 1, 100, internal))
-        .json()).data;
+    let contentTypeDefinitions = await flotiqApi.fetchContentType(internal);
 
     let i = 0;
     let ctdArrFormerLength = contentTypeDefinitions.length;
     let spinner;
     while (contentTypeDefinitions.length) {
         if (contentTypeDefinitions[i]) {
-            let objectsNotPurged = await removeContentObjects(contentTypeDefinitions[i], apiKey);
+            let objectsNotPurged = await removeContentObjects(contentTypeDefinitions[i], flotiqApi);
             if (objectsNotPurged) {
                 i++;
             } else {
@@ -36,7 +32,7 @@ module.exports = purgeContentObjects = async (apiKey, internal = false, force = 
                     return;
                 } else {
                     spinner = ora(`Cleaning data of relation loops, please do not stop the command or close the terminal... Content Types cleared of looped relations: ${ctdsClearedOfRelations}\n`).start();
-                    await dropRelations(contentTypeDefinitions.slice(ctdsClearedOfRelations), apiKey);
+                    await dropRelations(contentTypeDefinitions.slice(ctdsClearedOfRelations), flotiqApi);
                     ctdsClearedOfRelations++;
                     spinner.stop();
                 }
@@ -45,7 +41,7 @@ module.exports = purgeContentObjects = async (apiKey, internal = false, force = 
     }
 }
 
-const dropRelations = (contentTypeDefinitions, apiKey) => {
+const dropRelations = (contentTypeDefinitions, flotiqApi) => {
     const removeProperty = (ctd, property) => {
         delete ctd.metaDefinition.propertiesConfig[property];
         delete ctd.schemaDefinition.allOf[1].properties[property];
@@ -68,8 +64,8 @@ const dropRelations = (contentTypeDefinitions, apiKey) => {
                 ctdWithDroppedRelations = removeProperty(ctdWithDroppedRelations, property);
             }
         }
-        await updateContentTypeDefinition(ctdWithDroppedRelations, apiKey);
-        await updateContentTypeDefinition(ctd, apiKey);
+        await flotiqApi.updateContentTypeDefinition(ctdWithDroppedRelations.name, ctdWithDroppedRelations);
+        await flotiqApi.updateContentTypeDefinition(ctd.name, ctd);
     }
     
     for (let ctd in contentTypeDefinitions) {
@@ -82,7 +78,7 @@ const dropRelations = (contentTypeDefinitions, apiKey) => {
     }
 }
 
-const removeContentObjects = async (contentTypeDefinition, apiKey) => {
+const removeContentObjects = async (contentTypeDefinition, flotiqApi) => {
 
     let limit = 100;
     let page = 1;
@@ -91,10 +87,9 @@ const removeContentObjects = async (contentTypeDefinition, apiKey) => {
     while (totalPages !== page) {
 
         const ctdName = contentTypeDefinition.name;
-        let contentObjects = await (await fetch(
-            config.apiUrl + `/api/v1/content/${ctdName}?auth_token=${apiKey}&page=${page}&limit=${limit}`,
-            {method: 'GET'}
-        )).json();
+        let contentObjects = (await flotiqApi.middleware.get(
+            `/content/${ctdName}?page=${page}&limit=${limit}`
+        )).data;
 
         totalPages = contentObjects.total_pages;
 
@@ -107,20 +102,17 @@ const removeContentObjects = async (contentTypeDefinition, apiKey) => {
             deleteQuery.push(contentObject.id);
         });
 
-        let response = await fetch(
-            config.apiUrl + `/api/v1/content/${ctdName}/batch-delete?auth_token=${apiKey}`,
-            {
-                method: 'POST',
-                body: JSON.stringify(deleteQuery),
-                headers: {'Content-Type': 'application/json'}
-            }
+        const response = await flotiqApi.middleware.post(
+            `/content/${ctdName}/batch-delete`,
+            deleteQuery,
+            { validateStatus: (s) => s < 500 }
         );
 
         if (response.status === 400) {
             return contentTypeDefinition;
         }
 
-        console.log(`${ctdName} - Page: ${page}/${totalPages}`, await response.json());
+        console.log(`${ctdName} - Page: ${page}/${totalPages}`, response.data);
         page++;
     }
 }

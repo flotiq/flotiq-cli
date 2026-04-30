@@ -3,10 +3,6 @@ const util = require("util");
 const traverse = require("traverse");
 const glob = util.promisify(require('glob'));
 
-function ucFirst(str) {
-  return str[0].toUpperCase() + str.substring(1)
-}
-
 function camelize(str) {
   return str
     .replace(/(^|[_]+)([a-z])/g, (match, underscore, letter) => letter.toUpperCase());
@@ -75,7 +71,6 @@ function throttleInterceptor(axios, delay) {
 }
 
 module.exports = {
-  ucFirst,
   camelize,
   readCTDs,
   shouldUpdate,
