@@ -5,12 +5,14 @@ const { exporter } = require("./../../commands/exporter");
 
 jest.mock("fs/promises");
 jest.mock("./../../src/flotiq-api", () => {
-    return jest.fn().mockImplementation(() => ({
-        fetchContentType: jest.fn().mockResolvedValue([]), // Dodaj tę metodę!
+    const MockClass = jest.fn().mockImplementation(() => ({
+        fetchContentType: jest.fn().mockResolvedValue([]),
         fetchContentTypeDefs: jest.fn().mockResolvedValue([]),
         fetchContentObjects: jest.fn(),
         fetchMediaFile: jest.fn().mockResolvedValue(Buffer.from("dummy-media-data")),
     }));
+    MockClass.getFlotiqApi = (...args) => new MockClass(...args);
+    return MockClass;
 });
 jest.mock("./../../src/logger");
 
@@ -24,7 +26,7 @@ describe("exporter", () => {
     });
 
     it("should handle empty content types using FlotiqApi", async () => {
-        FlotiqApi.mockImplementation(() => ({
+        FlotiqApi.mockImplementationOnce(() => ({
             fetchContentType: jest.fn().mockResolvedValue([]),
             fetchContentTypeDefs: jest.fn().mockResolvedValue([]),
             fetchContentObjects: jest.fn().mockResolvedValue([]),
@@ -58,7 +60,7 @@ describe("exporter", () => {
             { id: "media1", url: "/media/test.jpg", extension: "jpg" },
         ];
 
-        FlotiqApi.mockImplementation(() => ({
+        FlotiqApi.mockImplementationOnce(() => ({
             fetchContentType: jest.fn().mockResolvedValue(mockContentTypeDefs),
             fetchContentTypeDefs: jest.fn().mockResolvedValue(mockContentTypeDefs),
             fetchContentObjects: jest
