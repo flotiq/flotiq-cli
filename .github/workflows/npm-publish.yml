@@ -3,9 +3,10 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
 jobs:
   npm-publish:
-    if: startsWith(github.event.head_commit.message, 'Release ')
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'Release ')
     runs-on: ubuntu-latest
     permissions:
       contents: write
