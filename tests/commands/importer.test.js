@@ -1,12 +1,10 @@
 const fs = require('fs/promises');
 const glob = require('glob');
-const fetch = require('node-fetch');
 const FlotiqApi = require('./../../src/flotiq-api');
 const { importer } = require('./../../commands/importer');
 
 jest.mock('fs/promises');
 jest.mock('glob', () => jest.fn());
-jest.mock('node-fetch');
 jest.mock('./../../src/flotiq-api');
 jest.mock('./../../src/logger', () => ({
     info: jest.fn(),
@@ -34,12 +32,6 @@ describe('importer', () => {
         fs.readFile.mockResolvedValue(
             JSON.stringify({ name: 'mockContentType' })
         );
-
-        // Mock fetch
-        fetch.mockResolvedValue({
-            ok: true,
-            json: jest.fn().mockResolvedValue({ id: 'mockId', data: [] }),
-        });
 
         // Mock FlotiqApi
         FlotiqApi.mockImplementation(() => ({

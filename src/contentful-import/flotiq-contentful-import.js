@@ -4,9 +4,10 @@ const path = require('path');
 const cfHtmlRenderer = require('@contentful/rich-text-html-renderer/dist/rich-text-html-renderer.es5');
 const {resultNotify} = require('./notify');
 const {flotiqMedia, cfMediaToObject} = require('./media');
-const {flotiqCtdUpload, flotiqCoUploadByCtd, flotiqMediaUpload} = require('../flotiq-api/flotiq-api');
+const { getFlotiqApi } = require('../flotiq-api');
 
 module.exports = contentful = async (contentfulSpaceId, contentfulContentManagementToken, flotiqApiKey, translation = "en-US") => {
+    const flotiqApi = getFlotiqApi(`${config.apiUrl}/api/v1`, flotiqApiKey);
 
     const export_options = {
         spaceId: contentfulSpaceId,
@@ -25,15 +26,15 @@ module.exports = contentful = async (contentfulSpaceId, contentfulContentManagem
         return;
     }
 
-    let resultCtd = await importCtd(exportData.contentTypes, flotiqApiKey);
+    let resultCtd = await importCtd(exportData.contentTypes, flotiqApi);
     resultNotify(resultCtd, "content_type");
-    let resultMedia = await importMedia(exportData.assets, translation, flotiqApiKey);
+    let resultMedia = await importMedia(exportData.assets, translation, flotiqApi);
     resultNotify(resultMedia[0], "media");
-    let resultCo = await importCo(exportData.entries, resultMedia[1], translation, flotiqApiKey);
+    let resultCo = await importCo(exportData.entries, resultMedia[1], translation, flotiqApi);
     resultNotify(resultCo, "content_object");
 }
 
-async function importCtd(data, apiKey) {
+async function importCtd(data, flotiqApi) {
     let ctd = [];
     await Promise.all(data.map(async (obj) => {
         let ctdRec = {
@@ -65,7 +66,7 @@ async function importCtd(data, apiKey) {
             ctdRec.schemaDefinition.allOf[1].properties[field.id] = buildSchemaDefinition(field);
             ctdRec.metaDefinition.propertiesConfig[field.id] = buildMetaDefinition(field, obj.displayField);
         });
-        let response = await flotiqCtdUpload(ctdRec, apiKey);
+        let response = await flotiqApi.createOrUpdate(undefined, ctdRec);
         response.name = ctdRec.name;
         response.label = ctdRec.label;
         ctd.push(response);
@@ -175,7 +176,7 @@ function convertFieldType(type) {
     return objTypes[type];
 }
 
-async function importCo(data, media, trans, apiKey) {
+async function importCo(data, media, trans, flotiqApi) {
     let co = {};
     await Promise.all(data.map(async (obj) => {
         if (!co[obj.sys.contentType.sys.id]) {
@@ -209,7 +210,7 @@ async function importCo(data, media, trans, apiKey) {
         }
         await co[obj.sys.contentType.sys.id].push(coRec);
     }));
-    return await flotiqCoUploadByCtd(co, apiKey);
+    return await persistContentObjectsByCtd(co, flotiqApi);
 
     function getImageByCfId(id) {
         return media.find(element => element.id === id);
@@ -233,15 +234,41 @@ async function importCo(data, media, trans, apiKey) {
     }
 }
 
-async function importMedia(data, trans, apiKey) {
-    let images = nameImages(await flotiqMedia(apiKey));
+async function persistContentObjectsByCtd(contentObjects, flotiqApi) {
+    let result = [];
+    const limit = 100;
+    for (let contentObjectName in contentObjects) {
+        for (let j = 0; j < contentObjects[contentObjectName].length; j += limit) {
+            const batch = contentObjects[contentObjectName].slice(j, j + limit);
+            const response = await flotiqApi.middleware.post(
+                `/content/${contentObjectName}/batch?updateExisting=true`,
+                batch,
+                { validateStatus: () => true }
+            );
+            result[contentObjectName] = wrapAxiosResponse(response);
+        }
+    }
+
+    return result;
+}
+
+function wrapAxiosResponse(response) {
+    return {
+        status: response.status,
+        ok: response.status >= 200 && response.status < 300,
+        json: async () => response.data,
+    };
+}
+
+async function importMedia(data, trans, flotiqApi) {
+    let images = nameImages(await flotiqMedia(flotiqApi));
     data = cfMediaToObject(data, trans);
     let mediaRec = [];
     let uploadedFiles = [];
     let uploaded = 0;
 
     await Promise.all(data.map(async (file) => {
-        mediaRec[file.cf_id] = await flotiqMediaUpload(apiKey, file, images);
+        mediaRec[file.cf_id] = await flotiqApi.uploadMediaFromUrl(file, images);
         if (!mediaRec[file.cf_id].code) {
             uploadedFiles[uploaded] = {
                 fileName: file.fileName,

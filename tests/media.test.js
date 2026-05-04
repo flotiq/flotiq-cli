@@ -2,15 +2,12 @@ const fs = require('fs/promises');
 const FlotiqApi = require('./../src/flotiq-api');
 const { mediaImporter } = require('./../src/media');
 const axios = require('axios');
-const { rateLimitInterceptor, throttleInterceptor } = require('./../src/util');
 const AxiosMockAdapter = require("axios-mock-adapter");
-const logger = require('./../src/logger');
 
 // This sets the mock adapter on the default instance
 const mock = new AxiosMockAdapter(axios);
 
 jest.mock('fs/promises');
-jest.mock('node-fetch');
 jest.mock('./../src/logger', () => ({
     info: jest.fn(),
     warn: jest.fn(),
@@ -39,11 +36,7 @@ describe('mediaImporter', () => {
             data: []
         });
 
-        global.fetch = jest.fn(() =>
-            Promise.resolve({
-                status: 404, // fetch should return 404 for importer to send postMedia request
-            })
-        );
+        mock.onGet(new RegExp(`${mockApiUrl}/image/.*`)).reply(404);
     });
 
     afterEach(() => {
@@ -63,15 +56,7 @@ describe('mediaImporter', () => {
         const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`,  mockApiKey, {
             batchSize: 100,
         });
-        flotiqApi.flotiqApiUrl = mockApiUrl;
-        const mediaApi = axios.create({
-            baseURL: `${mockApiUrl}/api/media`,
-            timeout: flotiqApi.timeout,
-            headers: flotiqApi.headers,
-        });
-        rateLimitInterceptor(mediaApi, logger, 1);
-
-        await mediaImporter(mockDirectory, flotiqApi, mediaApi);
+        await mediaImporter(mockDirectory, flotiqApi);
 
         expect(mock.history.post.length).toBe(3);
         expect(mock.history.post[1]._retryCount).toEqual(2);
@@ -87,22 +72,15 @@ describe('mediaImporter', () => {
         
         const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`,  mockApiKey, {
             batchSize: 100,
+            writePerSecondLimit: 1,
         });
-        flotiqApi.flotiqApiUrl = mockApiUrl;
-        const mediaApi = axios.create({
-            baseURL: `${mockApiUrl}/api/media`,
-            timeout: flotiqApi.timeout,
-            headers: flotiqApi.headers,
-        });
-        rateLimitInterceptor(mediaApi, logger, 1);
-        throttleInterceptor(mediaApi, 1000); // 1 request per second
         const start = Date.now();
-        await mediaImporter(mockDirectory, flotiqApi, mediaApi);
+        await mediaImporter(mockDirectory, flotiqApi);
 
         const end = Date.now();
         const elapsed = end - start;
         expect(mock.history.post.length).toBe(2);
-        // Check that importer respected throttle limit
-        expect(elapsed).toBeGreaterThanOrEqual(1000); // at least 1 second for 2 uploads
-    });
+        // With writePerSecondLimit=1, throttling applies to all API calls in this flow.
+        expect(elapsed).toBeGreaterThanOrEqual(5000);
+    }, 12000);
 });

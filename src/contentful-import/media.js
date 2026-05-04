@@ -1,17 +1,10 @@
-const config = require('../configuration/config');
-const fetch = require('node-fetch');
-
-const flotiqMedia = async (apiKey) => {
+const flotiqMedia = async (flotiqApi) => {
     let totalPages = 1;
     let page = 1;
     let allImages = [];
-    let headers = {
-        accept: 'application/json',
-    };
-    headers['X-AUTH-TOKEN'] = apiKey;
     for (page; page <= totalPages; page++) {
-        let images = await fetch(`${config.apiUrl}/api/v1/content/_media?limit=1000&page=${page}`, {headers: headers})
-        let imagesJson = await images.json();
+        const response = await flotiqApi.middleware.get(`/content/_media?limit=1000&page=${page}`);
+        const imagesJson = response.data;
         totalPages = imagesJson.total_pages;
         allImages = [...allImages, ...imagesJson.data];
     }

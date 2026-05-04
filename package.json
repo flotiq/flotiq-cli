@@ -26,6 +26,8 @@
   "license": "MIT",
   "dependencies": {
     "@contentful/rich-text-html-renderer": "^16.6.10",
+    "axios": "^1.15.2",
+    "cli-table3": "^0.6.5",
     "contentful-export": "^7.19.155",
     "dotenv": "^16.4.5",
     "flotiq-excel-migrator": "^1.0.15",
