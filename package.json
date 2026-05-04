@@ -19,7 +19,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/flotiq/flotiq-cli.git"
+    "url": "git+https://github.com/flotiq/flotiq-cli.git"
   },
   "homepage": "https://github.com/flotiq/flotiq-cli",
   "author": "Flotiq team <hello@flotiq.com>",
