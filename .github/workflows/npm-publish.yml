@@ -18,9 +18,9 @@ jobs:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
       - run: |
-          printf '%s\n' \
-            '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' \
-            'registry=https://registry.npmjs.org/' \
-            'always-auth=true' > ~/.npmrc
+          printf "%s\n" \
+            "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" \
+            "registry=https://registry.npmjs.org/" \
+            "always-auth=true" > ~/.npmrc
       - run: cat ~/.npmrc
       - run: npm publish --access public
