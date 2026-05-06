@@ -18,6 +18,7 @@ jobs:
       - run: echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
       - run: echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
       - run: echo "always-auth=true" >> ~/.npmrc
+      - run: cat ~/.npmrc
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
