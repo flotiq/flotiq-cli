@@ -22,5 +22,5 @@ jobs:
             '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' \
             'registry=https://registry.npmjs.org/' \
             'always-auth=true' > ~/.npmrc
-      - run: sed 's/_authToken=.*/_authToken=[MASKED]/' ~/.npmrc
+      - run: cat ~/.npmrc
       - run: npm publish --access public
