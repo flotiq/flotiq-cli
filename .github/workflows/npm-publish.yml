@@ -2,18 +2,22 @@ name: npm-publish
 on:
   push:
     branches:
-      - master
+      - feature/publication-update
 jobs:
   npm-publish:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: npm publish --provenance --access public
+      - run: echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
+      - run: echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+      - run: echo "always-auth=true" >> ~/.npmrc
+      - run: npm publish --access public
         env:
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
