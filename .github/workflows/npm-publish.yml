@@ -22,5 +22,6 @@ jobs:
             "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" \
             "registry=https://registry.npmjs.org/" \
             "always-auth=true" > ~/.npmrc
+      - run: npm whoami
       - run: cat ~/.npmrc
       - run: npm publish --access public
