@@ -2452,9 +2452,9 @@ fecha@^4.2.0:
   integrity sha512-OP2IUU6HeYKJi3i0z4A19kHMQoLVs4Hc+DPqqxI2h/DPZHTm/vjsfC6P0b4jCMy14XizLBqvndQ+UilD7707Jw==
 
 fflate@^0.8.2:
-  version "0.8.2"
-  resolved "https://registry.yarnpkg.com/fflate/-/fflate-0.8.2.tgz#fc8631f5347812ad6028bbe4a2308b2792aa1dea"
-  integrity sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/fflate/-/fflate-0.8.3.tgz#bc27d8eb30343d4d512abb03480202ce65d825fc"
+  integrity sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==
 
 figures@3.2.0, figures@^3.0.0, figures@^3.2.0:
   version "3.2.0"
@@ -2507,18 +2507,20 @@ find-up@^4.0.0, find-up@^4.1.0:
     locate-path "^5.0.0"
     path-exists "^4.0.0"
 
-"flotiq-excel-migrator@https://github.com/flotiq/flotiq-excel-migrator.git#upgrade-and-tests":
-  version "1.0.16"
-  resolved "https://github.com/flotiq/flotiq-excel-migrator.git#172b4214bfebe39c1eca9048d80fbcc1704bae69"
+flotiq-excel-migrator@^1.0.17:
+  version "1.0.17"
+  resolved "https://registry.yarnpkg.com/flotiq-excel-migrator/-/flotiq-excel-migrator-1.0.17.tgz#462029817105e435ee5a4e3030170e38c1e4c97b"
+  integrity sha512-ij2McxKj2y/VTjyqWtdvCHF1vmawF+jhOj/VgFLmYjf9I8EHTROvKEIjoDMw+ydm7+JWynJ+iggoxc59Ce2sLw==
   dependencies:
     node-fetch "2"
     read-excel-file "^9.0.9"
     write-excel-file "^1.4.13"
     yup "^0.32.11"
 
-"flotiq-wordpress-import@https://github.com/flotiq/flotiq-wordpress-import.git#upgrade-and--tests":
-  version "1.1.8"
-  resolved "https://github.com/flotiq/flotiq-wordpress-import.git#3107cf6ec8d9bc3b221641373f96753296fd9c1e"
+flotiq-wordpress-import@^1.1.9:
+  version "1.1.9"
+  resolved "https://registry.yarnpkg.com/flotiq-wordpress-import/-/flotiq-wordpress-import-1.1.9.tgz#e581a31c4875f06922f46d3036703ae6744cd16c"
+  integrity sha512-/Z3npJl9okadqhhO1uieWjBw5spfoCDIOyg8yTakHmrz3WEvtvL1h+qKB+YSOQDiqTmRGDF0k5LqaXWiDNkLMw==
   dependencies:
     form-data "^3.0.0"
     inquirer "^7.3.0"
