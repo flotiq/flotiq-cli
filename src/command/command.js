@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import "dotenv/config";
 import fs from "fs";
-import xlsxMigrator from "flotiq-excel-migrator";
+import {exportXlsx, importXlsx} from "flotiq-excel-migrator";
 import inquirer from "inquirer";
 import yargsFactory from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
@@ -205,7 +205,7 @@ yargs
             if (yargs.argv._.length < 3 || (yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv())) {
                 const answers = await askQuestions(questionsText.EXCEL_MIGRATION);
                 const { flotiqApiKey, ctdName, filePath } = answers;
-                await xlsxMigrator.exportXlsx({
+                await exportXlsx({
                     apiKey: flotiqApiKey,
                     ctdName,
                     filePath,
@@ -216,7 +216,7 @@ yargs
                 if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
                     argv.flotiqApiKey = process.env.FLOTIQ_API_KEY;
                 }
-                await xlsxMigrator.exportXlsx({
+                await importXlsx({
                     apiKey: argv.flotiqApiKey,
                     ctdName: argv.ctdName,
                     filePath: argv.filePath,
