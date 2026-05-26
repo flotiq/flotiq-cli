@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import "dotenv/config";
-import fs from "fs";
 import {exportXlsx, importXlsx} from "flotiq-excel-migrator";
 import inquirer from "inquirer";
 import yargsFactory from "yargs/yargs";
@@ -23,9 +22,6 @@ yargs
     .alias("help", "h")
     .command(exporterCommand)
     .command(importerCommand)
-    .boolean("json-output")
-    .alias("json-output", ["j"])
-    .describe("json-output", " Whether to save results as JSON")
     .string("framework")
     .alias("framework", ["fw"])
     .describe("framework", " Determines which framework should be used (gatsby, nextjs)")
@@ -81,11 +77,11 @@ yargs
         if (yargs.argv._.length < 2) {
             const answers = await askQuestions(questionsText.WORDPRESS_IMPORT_QUESTIONS);
             const { flotiqApiKey, wordpressUrl } = answers;
-            await wordpressStart(flotiqApiKey, wordpressUrl, yargs.argv["json-output"]);
+            await wordpressStart(flotiqApiKey, wordpressUrl);
         } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
-            await wordpressStart.run(process.env.FLOTIQ_API_KEY, argv.wordpressUrl, yargs.argv["json-input"]);
+            await wordpressStart.run(process.env.FLOTIQ_API_KEY, argv.wordpressUrl);
         } else if (yargs.argv._.length === 3) {
-            await wordpressStart.run(argv.flotiqApiKey, argv.wordpressUrl, yargs.argv["json-output"]);
+            await wordpressStart.run(argv.flotiqApiKey, argv.wordpressUrl);
         }
     })
     .command("contentful-import [contentfulSpaceId] [contentfulContentManagementToken] [flotiqApiKey] [translation]", "Import Contentful to Flotiq", () => {
