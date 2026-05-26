@@ -9,7 +9,6 @@ import importerCommand from "../../commands/importer.js";
 import exporterCommand from "../../commands/exporter.js";
 import questionsText from "./questions.js";
 import projectSetup from "../start/projectSetup.js";
-import custom from "../console/console.js";
 import purgeContentObjects from "../purifier/purifier.js";
 import sdk from "../sdk/sdk.js";
 import stats from "../stats/stats.js";
@@ -17,10 +16,6 @@ import { getFlotiqApi } from "@flotiq/api";
 import config from "../configuration/config.js";
 
 const yargs = yargsFactory(hideBin(process.argv));
-const errors = [];
-const stdOut = [];
-const errorObject = { errorCode: 0 };
-const oldConsole = console;
 
 yargs
     .usage("flotiq [command]")
@@ -52,8 +47,6 @@ yargs
             type: "string",
         });
     }, async (argv) => {
-        console = custom.console(oldConsole, yargs.argv["json-output"], errors, stdOut, errorObject, fs);
-        const isJson = !!yargs.argv["json-output"];
         if (yargs.argv.help) {
             yargs.showHelp();
             process.exit(1);
@@ -61,15 +54,15 @@ yargs
         if (yargs.argv._.length < 3) {
             const answers = await askQuestions(questionsText.START_QUESTIONS);
             const { flotiqApiKey, projectDirectory, url } = answers;
-            start(flotiqApiKey, projectDirectory, url, isJson);
+            start(flotiqApiKey, projectDirectory, url);
         } else if (yargs.argv._.length === 3 && apiKeyDefinedInDotEnv()) {
-            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, isJson, yargs.argv["framework"], yargs.argv["import"]);
+            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, yargs.argv["framework"], yargs.argv["import"]);
         } else if (yargs.argv._.length === 4 && argv.flotiqApiKey) {
-            start(argv.flotiqApiKey, argv.directory, argv.url, isJson, yargs.argv["framework"], yargs.argv["import"]);
+            start(argv.flotiqApiKey, argv.directory, argv.url, yargs.argv["framework"], yargs.argv["import"]);
         } else if (yargs.argv._.length === 4 && apiKeyDefinedInDotEnv()) {
-            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, isJson, yargs.argv["framework"], yargs.argv["import"]);
+            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, yargs.argv["framework"], yargs.argv["import"]);
         } else if (yargs.argv._.length === 5) {
-            start(argv.flotiqApiKey, argv.directory, argv.url, isJson, yargs.argv["framework"], yargs.argv["import"]);
+            start(argv.flotiqApiKey, argv.directory, argv.url, yargs.argv["framework"], yargs.argv["import"]);
         } else {
             yargs.showHelp();
             process.exit(1);
@@ -348,7 +341,7 @@ async function checkAllParameters(answer, questions) {
     return newAnswer;
 }
 
-function start(flotiqApiKey, directory, url, isJson, framework = null, importData = true) {
+function start(flotiqApiKey, directory, url, framework = null, importData = true) {
     if (framework) {
         framework = framework.toLowerCase();
     } else if (url.includes("nextjs")) {
