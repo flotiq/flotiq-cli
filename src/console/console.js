@@ -1,6 +1,6 @@
 const ERROR_COLOR  = '\x1b[31m%s\x1b[0m';
 
-let console = ((oldConsole, isJson, errors, stdOut, errorObject, fs) => {
+const customConsole = ((oldConsole, isJson, errors, stdOut, errorObject, fs) => {
 
     process.on('exit', () => {
         if (isJson) {
@@ -54,6 +54,9 @@ const removeColorsAndBrakeLines = (data) => {
     }
     return returnData;
 }
-module.exports = {
-    console
-}
+
+export { customConsole as console };
+
+export default {
+    console: customConsole,
+};

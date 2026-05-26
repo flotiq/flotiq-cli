@@ -1,7 +1,9 @@
-const fs = require("fs/promises");
-const util = require("util");
-const traverse = require("traverse");
-const glob = util.promisify(require('glob'));
+import fs from "fs/promises";
+import globModule from "glob";
+import traverse from "traverse";
+import { promisify } from "util";
+
+const glob = promisify(globModule);
 
 function camelize(str) {
   return str
@@ -70,10 +72,18 @@ function throttleInterceptor(axios, delay) {
   });
 }
 
-module.exports = {
+export {
   camelize,
   readCTDs,
   shouldUpdate,
   rateLimitInterceptor,
-  throttleInterceptor
-}
+  throttleInterceptor,
+};
+
+export default {
+  camelize,
+  readCTDs,
+  shouldUpdate,
+  rateLimitInterceptor,
+  throttleInterceptor,
+};

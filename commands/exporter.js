@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-const fs = require("fs/promises");
-const path = require("path");
-const logger = require("./../src/logger");
-const { camelize } = require("./../src/util");
-const { getFlotiqApi } = require('./../src/flotiq-api')
-const config = require("../src/configuration/config");
+import fs from "fs/promises";
+import path from "path";
+import config from "../src/configuration/config.js";
+import { getFlotiqApi } from "@flotiq/api";
+import logger from "@flotiq/api/src/logger.js";
+import { camelize } from "../src/util.js";
 
-exports.command = "export";
-exports.description = "Export flotiq entities to JSON structure";
-exports.builder = {
+export const command = "export";
+export const description = "Export flotiq entities to JSON structure";
+export const builder = {
   target: {
     description: "Export directory",
     alias: "directory",
@@ -162,9 +162,9 @@ async function handler(argv) {
   )
 }
 
-module.exports = {
-  command: 'export [directory] [flotiqApiKey]',
-  describe: 'Export objects from Flotiq to directory',
+const commandModule = {
+  command: "export [directory] [flotiqApiKey]",
+  describe: "Export objects from Flotiq to directory",
   builder: (yargs) => {
     return yargs
       .option("directory", {
@@ -199,10 +199,14 @@ module.exports = {
         description: "Coma-delimited list of CTD to export",
         alias: "",
         type: "string",
-        default: '',
+        default: "",
         demandOption: false,
-      })
+      });
   },
   handler,
-  exporter
-}
+  exporter,
+};
+
+export { handler, exporter };
+
+export default commandModule;

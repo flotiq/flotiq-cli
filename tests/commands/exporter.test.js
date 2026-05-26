@@ -1,88 +1,89 @@
-const fs = require("fs/promises");
-const FlotiqApi = require("./../../src/flotiq-api");
-const logger = require("./../../src/logger");
-const { exporter } = require("./../../commands/exporter");
+import fs from "fs/promises";
+import os from "os";
+import path from "path";
+import { jest } from "@jest/globals";
+import { getFlotiqApi } from "@flotiq/api";
+import logger from "@flotiq/api/src/logger.js";
+import { exporter } from "./../../commands/exporter.js";
 
-jest.mock("fs/promises");
-jest.mock("./../../src/flotiq-api", () => {
-    const MockClass = jest.fn().mockImplementation(() => ({
-        fetchContentType: jest.fn().mockResolvedValue([]),
-        fetchContentTypeDefs: jest.fn().mockResolvedValue([]),
-        fetchContentObjects: jest.fn(),
-        fetchMediaFile: jest.fn().mockResolvedValue(Buffer.from("dummy-media-data")),
-    }));
-    MockClass.getFlotiqApi = (...args) => new MockClass(...args);
-    return MockClass;
-});
-jest.mock("./../../src/logger");
-
-const directory = "/tmp/export-dir";
 const flotiqApiUrl = "https://dummy-api.flotiq.com";
 const flotiqApiKey = "dummyApiKey";
 
 describe("exporter", () => {
     beforeEach(() => {
-        jest.clearAllMocks();
+        jest.restoreAllMocks();
     });
 
     it("should handle empty content types using FlotiqApi", async () => {
-        FlotiqApi.mockImplementationOnce(() => ({
-            fetchContentType: jest.fn().mockResolvedValue([]),
-            fetchContentTypeDefs: jest.fn().mockResolvedValue([]),
-            fetchContentObjects: jest.fn().mockResolvedValue([]),
-            fetchMediaFile: jest.fn().mockResolvedValue(Buffer.from("dummy-media-data")),
-        }));
+        const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "flotiq-export-"));
+        const directory = path.join(tmpDir, "export");
+        await fs.mkdir(directory, { recursive: true });
 
-        fs.lstat.mockResolvedValue({ isDirectory: () => true });
-        fs.readdir.mockResolvedValue([]);
-        fs.mkdir.mockResolvedValue();
+        const writeFileSpy = jest.spyOn(fs, "writeFile");
+        const loggerInfoSpy = jest.spyOn(logger, "info").mockImplementation(() => {});
 
-        const result = await exporter(directory, flotiqApiUrl, flotiqApiKey, false, null);
+        const flotiqApi = getFlotiqApi(flotiqApiUrl, flotiqApiKey, { batchSizeRead: 1000 });
+        flotiqApi.fetchContentTypeDefs = jest.fn().mockResolvedValue([]);
+        flotiqApi.fetchContentObjects = jest.fn().mockResolvedValue([]);
+        flotiqApi.fetchMediaFile = jest.fn().mockResolvedValue(Buffer.from("dummy-media-data"));
 
-        expect(fs.writeFile).not.toHaveBeenCalled();
-        expect(logger.info).toHaveBeenCalledWith("Nothing to do");
-        expect(result).toEqual({
-            exportedCtdCount: 0,
-            exportedContentObjectsCount: 0,
-        });
+        try {
+            const result = await exporter(directory, flotiqApiUrl, flotiqApiKey, false, null, false);
+
+            expect(writeFileSpy).not.toHaveBeenCalled();
+            expect(loggerInfoSpy).toHaveBeenCalledWith("Nothing to do");
+            expect(result).toEqual({
+                exportedCtdCount: 0,
+                exportedContentObjectsCount: 0,
+            });
+        } finally {
+            await fs.rm(tmpDir, { recursive: true, force: true });
+        }
     });
 
     it("should export content type definitions and content objects correctly", async () => {
+        const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "flotiq-export-"));
+        const directory = path.join(tmpDir, "export");
+        await fs.mkdir(directory, { recursive: true });
+
         const mockContentTypeDefs = [
             { name: "testType", label: "Test Type", internal: false },
             { name: "_media", label: "Media", internal: true },
         ];
         const mockContentObjects = [
-            { id: "1", name: "Test Object" },
-            { id: "2", name: "Another Object" },
+            { id: "1", name: "Test Object", internal: {} },
+            { id: "2", name: "Another Object", internal: {} },
         ];
         const mockMediaObjects = [
-            { id: "media1", url: "/media/test.jpg", extension: "jpg" },
+            { id: "media1", url: "/media/test.jpg", extension: "jpg", internal: {} },
         ];
 
-        FlotiqApi.mockImplementationOnce(() => ({
-            fetchContentType: jest.fn().mockResolvedValue(mockContentTypeDefs),
-            fetchContentTypeDefs: jest.fn().mockResolvedValue(mockContentTypeDefs),
-            fetchContentObjects: jest
-                .fn()
-                .mockImplementation((type) =>
-                    type === "_media" ? mockMediaObjects : mockContentObjects
-                ),
-            fetchMediaFile: jest.fn().mockResolvedValue(Buffer.from("dummy-media-data")),
-        }));
+        jest.spyOn(logger, "info").mockImplementation(() => {});
+        const flotiqApi = getFlotiqApi(flotiqApiUrl, flotiqApiKey, { batchSizeRead: 1000 });
+        flotiqApi.fetchContentTypeDefs = jest.fn().mockResolvedValue(mockContentTypeDefs);
+        flotiqApi.fetchContentObjects = jest
+            .fn()
+            .mockImplementation((type) =>
+                type === "_media" ? mockMediaObjects : mockContentObjects
+            );
+        flotiqApi.fetchMediaFile = jest.fn().mockResolvedValue(Buffer.from("dummy-media-data"));
 
-        fs.lstat.mockResolvedValue({ isDirectory: () => true });
-        fs.readdir.mockResolvedValue([]);
-        fs.mkdir.mockResolvedValue();
-        fs.writeFile.mockResolvedValue();
+        try {
+            const result = await exporter(directory, flotiqApiUrl, flotiqApiKey, false, null, false);
 
-        const result = await exporter(directory, flotiqApiUrl, flotiqApiKey, false, null);
+            expect(result).toEqual({
+                exportedCtdCount: 2,
+                exportedContentObjectsCount: 3,
+            });
 
-        expect(fs.mkdir).toHaveBeenCalled();
-        expect(fs.writeFile).toHaveBeenCalled();
-        expect(result).toEqual({
-            exportedCtdCount: 2,
-            exportedContentObjectsCount: 3,
-        });
+            await expect(
+                fs.stat(path.join(directory, "ContentTypeTestType", "ContentTypeDefinition.json"))
+            ).resolves.toBeDefined();
+            await expect(
+                fs.stat(path.join(directory, "InternalContentTypeMedia", "media1.jpg"))
+            ).resolves.toBeDefined();
+        } finally {
+            await fs.rm(tmpDir, { recursive: true, force: true });
+        }
     });
 });

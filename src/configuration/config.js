@@ -1,8 +1,8 @@
-require('dotenv').config();
+import "dotenv/config";
 
-let settings = {
+const settings = {
     apiUrl: process.env.FLOTIQ_API_URL || 'https://api.flotiq.com',
     gatsbyCli:'./node_modules/.bin/gatsby'
 }
 
-module.exports = settings;
+export default settings;

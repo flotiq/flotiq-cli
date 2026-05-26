@@ -1,5 +1,9 @@
 let settings = '';
 
-exports.settings = () => {
+export function getSettings() {
 
 }
+
+export default {
+	settings: getSettings,
+};

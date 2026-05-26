@@ -1,6 +1,6 @@
 let countedObjects = {};
 
-module.exports = stats = async (flotiqApi) => {
+const stats = async (flotiqApi) => {
     let loading = (function() {
         let h = ['|', '/', '-', '\\'];
         let i = 0;
@@ -104,3 +104,5 @@ function formatDate(date) {
 function padTo2Digits(num) {
     return num.toString().padStart(2, '0');
 }
+
+export default stats;

@@ -1,30 +1,30 @@
-const axios = require('axios');
-const FlotiqApi = require('./../src/flotiq-api');
-const AxiosMockAdapter = require("axios-mock-adapter");
-
-// This sets the mock adapter on the default instance
-const mock = new AxiosMockAdapter(axios);
+import AxiosMockAdapter from "axios-mock-adapter";
+import FlotiqApi from "@flotiq/api";
 
 describe('FlotiqApi', () => {
     const mockApiUrl = 'https://dummy-api.flotiq.com';
     const mockApiKey = 'dummyApiKey';
+    let mock;
     
     afterEach(() => {
-        mock.reset();
+        if (mock) {
+            mock.reset();
+        }
     });
   
     it('method persistContentObjectBatch should retry when receiving a 429 status', async () => {
-        // Mock first response from Axios as 429, seconds as 200
-        const url = new RegExp(`${mockApiUrl}/api/v1/content/mockContentType/batch.*`);
-        mock
-            .onPost(url).replyOnce(429)
-            .onPost(url).replyOnce(429)
-            .onPost(url).reply(200);
-
         const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`, mockApiKey, {
             batchSize: 100,
             writePerSecondLimit: 5,
         });
+        mock = new AxiosMockAdapter(flotiqApi.middleware);
+
+        // Mock first response from Axios as 429, seconds as 200
+        const url = '/content/mockContentType/batch?updateExisting=true';
+        mock
+            .onPost(url).replyOnce(429)
+            .onPost(url).replyOnce(429)
+            .onPost(url).reply(200);
 
         const obj = new Array(100).fill({});
         await flotiqApi.persistContentObjectBatch('mockContentType', obj);
@@ -35,16 +35,17 @@ describe('FlotiqApi', () => {
     });
 
     it('method patchContentObjectBatch should retry when receiving a 429 status', async () => {
-        // Mock first response from Axios as 429, seconds as 200
-        const url = new RegExp(`${mockApiUrl}/api/v1/content/mockContentType/batch.*`);
-        mock
-            .onPatch(url).replyOnce(429)
-            .onPatch(url).reply(200);
-
         const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`, mockApiKey, {
             batchSize: 100,
             writePerSecondLimit: 5,
         });
+        mock = new AxiosMockAdapter(flotiqApi.middleware);
+
+        // Mock first response from Axios as 429, seconds as 200
+        const url = '/content/mockContentType/batch';
+        mock
+            .onPatch(url).replyOnce(429)
+            .onPatch(url).reply(200);
 
         const obj = new Array(100).fill({});
         await flotiqApi.patchContentObjectBatch('mockContentType', obj);

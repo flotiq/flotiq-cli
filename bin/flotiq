@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('./../src/command/command.js');
+import "./../src/command/command.js";
