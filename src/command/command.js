@@ -216,7 +216,7 @@ yargs
                 if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
                     argv.flotiqApiKey = process.env.FLOTIQ_API_KEY;
                 }
-                await importXlsx({
+                await exportXlsx({
                     apiKey: argv.flotiqApiKey,
                     ctdName: argv.ctdName,
                     filePath: argv.filePath,
@@ -257,7 +257,7 @@ yargs
             if (yargs.argv._.length < 3 || (yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv())) {
                 const answers = await askQuestions(questionsText.EXCEL_MIGRATION);
                 const { flotiqApiKey, ctdName, filePath } = answers;
-                await xlsxMigrator.importXlsx({
+                await importXlsx({
                     apiKey: flotiqApiKey,
                     ctdName,
                     filePath,
@@ -270,7 +270,7 @@ yargs
                 if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
                     argv.flotiqApiKey = process.env.FLOTIQ_API_KEY;
                 }
-                await xlsxMigrator.importXlsx({
+                await importXlsx({
                     apiKey: argv.flotiqApiKey,
                     ctdName: argv.ctdName,
                     filePath: argv.filePath,
