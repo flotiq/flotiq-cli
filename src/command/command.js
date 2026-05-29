@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import "dotenv/config";
-import {exportXlsx, importXlsx} from "flotiq-excel-migrator";
+import { importXlsx, exportXlsx } from "flotiq-excel-migrator";
 import inquirer from "inquirer";
 import yargsFactory from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
