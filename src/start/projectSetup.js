@@ -1,13 +1,15 @@
-const exec = require('child_process').exec;
-const config = require('../configuration/config');
-const fs = require('fs');
-const path = require('path');
+import { exec } from "child_process";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import config from "../configuration/config.js";
 
 const ERROR_COLOR  ='\x1b[36m%s\x1b[0m';
 const FRAMEWORK_NEXTJS = 'nextjs';
 const FRAMEWORK_GATSBY = 'gatsby';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-exports.setup = async (projectDirectory, starterUrl, framework) => {
+const setup = async (projectDirectory, starterUrl, framework) => {
     if (framework === FRAMEWORK_NEXTJS) {
         console.log("Starting Nextjs setup");
         await execShellCommand(`git clone ${starterUrl}.git ${projectDirectory}`);
@@ -20,7 +22,7 @@ exports.setup = async (projectDirectory, starterUrl, framework) => {
     }
 }
 
-exports.init = async (projectDirectory, apiKey, framework) => {
+const init = async (projectDirectory, apiKey, framework) => {
     if (framework === FRAMEWORK_NEXTJS) {
 
         let file = fs.readFileSync(projectDirectory + '/.env.dist', 'utf-8');
@@ -61,7 +63,7 @@ exports.init = async (projectDirectory, apiKey, framework) => {
     }
 }
 
-exports.develop = async (projectDirectory, framework) => {
+const develop = async (projectDirectory, framework) => {
     if (framework === FRAMEWORK_NEXTJS) {
         await execShellCommand(`cd ${projectDirectory} && yarn install`);
         await execShellCommand(`cd ${projectDirectory} && yarn next dev`);
@@ -78,7 +80,7 @@ function createGatsbyCommand(action, projectDirectory = '', starterUrl = '') {
     return cmd + ' ' + action + ' ' + projectDirectory + ' ' + starterUrl;
 }
 
-execShellCommand = async (cmd) => {
+const execShellCommand = async (cmd) => {
     return new Promise((resolve, reject) => {
         let commandProcess = exec(cmd, (error, stdout, stderr) => {
             if (error) {
@@ -97,3 +99,11 @@ execShellCommand = async (cmd) => {
         });
     });
 }
+
+export { setup, init, develop };
+
+export default {
+    setup,
+    init,
+    develop,
+};

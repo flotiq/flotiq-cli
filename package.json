@@ -3,12 +3,13 @@
   "version": "2.14.6",
   "description": "Flotiq CLI",
   "main": "src/command/command.js",
+  "type": "module",
   "private": false,
   "bin": {
     "flotiq": "bin/flotiq"
   },
   "scripts": {
-    "test": "jest"
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
   },
   "keywords": [
     "flotiq",
@@ -26,12 +27,13 @@
   "license": "MIT",
   "dependencies": {
     "@contentful/rich-text-html-renderer": "^16.6.10",
+    "@flotiq/api": "^1.0.0",
     "axios": "^1.15.2",
     "cli-table3": "^0.6.5",
     "contentful-export": "^7.19.155",
     "dotenv": "^16.4.5",
-    "flotiq-excel-migrator": "^1.0.17",
-    "flotiq-wordpress-import": "^1.1.9",
+    "flotiq-excel-migrator": "^1.1.1",
+    "flotiq-wordpress-import": "^1.2.2",
     "form-data": "^4.0.0",
     "gatsby-cli": "^5.14.0",
     "inquirer": "^13.4.3",

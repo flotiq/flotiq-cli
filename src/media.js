@@ -1,8 +1,8 @@
-const fs = require('fs/promises')
-const traverse = require('traverse')
-const logger = require('./logger')
-const { Blob } = require('buffer');
-const {readCTDs, shouldUpdate } = require("./util");
+import { Blob } from "buffer";
+import fs from "fs/promises";
+import traverse from "traverse";
+import logger from "@flotiq/api/src/logger.js";
+import { readCTDs, shouldUpdate } from "./util.js";
 
 async function mediaImporter (directory, flotiqApi) {
     const checkIfMediaUsed = true;
@@ -120,4 +120,8 @@ async function checkIsUsedIn(fileId, objects) {
     }
 }
 
-module.exports = {mediaImporter}
+export { mediaImporter };
+
+export default {
+    mediaImporter,
+};

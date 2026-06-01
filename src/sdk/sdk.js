@@ -1,10 +1,10 @@
-const https = require('https');
-const fs = require('fs');
-const unzipper = require('unzipper');
-const {execSync} = require("child_process");
+import { execSync } from "child_process";
+import fs from "fs";
+import https from "https";
+import unzipper from "unzipper";
 const ERROR_COLOR  ='\x1b[36m%s\x1b[0m';
 
-module.exports = sdk = async (language, directory, apiKey) => {
+const sdk = async (language, directory, apiKey) => {
     const filePath = `${directory}/flotiq-sdk-${language}.zip`;
     await checkProject(directory, language);
     await download(language, filePath, apiKey);
@@ -18,7 +18,7 @@ module.exports = sdk = async (language, directory, apiKey) => {
     console.log(`Please see ${directory}/flotiq-${language}-sdk/README.md for more details.`);
     await clean(filePath);
 }
-checkProject = async (directory, language) => {
+const checkProject = async (directory, language) => {
     if (!fs.existsSync(directory)) {
         console.log(`Path: '${directory}' doesn't exist, creating it.`);
         fs.mkdirSync(directory);
@@ -31,7 +31,7 @@ checkProject = async (directory, language) => {
         process.exit(1);
     }
 }
-download = async (language, filePath, apiKey) => {
+const download = async (language, filePath, apiKey) => {
     console.log('Start downloading SDK...');
     const file = fs.createWriteStream(filePath);
     return new Promise((resolve) => {
@@ -53,13 +53,13 @@ download = async (language, filePath, apiKey) => {
     })
 }
 
-extract = async (directory, filePath) => {
+const extract = async (directory, filePath) => {
     return fs.createReadStream(filePath)
         .pipe(unzipper.Extract({path: directory}))
         .promise();
 }
 
-installJSsdk = async (directory, language) => {
+const installJSsdk = async (directory, language) => {
     const cmd = `cd ${directory}/flotiq-${language}-sdk && npm install && npm run build`;
     execSync(cmd, (error, stdout, stderr) => {
         if (error) {
@@ -73,8 +73,10 @@ installJSsdk = async (directory, language) => {
     });
 }
 
-clean = async (filePath) => {
+const clean = async (filePath) => {
     fs.unlinkSync(filePath);
 }
+
+export default sdk;
 
 

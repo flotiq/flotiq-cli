@@ -1,22 +1,25 @@
 #!/usr/bin/env node
 
-const util = require('util')
-const glob = util.promisify(require('glob'))
-const fs = require('fs/promises')
-const path = require('path')
-const traverse = require('traverse')
-const logger = require('./../src/logger')
-const { getFlotiqApi } = require("./../src/flotiq-api");
-const config = require("./../src/configuration/config");
-const {mediaImporter} = require("./../src/media");
-const {shouldUpdate } = require("./../src/util");
-const {readCTDs} = require("../src/util");
+import fs from "fs/promises";
+import globModule from "glob";
+import path from "path";
+import traverse from "traverse";
+import { fileURLToPath } from "url";
+import { promisify } from "util";
+import config from "../src/configuration/config.js";
+import { getFlotiqApi } from "@flotiq/api";
+import logger from "@flotiq/api/src/logger.js";
+import { mediaImporter } from "../src/media.js";
+import { readCTDs, shouldUpdate } from "../src/util.js";
+
+const glob = promisify(globModule);
+const __filename = fileURLToPath(import.meta.url);
 
 const WEBHOOKS_MESSAGE_403 = 'It looks like the api key does not have access to webhooks, it continues without deactivating webhooks';
 
-exports.command = 'import'
-exports.description = 'Import flotiq entities from JSON structure'
-exports.builder = {
+export const command = 'import'
+export const description = 'Import flotiq entities from JSON structure'
+export const builder = {
     source: {
         description: 'Import directory',
         alias: 'directory',
@@ -226,7 +229,7 @@ async function importer(
                 );
             } else {
                 let responseJson = await response.json();
-                throw new Error(util.format(`${response.statusText}:`, responseJson));
+                throw new Error(`${response.statusText}: ${JSON.stringify(responseJson)}`);
             }
         }
     }
@@ -542,7 +545,7 @@ async function handler(argv) {
 
 }
 
-module.exports = {
+const commandModule = {
     command: 'import [directory] [flotiqApiKey]',
     describe: 'Import objects from directory to Flotiq',
     builder: (yargs) => {
@@ -571,4 +574,8 @@ module.exports = {
     },
     handler,
     importer
-}
+};
+
+export { handler, importer };
+
+export default commandModule;

@@ -1,6 +1,6 @@
-const ora = require('ora');
+import ora from "ora";
 
-module.exports = purgeContentObjects = async (flotiqApi, internal = false, force = false) => {
+const purgeContentObjects = async (flotiqApi, internal = false, force = false) => {
     
     let ctdsClearedOfRelations = 0;
 
@@ -40,6 +40,8 @@ module.exports = purgeContentObjects = async (flotiqApi, internal = false, force
         }
     }
 }
+
+export default purgeContentObjects;
 
 const dropRelations = (contentTypeDefinitions, flotiqApi) => {
     const removeProperty = (ctd, property) => {

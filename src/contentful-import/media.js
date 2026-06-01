@@ -24,4 +24,9 @@ const cfMediaToObject = (data, trans) => {
     return (assets);
 }
 
-module.exports = {cfMediaToObject, flotiqMedia}
+export { cfMediaToObject, flotiqMedia };
+
+export default {
+    cfMediaToObject,
+    flotiqMedia,
+};

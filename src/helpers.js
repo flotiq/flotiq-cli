@@ -1,8 +1,8 @@
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const loading = require('loading-cli');
-const inquirer = require('inquirer');
+import fs from "fs";
+import os from "os";
+import path from "path";
+import loading from "loading-cli";
+import inquirer from "inquirer";
 
 const colorYellow = (str) => {
     return `\x1b[33m${str}\x1b[0m`;
@@ -21,9 +21,16 @@ async function confirm(msg) {
     return response.confirmation;
 }
 
-module.exports = {
+export {
     getWorkingPath,
     loader,
     confirm,
-    colorYellow
-}
+    colorYellow,
+};
+
+export default {
+    getWorkingPath,
+    loader,
+    confirm,
+    colorYellow,
+};

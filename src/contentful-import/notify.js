@@ -1,4 +1,4 @@
-const cliTable = require("cli-table3");
+import cliTable from "cli-table3";
 
 const resultNotify = (response, context) => {
     if (!response || response === []) {
@@ -175,4 +175,8 @@ function typeOutWarnings(data, starting_line = "") {
     return text;
 }
 
-module.exports = {resultNotify};
+export { resultNotify };
+
+export default {
+    resultNotify,
+};

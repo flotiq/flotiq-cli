@@ -1,12 +1,12 @@
-const config = require("../configuration/config");
-const contentfulExport = require('contentful-export');
-const path = require('path');
-const cfHtmlRenderer = require('@contentful/rich-text-html-renderer/dist/rich-text-html-renderer.es5');
-const {resultNotify} = require('./notify');
-const {flotiqMedia, cfMediaToObject} = require('./media');
-const { getFlotiqApi } = require('../flotiq-api');
+import path from "path";
+import cfHtmlRenderer from "@contentful/rich-text-html-renderer/dist/rich-text-html-renderer.es5";
+import contentfulExport from "contentful-export";
+import config from "../configuration/config.js";
+import { resultNotify } from "./notify.js";
+import { cfMediaToObject, flotiqMedia } from "./media.js";
+import { getFlotiqApi } from "@flotiq/api";
 
-module.exports = contentful = async (contentfulSpaceId, contentfulContentManagementToken, flotiqApiKey, translation = "en-US") => {
+const contentful = async (contentfulSpaceId, contentfulContentManagementToken, flotiqApiKey, translation = "en-US") => {
     const flotiqApi = getFlotiqApi(`${config.apiUrl}/api/v1`, flotiqApiKey);
 
     const export_options = {
@@ -33,6 +33,8 @@ module.exports = contentful = async (contentfulSpaceId, contentfulContentManagem
     let resultCo = await importCo(exportData.entries, resultMedia[1], translation, flotiqApi);
     resultNotify(resultCo, "content_object");
 }
+
+export default contentful;
 
 async function importCtd(data, flotiqApi) {
     let ctd = [];

@@ -192,10 +192,6 @@ This command displays your Flotiq API Key's following statistics:
 
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 
-## Flags
-
-`--json-output`, `-j` - Error and console output will be additionally written into json file named `output.json`
-
 ## Gatsby Starters
 
 You can choose one of our starters:
