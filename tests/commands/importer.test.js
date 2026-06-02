@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import os from "os";
 import path from "path";
 import { jest } from "@jest/globals";
-import logger from "@flotiq/api/src/logger.js";
+import logger from "@flotiq/api/logger.js";
 import { importer } from "./../../commands/importer.js";
 
 describe("importer", () => {

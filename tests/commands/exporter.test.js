@@ -3,7 +3,7 @@ import os from "os";
 import path from "path";
 import { jest } from "@jest/globals";
 import { getFlotiqApi } from "@flotiq/api";
-import logger from "@flotiq/api/src/logger.js";
+import logger from "@flotiq/api/logger.js";
 import { exporter } from "./../../commands/exporter.js";
 
 const flotiqApiUrl = "https://dummy-api.flotiq.com";

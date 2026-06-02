@@ -2,7 +2,7 @@ import AxiosMockAdapter from "axios-mock-adapter";
 import fs from "fs/promises";
 import { jest } from "@jest/globals";
 import FlotiqApi from "@flotiq/api";
-import logger from "@flotiq/api/src/logger.js";
+import logger from "@flotiq/api/logger.js";
 import { mediaImporter } from "./../src/media.js";
 
 let mock;

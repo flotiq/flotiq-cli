@@ -8,7 +8,7 @@ import { fileURLToPath } from "url";
 import { promisify } from "util";
 import config from "../src/configuration/config.js";
 import { getFlotiqApi } from "@flotiq/api";
-import logger from "@flotiq/api/src/logger.js";
+import logger from "@flotiq/api/logger.js";
 import { mediaImporter } from "../src/media.js";
 import { readCTDs, shouldUpdate } from "../src/util.js";
 

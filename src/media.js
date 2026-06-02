@@ -1,7 +1,7 @@
 import { Blob } from "buffer";
 import fs from "fs/promises";
 import traverse from "traverse";
-import logger from "@flotiq/api/src/logger.js";
+import logger from "@flotiq/api/logger.js";
 import { readCTDs, shouldUpdate } from "./util.js";
 
 async function mediaImporter (directory, flotiqApi) {
