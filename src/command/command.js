@@ -8,7 +8,7 @@ import importerCommand from "../../commands/importer.js";
 import exporterCommand from "../../commands/exporter.js";
 import questionsText from "./questions.js";
 import projectSetup from "../start/projectSetup.js";
-import purgeContentObjects from "../purifier/purifier.js";
+import purgeCommand from "../purifier/command.js";
 import sdk from "../sdk/sdk.js";
 import stats from "../stats/stats.js";
 import { getFlotiqApi } from "@flotiq/api";
@@ -22,6 +22,7 @@ yargs
     .alias("help", "h")
     .command(exporterCommand)
     .command(importerCommand)
+    .command(purgeCommand)
     .string("framework")
     .alias("framework", ["fw"])
     .describe("framework", " Determines which framework should be used (gatsby, nextjs)")
@@ -104,44 +105,6 @@ yargs
             process.exit(1);
         }
     })
-    .command(
-        "purge [flotiqApiKey]",
-        "Purge Flotiq account, removes all objects to which the key has access",
-        (yargs) => {
-            optionalParamFlotiqApiKey(yargs);
-            yargs
-                .boolean("force")
-                .alias("force", ["f"])
-                .describe("force", "force removing content objects when function gets stuck")
-                .boolean("withInternal")
-                .alias("withInternal", ["internal"])
-                .describe("withInternal", "remove objects from internal CTD like _media");
-        }, (argv) => {
-            const purge = async (apiKey, withInternal, force) => {
-                const answers = await askQuestions(questionsText.PURGE_QUESTION);
-                const { confirmation } = answers;
-                if (confirmation.toUpperCase() === "Y") {
-                    await purgeContentObjects(getFlotiqApi(`${config.apiUrl}/api/v1`, apiKey), withInternal, force);
-                } else {
-                    console.log("I'm finishing, no data has been deleted");
-                    process.exit(1);
-                }
-            };
-
-            if (yargs.argv._.length < 2 && !apiKeyDefinedInDotEnv()) {
-                console.log("Api key not found");
-            } else if (yargs.argv._.length === 1 && apiKeyDefinedInDotEnv()) {
-                purge(process.env.FLOTIQ_API_KEY);
-            } else if ((yargs.argv._.length <= 3 && apiKeyDefinedInDotEnv()) || yargs.argv._.length <= 4) {
-                if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
-                    argv.flotiqApiKey = process.env.FLOTIQ_API_KEY;
-                }
-                purge(argv.flotiqApiKey, yargs.argv["withInternal"], yargs.argv["force"]);
-            } else {
-                yargs.showHelp();
-                process.exit(1);
-            }
-        })
     .command("sdk install [language] [directory] [flotiqApiKey]", "Install Flotiq SDK", (yargs) => {
         yargs.positional("language", {
             describe: "SDK language, choices: csharp, go, java, javascript, php, python, typescript",
