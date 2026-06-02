@@ -4,7 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import config from "../src/configuration/config.js";
 import { getFlotiqApi } from "@flotiq/api";
-import logger from "@flotiq/api/src/logger.js";
+import logger from "@flotiq/api/logger.js";
 import { camelize } from "../src/util.js";
 
 export const command = "export";
