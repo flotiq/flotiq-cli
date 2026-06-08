@@ -4,8 +4,13 @@ import questionsText from "../command/questions.js";
 import config from "../configuration/config.js";
 import purgeContentObjects from "./purifier.js";
 
-async function confirmPurge() {
-    const answers = await inquirer.prompt(questionsText.PURGE_QUESTION);
+async function confirmPurge(type) {
+    let answers = '';
+    if (type === 'space') {
+        answers = await inquirer.prompt(questionsText.PURGE_SPACE_QUESTION);
+    } else {
+        answers = await inquirer.prompt(questionsText.PURGE_CTD_QUESTION);
+    }
     return answers.confirmation.toUpperCase() === "Y";
 }
 
@@ -52,14 +57,13 @@ async function handler(argv) {
     if (!apiKey) {
         throw new Error("Api key not found");
     }
-
-    const confirmed = await confirmPurge();
+    const purgeOptions = resolvePurgeOptions(argv);
+    const confirmed = await confirmPurge(purgeOptions.type);
     if (!confirmed) {
         console.log("I'm finishing, no data has been deleted");
         process.exit(1);
     }
 
-    const purgeOptions = resolvePurgeOptions(argv);
     await purgeContentObjects(getFlotiqApi(`${config.apiUrl}/api/v1`, apiKey), purgeOptions);
 }
 
