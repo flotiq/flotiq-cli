@@ -35,12 +35,20 @@ const CF_API_KEY = {
     type: "input",
     message: "Contentful api key"
 }
-const PURGE_QUESTION_CONFIRMATION = {
+const PURGE_SPACE_QUESTION_CONFIRMATION = {
     name: "confirmation",
     type: "input",
     message: "Are you sure you want to delete all data available for this API KEY? [y/N]",
     defaultAnswer: 'n'
 }
+
+const PURGE_CTD_QUESTION_CONFIRMATION = {
+    name: "confirmation",
+    type: "input",
+    message: "Are you sure you want to delete all data belonging to this content type? [y/N]",
+    defaultAnswer: 'n'
+}
+
 const LANGUAGE = {
     name: "language",
     type: "input",
@@ -81,8 +89,12 @@ const CONTENTFUL_IMPORT = [
     CF_API_KEY,
 ]
 
-const PURGE_QUESTION = [
-    PURGE_QUESTION_CONFIRMATION
+const PURGE_SPACE_QUESTION = [
+    PURGE_SPACE_QUESTION_CONFIRMATION
+]
+
+const PURGE_CTD_QUESTION = [
+    PURGE_CTD_QUESTION_CONFIRMATION
 ]
 
 const EXPORT_QUESTIONS = [
@@ -115,7 +127,8 @@ export {
     IMPORT_QUESTIONS,
     WORDPRESS_IMPORT_QUESTIONS,
     CONTENTFUL_IMPORT,
-    PURGE_QUESTION,
+    PURGE_SPACE_QUESTION,
+    PURGE_CTD_QUESTION,
     EXPORT_QUESTIONS,
     INSTALL_SDK,
     EXCEL_MIGRATION,
@@ -131,7 +144,8 @@ export default {
     IMPORT_QUESTIONS,
     WORDPRESS_IMPORT_QUESTIONS,
     CONTENTFUL_IMPORT,
-    PURGE_QUESTION,
+    PURGE_SPACE_QUESTION,
+    PURGE_CTD_QUESTION,
     EXPORT_QUESTIONS,
     INSTALL_SDK,
     EXCEL_MIGRATION,

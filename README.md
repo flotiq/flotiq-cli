@@ -112,7 +112,7 @@ This command will:
 
 `flotiq purge [flotiqApiKey]`
 
-This command will remove all data from your account. Great for testing imports. Command requires additional confirmation.
+This command purges a selected target in your account. Command requires additional confirmation.
 
 **Parameters**
 
@@ -120,8 +120,9 @@ This command will remove all data from your account. Great for testing imports. 
 
 **Flags**
 
-* `--withInternal` or `--internal` - purge will also remove internal type objects like (`_media`)
-* `--force` or `--f` - purge will remove data even if Content Types relations loop to each other.
+* `--spaceId=[spaceId]` or `--space=[spaceId]` - purge all data in selected space
+* `--ctdName=[ctdName]` or `--ctd=[ctdName]` - purge data for selected Content Type Definition
+* `--deleteSchema` or `--deleteCtd` - when used with `--ctdName`, also removes the CTD schema
 
 ### Install Flotiq SDK
 
