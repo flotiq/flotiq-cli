@@ -4,7 +4,7 @@ import { importXlsx, exportXlsx } from "flotiq-excel-migrator";
 import inquirer from "inquirer";
 import yargsFactory from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
-import importerCommand from "../../commands/importer.js";
+import { importerCommand, handler } from "../../commands/importer.js";
 import exporterCommand from "../../commands/exporter.js";
 import questionsText from "./questions.js";
 import projectSetup from "../start/projectSetup.js";
@@ -48,6 +48,7 @@ yargs
             yargs.showHelp();
             process.exit(1);
         }
+        console.log('fff')
         if (yargs.argv._.length < 3) {
             const answers = await askQuestions(questionsText.START_QUESTIONS);
             const { flotiqApiKey, projectDirectory, url } = answers;
@@ -312,7 +313,12 @@ function start(flotiqApiKey, directory, url, framework = null, importData = true
     function startSetup(type) {
         projectSetup.setup(directory, url, type).then(async () => {
             if (importData) {
-                await importerCommand.importer(flotiqApiKey, directory + "/.flotiq", false);
+                const flotiqApi = getFlotiqApi(`${config.apiUrl}/api/v1`, flotiqApiKey);
+                let args = {
+                    directory: directory + "/.flotiq",
+                    flotiqApiKey: flotiqApiKey
+                }
+                await handler(args);
             }
             await projectSetup.init(directory, flotiqApiKey, type);
             await projectSetup.develop(directory, type);

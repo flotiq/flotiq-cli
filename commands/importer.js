@@ -229,7 +229,9 @@ async function importer(
                 );
             } else {
                 let responseJson = await response.json();
-                throw new Error(`${response.statusText}: ${JSON.stringify(responseJson)}`);
+                let error = new Error(`${response.statusText}: ${JSON.stringify(responseJson)}`);
+                logger.error(error);
+                throw error;
             }
         }
     }
@@ -288,7 +290,7 @@ async function importer(
                     .then(f => f.map(JSON.parse))
                     .then(f => f.flat())
                     .catch(e => {
-                        console.log(`Error processing ${fn}`);
+                        logger.error(`Error processing ${fn}`);
                         throw e;
                     })
 
@@ -494,7 +496,7 @@ async function publishObjects(flotiqApi, objectsToPublish) {
 async function handler(argv) {
     let directory = argv.directory;
     if (!directory || !argv.flotiqApiKey) {
-        console.error(`Usage: ${__filename} <import_dir> <api_key>`)
+        logger.error(`Usage: ${__filename} <import_dir> <api_key>`)
         return false;
     }
 
@@ -545,7 +547,7 @@ async function handler(argv) {
 
 }
 
-const commandModule = {
+const importerCommand = {
     command: 'import [directory] [flotiqApiKey]',
     describe: 'Import objects from directory to Flotiq',
     builder: (yargs) => {
@@ -576,6 +578,4 @@ const commandModule = {
     importer
 };
 
-export { handler, importer };
-
-export default commandModule;
+export { handler, importer, importerCommand };

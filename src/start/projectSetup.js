@@ -3,21 +3,20 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import config from "../configuration/config.js";
-
-const ERROR_COLOR  ='\x1b[36m%s\x1b[0m';
+import logger from "@flotiq/api/logger.js";
 const FRAMEWORK_NEXTJS = 'nextjs';
 const FRAMEWORK_GATSBY = 'gatsby';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const setup = async (projectDirectory, starterUrl, framework) => {
     if (framework === FRAMEWORK_NEXTJS) {
-        console.log("Starting Nextjs setup");
+        logger.info("Starting Nextjs setup");
         await execShellCommand(`git clone ${starterUrl}.git ${projectDirectory}`);
     } else if (framework === "gatsby") {
-        console.log('Starting Gatsby setup');
+        logger.info('Starting Gatsby setup');
         await execShellCommand(`git clone ${starterUrl}.git ${projectDirectory}`);
     } else {
-        console.error(ERROR_COLOR, "Invalid framework!");
+        logger.error("Invalid framework!");
         process.exit(1);
     }
 }
@@ -28,7 +27,7 @@ const init = async (projectDirectory, apiKey, framework) => {
         let file = fs.readFileSync(projectDirectory + '/.env.dist', 'utf-8');
         file = file.replace('FLOTIQ_API_KEY=', 'FLOTIQ_API_KEY=' + apiKey);
         fs.writeFileSync(projectDirectory + '/.env.local', file);
-        console.log('Configuration is created successfully: ' + projectDirectory + '/.env');
+        logger.info(`Configuration is created successfully: ${projectDirectory}/.env`);
 
     } else if (framework === FRAMEWORK_GATSBY) {
 
@@ -45,21 +44,21 @@ const init = async (projectDirectory, apiKey, framework) => {
             let fileContent = 'GATSBY_FLOTIQ_API_KEY=' + apiKey + '\n';
             fs.writeFile(projectDirectory + '/.env', fileContent, (err) => {
                 if (err) {
-                    console.errorCode(100);
+                    logger.error(err);
                     throw err;
                 }
             });
             fs.writeFile(projectDirectory + '/.env.development', fileContent, (err) => {
                 if (err) {
-                    console.errorCode(100);
+                    err.error(err);
                     throw err;
                 }
             });
         }
-        console.log(`Configuration is created successfully: ${projectDirectory} /.env`);
+        logger.info(`Configuration is created successfully: ${projectDirectory} /.env`);
 
     } else {
-        console.error(ERROR_COLOR, 'Invalid framework!');
+        logger.error('Invalid framework!');
     }
 }
 
@@ -71,7 +70,7 @@ const develop = async (projectDirectory, framework) => {
         await execShellCommand(`cd ${projectDirectory} && yarn install`);
         await execShellCommand(`cd ${projectDirectory} && ${createGatsbyCommand('develop')}`);
     } else {
-        console.error(ERROR_COLOR, "Invalid framework!");
+        logger.error("Invalid framework!");
     }
 }
 
@@ -84,18 +83,18 @@ const execShellCommand = async (cmd) => {
     return new Promise((resolve, reject) => {
         let commandProcess = exec(cmd, (error, stdout, stderr) => {
             if (error) {
-                console.errorCode(200);
+                logger.error(error);
                 process.exit(1);
             }
             resolve(stdout || stderr);
         });
         // live output from command
         commandProcess.stderr.on('data', function (data) {
-            console.error(ERROR_COLOR, data);
+            logger.error(data);
         });
 
         commandProcess.stdout.on('data', function (data) {
-            console.log(data);
+            logger.info(data);
         });
     });
 }
