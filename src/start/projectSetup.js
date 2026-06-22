@@ -90,7 +90,7 @@ const execShellCommand = async (cmd) => {
         });
         // live output from command
         commandProcess.stderr.on('data', function (data) {
-            logger.error(data);
+            logger.info(data);
         });
 
         commandProcess.stdout.on('data', function (data) {

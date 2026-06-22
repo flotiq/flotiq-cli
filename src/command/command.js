@@ -48,7 +48,6 @@ yargs
             yargs.showHelp();
             process.exit(1);
         }
-        console.log('fff')
         if (yargs.argv._.length < 3) {
             const answers = await askQuestions(questionsText.START_QUESTIONS);
             const { flotiqApiKey, projectDirectory, url } = answers;
