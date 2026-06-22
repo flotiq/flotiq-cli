@@ -80,10 +80,12 @@ async function runCli(argv) {
 
 describe("start CLI command", () => {
     const originalApiKey = process.env.FLOTIQ_API_KEY;
+    const originalExit = process.exit;
 
     beforeEach(() => {
         jest.clearAllMocks();
         process.env.FLOTIQ_API_KEY = "";
+        process.exit = originalExit;
         inquirerPrompt.mockResolvedValue({
             flotiqApiKey: "prompt-api-key",
             projectDirectory: "prompt-directory",
@@ -93,6 +95,7 @@ describe("start CLI command", () => {
 
     afterAll(() => {
         process.env.FLOTIQ_API_KEY = originalApiKey;
+        process.exit = originalExit;
     });
 
     it("should start project with API key from environment", async () => {
@@ -145,4 +148,63 @@ describe("start CLI command", () => {
             flotiqApiKey: "prompt-api-key",
         });
     });
+
+    it("should use provided api key when 4 positional args are passed", async () => {
+        process.env.FLOTIQ_API_KEY = "env-api-key";
+        const starterUrl = "https://github.com/flotiq/flotiq-starter-gatsby";
+
+        await runCli(["start", "demo-positional", starterUrl, "argv-api-key"]);
+
+        expect(setup).toHaveBeenCalledWith("demo-positional", starterUrl, "gatsby");
+        expect(init).toHaveBeenCalledWith("demo-positional", "argv-api-key", "gatsby");
+        expect(develop).toHaveBeenCalledWith("demo-positional", "gatsby");
+        expect(importerHandler).toHaveBeenCalledWith({
+            directory: "demo-positional/.flotiq",
+            flotiqApiKey: "argv-api-key",
+        });
+    });
+
+    it("should normalize framework from 5 positional args", async () => {
+        await runCli([
+            "start",
+            "demo-framework",
+            "https://github.com/flotiq/custom-starter",
+            "argv-api-key",
+            "--framework",
+            "NeXtJs",
+        ]);
+
+        expect(setup).toHaveBeenCalledWith(
+            "demo-framework",
+            "https://github.com/flotiq/custom-starter",
+            "nextjs"
+        );
+        expect(init).toHaveBeenCalledWith("demo-framework", "argv-api-key", "nextjs");
+        expect(develop).toHaveBeenCalledWith("demo-framework", "nextjs");
+    });
+
+    it("should re-prompt for empty start answers", async () => {
+        inquirerPrompt
+            .mockResolvedValueOnce({
+                flotiqApiKey: "",
+                projectDirectory: "",
+                url: "",
+            })
+            .mockResolvedValueOnce({ flotiqApiKey: "retry-api-key" })
+            .mockResolvedValueOnce({ projectDirectory: "retry-directory" })
+            .mockResolvedValueOnce({ url: "https://github.com/flotiq/flotiq-starter-nextjs" });
+
+        await runCli(["start"]);
+
+        expect(inquirerPrompt).toHaveBeenCalledTimes(4);
+        expect(setup).toHaveBeenCalledWith(
+            "retry-directory",
+            "https://github.com/flotiq/flotiq-starter-nextjs",
+            "nextjs"
+        );
+        expect(init).toHaveBeenCalledWith("retry-directory", "retry-api-key", "nextjs");
+        expect(develop).toHaveBeenCalledWith("retry-directory", "nextjs");
+    });
+
+
 });
