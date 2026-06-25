@@ -15,7 +15,7 @@ import { checkCommand } from "./helpers.js";
 
 const yargs = yargsFactory(hideBin(process.argv));
 
-const argv = yargs
+const argv = await yargs
     .usage("flotiq [command]")
     .help()
     .alias("help", "h")
@@ -30,6 +30,6 @@ const argv = yargs
     .command(excelImportCommand)
     .command(statsCommand)
     .help()
-    .argv;
+    .parseAsync();
 
-checkCommand(yargs, 0);
+checkCommand(yargs, 0, argv);

@@ -13,8 +13,9 @@ function optionalParamFlotiqApiKey(yargs) {
     }
 }
 
-function checkCommand(yargs, numRequired) {
-    if (yargs.argv._.length <= numRequired) {
+function checkCommand(yargs, numRequired, argv = null) {
+    const parsedArgv = argv || yargs.argv;
+    if (parsedArgv._.length <= numRequired) {
         yargs.showHelp();
         process.exit(1);
     }

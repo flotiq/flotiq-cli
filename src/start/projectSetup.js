@@ -11,10 +11,20 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const setup = async (projectDirectory, starterUrl, framework) => {
     if (framework === FRAMEWORK_NEXTJS) {
         logger.info("Starting Nextjs setup");
-        await execShellCommand(`git clone ${starterUrl}.git ${projectDirectory}`);
+        try {
+            await execShellCommand(`git clone ${starterUrl}.git ${projectDirectory}`);
+        } catch (error) {
+            logger.error(error);
+            process.exit(1);
+        }
     } else if (framework === "gatsby") {
         logger.info('Starting Gatsby setup');
-        await execShellCommand(`git clone ${starterUrl}.git ${projectDirectory}`);
+        try {
+            await execShellCommand(`git clone ${starterUrl}.git ${projectDirectory}`);
+        } catch (error) {
+            logger.error(error);
+            process.exit(1);
+        }
     } else {
         logger.error("Invalid framework!");
         process.exit(1);
@@ -42,17 +52,25 @@ const init = async (projectDirectory, apiKey, framework) => {
             fs.writeFileSync(configPathDev, file);
         } catch (e) {
             let fileContent = 'GATSBY_FLOTIQ_API_KEY=' + apiKey + '\n';
-            await fs.writeFileSync(projectDirectory + '/.env', fileContent, (err) => {
-                if (err) {
-                    logger.error(err);
-                    throw err;
-                }
+            await new Promise((resolve, reject) => {
+                fs.writeFile(projectDirectory + '/.env', fileContent, (err) => {
+                    if (err) {
+                        logger.error(err);
+                        reject(err);
+                        return;
+                    }
+                    resolve();
+                });
             });
-            await fs.writeFileSync(projectDirectory + '/.env.development', fileContent, (err) => {
-                if (err) {
-                    logger.error(err);
-                    throw err;
-                }
+            await new Promise((resolve, reject) => {
+                fs.writeFile(projectDirectory + '/.env.development', fileContent, (err) => {
+                    if (err) {
+                        logger.error(err);
+                        reject(err);
+                        return;
+                    }
+                    resolve();
+                });
             });
         }
         logger.info(`Configuration is created successfully: ${projectDirectory}/.env`);
@@ -84,6 +102,8 @@ const execShellCommand = async (cmd) => {
         let commandProcess = exec(cmd, (error, stdout, stderr) => {
             if (error) {
                 logger.error(error);
+                reject(error);
+                return;
             }
             resolve(stdout || stderr);
         });
