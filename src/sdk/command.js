@@ -12,9 +12,8 @@ async function handler(argv) {
 
     if (!argv.language || !argv.directory) {
         const answers = await askQuestions(sdkYargs, questionsText.INSTALL_SDK);
-        const { language, projectDirectory, apiKey } = answers;
-        await sdk(language, projectDirectory, apiKey);
-    } else {
+        const { language, projectDirectory, flotiqApiKey } = answers;
+        await sdk(language, projectDirectory, flotiqApiKey);
         const apiKey = argv.flotiqApiKey || (apiKeyDefinedInDotEnv() ? process.env.FLOTIQ_API_KEY : null);
         if (!apiKey) {
             if (sdkYargs) {

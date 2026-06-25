@@ -87,7 +87,7 @@ const excelExportCommand = {
             .describe("hideResults", "information about export process will not appear in the console")
             .number("limit")
             .alias("limit", ["l"])
-            .describe("number of Content Objects to export counting from the top row, default: 10.000");
+            .describe("limit", "number of Content Objects to export counting from the top row, default: 10.000");
 
         return yargs;
     },
@@ -120,7 +120,7 @@ const excelImportCommand = {
             .describe("batchLimit", "number of Content Objects imported per batch call, default: 100")
             .boolean("updateExisting")
             .alias("updateExisting", ["ue"])
-            .describe("If content objects with a given id already exist in the Flotiq account, they will be updated");
+            .describe("updateExisting", "If content objects with a given id already exist in the Flotiq account, they will be updated");
 
         return yargs;
     },

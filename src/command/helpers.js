@@ -35,10 +35,8 @@ async function checkAllParameters(yargs, answer, questions) {
             if (!questions[i].defaultAnswer) {
                 const param = await inquirer.prompt(questions[i]);
                 newAnswer[paramName] = param[paramName];
-                console.log(newAnswer[paramName]);
             } else {
                 newAnswer[paramName] = questions[i].defaultAnswer;
-                console.log(newAnswer[paramName]);
             }
         }
     }

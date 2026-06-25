@@ -41,7 +41,7 @@ async function handler(argv) {
     if (!argv.directory || !argv.url) {
         const answers = await askQuestions(startYargs, questionsText.START_QUESTIONS);
         const { flotiqApiKey, projectDirectory, url } = answers;
-        start(flotiqApiKey, projectDirectory, url);
+        await start(flotiqApiKey, projectDirectory, url);
     } else {
         const apiKey = argv.flotiqApiKey || (apiKeyDefinedInDotEnv() ? process.env.FLOTIQ_API_KEY : null);
         if (!apiKey) {
@@ -51,7 +51,7 @@ async function handler(argv) {
             process.exit(1);
             return;
         }
-        start(apiKey, argv.directory, argv.url, argv.framework, argv.import);
+        await start(apiKey, argv.directory, argv.url, argv.framework, argv.import);
     }
 }
 

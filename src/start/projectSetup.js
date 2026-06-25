@@ -27,7 +27,7 @@ const init = async (projectDirectory, apiKey, framework) => {
         let file = fs.readFileSync(projectDirectory + '/.env.dist', 'utf-8');
         file = file.replace('FLOTIQ_API_KEY=', 'FLOTIQ_API_KEY=' + apiKey);
         fs.writeFileSync(projectDirectory + '/.env.local', file);
-        logger.info(`Configuration is created successfully: ${projectDirectory}/.env`);
+        logger.info(`Configuration is created successfully: ${projectDirectory}/.env.local`);
 
     } else if (framework === FRAMEWORK_GATSBY) {
 
@@ -42,20 +42,20 @@ const init = async (projectDirectory, apiKey, framework) => {
             fs.writeFileSync(configPathDev, file);
         } catch (e) {
             let fileContent = 'GATSBY_FLOTIQ_API_KEY=' + apiKey + '\n';
-            fs.writeFile(projectDirectory + '/.env', fileContent, (err) => {
+            await fs.writeFileSync(projectDirectory + '/.env', fileContent, (err) => {
                 if (err) {
                     logger.error(err);
                     throw err;
                 }
             });
-            fs.writeFile(projectDirectory + '/.env.development', fileContent, (err) => {
+            await fs.writeFileSync(projectDirectory + '/.env.development', fileContent, (err) => {
                 if (err) {
-                    err.error(err);
+                    logger.error(err);
                     throw err;
                 }
             });
         }
-        logger.info(`Configuration is created successfully: ${projectDirectory} /.env`);
+        logger.info(`Configuration is created successfully: ${projectDirectory}/.env`);
 
     } else {
         logger.error('Invalid framework!');
@@ -84,7 +84,6 @@ const execShellCommand = async (cmd) => {
         let commandProcess = exec(cmd, (error, stdout, stderr) => {
             if (error) {
                 logger.error(error);
-                process.exit(1);
             }
             resolve(stdout || stderr);
         });
