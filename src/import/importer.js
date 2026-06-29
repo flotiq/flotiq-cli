@@ -6,58 +6,16 @@ import path from "path";
 import traverse from "traverse";
 import { fileURLToPath } from "url";
 import { promisify } from "util";
-import config from "../src/configuration/config.js";
+import config from "../configuration/config.js";
 import { getFlotiqApi } from "@flotiq/api";
 import logger from "@flotiq/api/logger.js";
-import { mediaImporter } from "../src/media.js";
-import { readCTDs, shouldUpdate } from "../src/util.js";
+import { mediaImporter } from "../media.js";
+import { readCTDs, shouldUpdate } from "../util.js";
 
 const glob = promisify(globModule);
 const __filename = fileURLToPath(import.meta.url);
 
 const WEBHOOKS_MESSAGE_403 = 'It looks like the api key does not have access to webhooks, it continues without deactivating webhooks';
-
-export const command = 'import'
-export const description = 'Import flotiq entities from JSON structure'
-export const builder = {
-    source: {
-        description: 'Import directory',
-        alias: 'directory',
-        type: 'string',
-        demand: true
-    },
-    ctd: {
-        description: 'Coma-delimited list of CTD to import, can be used multiple times',
-        type: 'string'
-    },
-    'skip-ctd': {
-        description: 'Coma-delimited list of CTD to skip, can be used multiple times',
-        type: 'string'
-    },
-    'skip-definitions': {
-        description: 'Import only contentObjects',
-        type: 'boolean',
-        default: false,
-    },
-    'update-definitions': {
-        description: 'Reload contentTypeDefinitions',
-        type: 'boolean',
-        default: false,
-    },
-    'skip-content': {
-        description: "Don't import content objects",
-        type: 'boolean',
-        default: false
-    },
-    'disable-webhooks': {
-        description: "Disable webhooks during import",
-        type: 'boolean',
-        default: true
-    },
-    'fix-definitions': {
-        description: "Shortcut for --update-definitions --skip-content",
-    }
-}
 
 function hasRelationshipConstraints(contentTypeDefinition) {
     return traverse(contentTypeDefinition)
@@ -229,9 +187,9 @@ async function importer(
                 );
             } else {
                 let responseJson = await response.json();
-                let error = new Error(`${response.statusText}: ${JSON.stringify(responseJson)}`);
-                logger.error(error);
-                throw error;
+                let errorMessage = `${response.statusText}: ${JSON.stringify(responseJson)}`;
+                logger.error(errorMessage);
+                throw new Error(errorMessage);
             }
         }
     }
@@ -547,35 +505,4 @@ async function handler(argv) {
 
 }
 
-const importerCommand = {
-    command: 'import [directory] [flotiqApiKey]',
-    describe: 'Import objects from directory to Flotiq',
-    builder: (yargs) => {
-        return yargs
-            .option("directory", {
-                description: "Directory path to import data.",
-                alias: "",
-                type: "string",
-                default: "",
-                demandOption: false,
-            })
-            .option("flotiqApiKey", {
-                description: "Flotiq Read and write API KEY.",
-                alias: "",
-                type: "string",
-                default: false,
-                demandOption: false,
-            })
-            .option("publish", {
-                description: "Publish objects with public status in internal",
-                alias: "",
-                type: "boolean",
-                default: false,
-                demandOption: false,
-            })
-    },
-    handler,
-    importer
-};
-
-export { handler, importer, importerCommand };
+export { handler, importer };

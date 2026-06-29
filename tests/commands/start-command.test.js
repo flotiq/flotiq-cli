@@ -25,17 +25,26 @@ jest.unstable_mockModule("../../src/start/projectSetup.js", () => ({
     },
 }));
 
-jest.unstable_mockModule("../../commands/importer.js", () => ({
+jest.unstable_mockModule("../../src/import/command.js", () => ({
     importerCommand: {
         command: "import [directory] [flotiqApiKey]",
         describe: "Import content",
         builder: () => {},
         handler: () => {},
     },
+    default: {
+        command: "import [directory] [flotiqApiKey]",
+        describe: "Import content",
+        builder: () => {},
+        handler: () => {},
+    },
+}));
+
+jest.unstable_mockModule("../../src/import/importer.js", () => ({
     handler: importerHandler,
 }));
 
-jest.unstable_mockModule("../../commands/exporter.js", () => ({
+jest.unstable_mockModule("../../src/export/command.js", () => ({
     default: {
         command: "export [directory] [flotiqApiKey]",
         describe: "Export content",

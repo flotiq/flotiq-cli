@@ -1,5 +1,5 @@
 import { getFlotiqApi } from "@flotiq/api";
-import { handler as importerHandler } from "../../commands/importer.js";
+import { handler as importerHandler } from "../import/importer.js";
 import questionsText from "../command/questions.js";
 import { apiKeyDefinedInDotEnv, askQuestions, optionalParamFlotiqApiKey } from "../command/helpers.js";
 import config from "../configuration/config.js";

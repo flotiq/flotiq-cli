@@ -3,7 +3,7 @@ import os from "os";
 import path from "path";
 import { jest } from "@jest/globals";
 import logger from "@flotiq/api/logger.js";
-import { importer } from "./../../commands/importer.js";
+import { importer } from "../../src/import/importer.js";
 
 describe("importer", () => {
     beforeEach(() => {

@@ -2,8 +2,8 @@
 import "dotenv/config";
 import yargsFactory from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
-import { importerCommand } from "../../commands/importer.js";
-import exporterCommand from "../../commands/exporter.js";
+import importerCommand from "../import/command.js";
+import exporterCommand from "../export/command.js";
 import purgeCommand from "../purifier/command.js";
 import startCommand from "../start/command.js";
 import sdkCommand from "../sdk/command.js";
