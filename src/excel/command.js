@@ -21,7 +21,7 @@ async function exportHandler(argv) {
 
     let apiKey = argv.flotiqApiKey || (apiKeyDefinedInDotEnv() ? process.env.FLOTIQ_API_KEY : null);
     if (!apiKey) {
-        const answer = await askQuestions(excelExportYargs, [questionsText.FLOTIQ_API_KEY]);
+        const answer = await askQuestions(excelExportYargs, [questionsText.EXCEL_MIGRATION[0]]);
         apiKey = answer.flotiqApiKey;
     }
 
@@ -52,7 +52,7 @@ async function importHandler(argv) {
 
     let apiKey = argv.flotiqApiKey || (apiKeyDefinedInDotEnv() ? process.env.FLOTIQ_API_KEY : null);
     if (!apiKey) {
-        const answer = await askQuestions(excelImportYargs, [questionsText.FLOTIQ_API_KEY]);
+        const answer = await askQuestions(excelImportYargs, [questionsText.EXCEL_MIGRATION[0]]);
         apiKey = answer.flotiqApiKey;
     }
 

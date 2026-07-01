@@ -18,7 +18,7 @@ function start(flotiqApiKey, directory, url, framework = null, importData = true
         resolvedFramework = "gatsby";
     }
 
-    projectSetup.setup(directory, url, resolvedFramework).then(async () => {
+    return projectSetup.setup(directory, url, resolvedFramework).then(async () => {
         if (importData) {
             getFlotiqApi(`${config.apiUrl}/api/v1`, flotiqApiKey);
             const args = {
@@ -51,7 +51,7 @@ async function handler(argv) {
             process.exit(1);
             return;
         }
-        await start(apiKey, argv.directory, argv.url, argv.framework, argv.import);
+        await start(apiKey, argv.directory, argv.url, argv.framework, argv.import !== false);
     }
 }
 

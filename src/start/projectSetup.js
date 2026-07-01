@@ -17,7 +17,7 @@ const setup = async (projectDirectory, starterUrl, framework) => {
             logger.error(error);
             process.exit(1);
         }
-    } else if (framework === "gatsby") {
+    } else if (framework === FRAMEWORK_GATSBY) {
         logger.info('Starting Gatsby setup');
         try {
             await execShellCommand(`git clone ${starterUrl}.git ${projectDirectory}`);
