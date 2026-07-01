@@ -14,16 +14,18 @@ async function handler(argv) {
         const answers = await askQuestions(sdkYargs, questionsText.INSTALL_SDK);
         const { language, projectDirectory, flotiqApiKey } = answers;
         await sdk(language, projectDirectory, flotiqApiKey);
-        const apiKey = argv.flotiqApiKey || (apiKeyDefinedInDotEnv() ? process.env.FLOTIQ_API_KEY : null);
-        if (!apiKey) {
-            if (sdkYargs) {
-                sdkYargs.showHelp();
-            }
-            process.exit(1);
-            return;
-        }
-        await sdk(argv.language, argv.directory, apiKey);
+        return;
     }
+
+    const apiKey = argv.flotiqApiKey || (apiKeyDefinedInDotEnv() ? process.env.FLOTIQ_API_KEY : null);
+    if (!apiKey) {
+        if (sdkYargs) {
+            sdkYargs.showHelp();
+        }
+        process.exit(1);
+        return;
+    }
+    await sdk(argv.language, argv.directory, apiKey);
 }
 
 const sdkCommand = {
