@@ -67,7 +67,7 @@ async function handler(argv) {
     await purgeContentObjects(getFlotiqApi(`${config.apiUrl}/api/v1`, apiKey), purgeOptions);
 }
 
-const commandModule = {
+const purgeCommand = {
     command: "purge [flotiqApiKey]",
     describe: "Purge Flotiq space or selected CTD",
     builder: (yargs) => yargs
@@ -98,6 +98,6 @@ const commandModule = {
     handler,
 };
 
-export { confirmPurge, handler, resolveApiKey, resolvePurgeOptions };
+export { confirmPurge, handler, resolveApiKey, resolvePurgeOptions, purgeCommand };
 
-export default commandModule;
+export default purgeCommand;

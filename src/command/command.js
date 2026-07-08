@@ -1,323 +1,35 @@
 #!/usr/bin/env node
 import "dotenv/config";
-import { importXlsx, exportXlsx } from "flotiq-excel-migrator";
-import inquirer from "inquirer";
 import yargsFactory from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
-import importerCommand from "../../commands/importer.js";
-import exporterCommand from "../../commands/exporter.js";
-import questionsText from "./questions.js";
-import projectSetup from "../start/projectSetup.js";
+import importerCommand from "../import/command.js";
+import exporterCommand from "../export/command.js";
 import purgeCommand from "../purifier/command.js";
-import sdk from "../sdk/sdk.js";
-import stats from "../stats/stats.js";
-import { getFlotiqApi } from "@flotiq/api";
-import config from "../configuration/config.js";
+import startCommand from "../start/command.js";
+import sdkCommand from "../sdk/command.js";
+import statsCommand from "../stats/command.js";
+import wordpressImportCommand from "../wordpress-import/command.js";
+import contentfulImportCommand from "../contentful-import/command.js";
+import { excelExportCommand, excelImportCommand } from "../excel/command.js";
+import { checkCommand } from "./helpers.js";
 
 const yargs = yargsFactory(hideBin(process.argv));
 
-yargs
+const argv = await yargs
     .usage("flotiq [command]")
     .help()
     .alias("help", "h")
     .command(exporterCommand)
     .command(importerCommand)
     .command(purgeCommand)
-    .string("framework")
-    .alias("framework", ["fw"])
-    .describe("framework", " Determines which framework should be used (gatsby, nextjs)")
-    .boolean("no-import")
-    .alias("no-import", ["n"])
-    .describe("no-import", "skip importing example objects")
-    .command("start [directory] [url] [flotiqApiKey] [framework]", "Start the project", (yargs) => {
-        yargs.positional("directory", {
-            describe: "Directory to create project in.",
-            type: "string",
-        });
-        yargs.positional("url", {
-            describe: "Url to git repository with starter.",
-            type: "string",
-        });
-        optionalParamFlotiqApiKey(yargs);
-        yargs.positional("framework", {
-            describe: "Framework determining if the starter is nextjs or gatsby.",
-            type: "string",
-        });
-    }, async (argv) => {
-        if (yargs.argv.help) {
-            yargs.showHelp();
-            process.exit(1);
-        }
-        if (yargs.argv._.length < 3) {
-            const answers = await askQuestions(questionsText.START_QUESTIONS);
-            const { flotiqApiKey, projectDirectory, url } = answers;
-            start(flotiqApiKey, projectDirectory, url);
-        } else if (yargs.argv._.length === 3 && apiKeyDefinedInDotEnv()) {
-            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, yargs.argv["framework"], yargs.argv["import"]);
-        } else if (yargs.argv._.length === 4 && argv.flotiqApiKey) {
-            start(argv.flotiqApiKey, argv.directory, argv.url, yargs.argv["framework"], yargs.argv["import"]);
-        } else if (yargs.argv._.length === 4 && apiKeyDefinedInDotEnv()) {
-            start(process.env.FLOTIQ_API_KEY, argv.directory, argv.url, yargs.argv["framework"], yargs.argv["import"]);
-        } else if (yargs.argv._.length === 5) {
-            start(argv.flotiqApiKey, argv.directory, argv.url, yargs.argv["framework"], yargs.argv["import"]);
-        } else {
-            yargs.showHelp();
-            process.exit(1);
-        }
-    })
-    .command("wordpress-import [wordpressUrl] [flotiqApiKey]", "Import wordpress to Flotiq", (yargs) => {
-        yargs.positional("wordpressUrl", {
-            describe: "Url to wordpress blog project",
-            type: "string",
-        });
-        optionalParamFlotiqApiKey(yargs);
-    }, async (argv) => {
-        const wordpressStartModule = await import("flotiq-wordpress-import");
-        const wordpressStart = wordpressStartModule.default ?? wordpressStartModule;
-
-        if (yargs.argv._.length < 2) {
-            const answers = await askQuestions(questionsText.WORDPRESS_IMPORT_QUESTIONS);
-            const { flotiqApiKey, wordpressUrl } = answers;
-            await wordpressStart(flotiqApiKey, wordpressUrl);
-        } else if (yargs.argv._.length === 2 && apiKeyDefinedInDotEnv()) {
-            await wordpressStart.run(process.env.FLOTIQ_API_KEY, argv.wordpressUrl);
-        } else if (yargs.argv._.length === 3) {
-            await wordpressStart.run(argv.flotiqApiKey, argv.wordpressUrl);
-        }
-    })
-    .command("contentful-import [contentfulSpaceId] [contentfulContentManagementToken] [flotiqApiKey] [translation]", "Import Contentful to Flotiq", () => {
-    }, async (argv) => {
-        const contentfulModule = await import("../contentful-import/flotiq-contentful-import.js");
-        const contentful = contentfulModule.default;
-
-        if (yargs.argv._.length < 3 || (yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv())) {
-            const answers = await askQuestions(questionsText.CONTENTFUL_IMPORT);
-            const { contentfulSpaceId, contentfulApiKey, flotiqApiKey } = answers;
-            await contentful(contentfulSpaceId, contentfulApiKey, flotiqApiKey);
-        } else if (yargs.argv._.length === 3 && apiKeyDefinedInDotEnv()) {
-            await contentful(argv.contentfulSpaceId, argv.contentfulContentManagementToken, process.env.FLOTIQ_API_KEY);
-        } else if (yargs.argv._.length === 4) {
-            await contentful(argv.contentfulSpaceId, argv.contentfulContentManagementToken, argv.flotiqApiKey);
-        } else if (yargs.argv._.length === 5) {
-            await contentful(argv.contentfulSpaceId, argv.contentfulContentManagementToken, argv.flotiqApiKey, argv.translation);
-        } else {
-            yargs.showHelp();
-            process.exit(1);
-        }
-    })
-    .command("sdk install [language] [directory] [flotiqApiKey]", "Install Flotiq SDK", (yargs) => {
-        yargs.positional("language", {
-            describe: "SDK language, choices: csharp, go, java, javascript, php, python, typescript",
-            type: "string",
-            choices: ["csharp", "go", "java", "javascript", "php", "python", "typescript"],
-        });
-        yargs.positional("directory", {
-            describe: "Directory where to install SDK",
-            type: "string",
-        });
-        optionalParamFlotiqApiKey(yargs);
-    }, async (argv) => {
-        if (yargs.argv.help) {
-            yargs.showHelp();
-            process.exit(1);
-        }
-        if (yargs.argv._.length < 3) {
-            const answers = await askQuestions(questionsText.INSTALL_SDK);
-            const { language, projectDirectory, apiKey } = answers;
-            await sdk(language, projectDirectory, apiKey);
-        } else if (yargs.argv._.length === 4 && apiKeyDefinedInDotEnv()) {
-            await sdk(argv.language, argv.directory, process.env.FLOTIQ_API_KEY);
-        } else if (yargs.argv._.length === 5) {
-            await sdk(argv.language, argv.directory, argv.flotiqApiKey);
-        } else {
-            yargs.showHelp();
-            process.exit(1);
-        }
-    })
-    .command("excel-export [ctdName] [filePath] [flotiqApiKey]",
-        "Export Content Objects from Flotiq account to the excel file",
-        (yargs) => {
-            optionalParamFlotiqApiKey(yargs);
-            yargs
-                .positional("ctdName", {
-                    describe: "API name of Content Type Definition you wish to export",
-                    type: "string",
-                })
-                .positional("filePath", {
-                    describe: "the directory to which the xlsx file is to be saved, type in \".\" if you want to save the file inside the current directory",
-                    type: "string",
-                })
-                .boolean("hideResults")
-                .alias("hideResults", ["hr"])
-                .describe("hideResults", "information about export process will not appear in the console")
-                .number("limit")
-                .alias("limit", ["l"])
-                .describe("number of Content Objects to export counting from the top row, default: 10.000");
-        }, async (argv) => {
-            if (yargs.argv._.length < 3 || (yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv())) {
-                const answers = await askQuestions(questionsText.EXCEL_MIGRATION);
-                const { flotiqApiKey, ctdName, filePath } = answers;
-                await exportXlsx({
-                    apiKey: flotiqApiKey,
-                    ctdName,
-                    filePath,
-                    limit: yargs.argv["limit"],
-                    logResults: !yargs.argv["hideResults"],
-                });
-            } else if (yargs.argv._.length <= 4) {
-                if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
-                    argv.flotiqApiKey = process.env.FLOTIQ_API_KEY;
-                }
-                await exportXlsx({
-                    apiKey: argv.flotiqApiKey,
-                    ctdName: argv.ctdName,
-                    filePath: argv.filePath,
-                    limit: yargs.argv["limit"],
-                    logResults: !yargs.argv["hideResults"],
-                });
-            } else {
-                yargs.showHelp();
-                process.exit(1);
-            }
-        })
-    .command("excel-import [ctdName] [filePath] [flotiqApiKey]",
-        "Import Content Objects from excel file to Flotiq account",
-        (yargs) => {
-            optionalParamFlotiqApiKey(yargs);
-            yargs
-                .positional("ctdName", {
-                    describe: "API name of Content Type Definition you wish to import data to",
-                    type: "string",
-                })
-                .positional("filePath", {
-                    describe: "the directory to the xlsx file you wish to import data from",
-                    type: "string",
-                })
-                .boolean("hideResults")
-                .alias("hideResults", ["hr"])
-                .describe("hideResults", "information about import process will not appear in the console")
-                .number("limit")
-                .alias("limit", ["l"])
-                .describe("number of Content Objects imported counting from the top row, default: 10.000")
-                .number("batchLimit")
-                .alias("batchLimit", ["bl"])
-                .describe("batchLimit", "number of Content Objects imported per batch call, default: 100")
-                .boolean("updateExisting")
-                .alias("updateExisting", ["ue"])
-                .describe("If content objects with a given id already exist in the Flotiq account, they will be updated");
-        }, async (argv) => {
-            if (yargs.argv._.length < 3 || (yargs.argv._.length === 3 && !apiKeyDefinedInDotEnv())) {
-                const answers = await askQuestions(questionsText.EXCEL_MIGRATION);
-                const { flotiqApiKey, ctdName, filePath } = answers;
-                await importXlsx({
-                    apiKey: flotiqApiKey,
-                    ctdName,
-                    filePath,
-                    limit: yargs.argv["limit"],
-                    logResults: !yargs.argv["hideResults"],
-                    batchLimit: yargs.argv["batchLimit"],
-                    updateExisting: yargs.argv["updateExisting"],
-                });
-            } else if (yargs.argv._.length <= 4) {
-                if (!argv.flotiqApiKey && apiKeyDefinedInDotEnv()) {
-                    argv.flotiqApiKey = process.env.FLOTIQ_API_KEY;
-                }
-                await importXlsx({
-                    apiKey: argv.flotiqApiKey,
-                    ctdName: argv.ctdName,
-                    filePath: argv.filePath,
-                    limit: yargs.argv["limit"],
-                    logResults: !yargs.argv["hideResults"],
-                    batchLimit: yargs.argv["batchLimit"],
-                    updateExisting: yargs.argv["updateExisting"],
-                });
-            } else {
-                yargs.showHelp();
-                process.exit(1);
-            }
-        })
-    .command("stats [flotiqApiKey]", "Display Flotiq stats", () => {
-    }, async (argv) => {
-        if (yargs.argv._.length === 1 && !apiKeyDefinedInDotEnv()) {
-            const answers = await askQuestions(questionsText.STATS);
-            const { flotiqApiKey } = answers;
-            await stats(getFlotiqApi(`${config.apiUrl}/api/v1`, flotiqApiKey));
-        } else if (yargs.argv._.length < 2 && apiKeyDefinedInDotEnv()) {
-            await stats(getFlotiqApi(`${config.apiUrl}/api/v1`, process.env.FLOTIQ_API_KEY));
-        } else if (yargs.argv._.length === 2) {
-            await stats(getFlotiqApi(`${config.apiUrl}/api/v1`, argv.flotiqApiKey));
-        } else {
-            yargs.showHelp();
-            process.exit(1);
-        }
-    })
+    .command(startCommand)
+    .command(wordpressImportCommand)
+    .command(contentfulImportCommand)
+    .command(sdkCommand)
+    .command(excelExportCommand)
+    .command(excelImportCommand)
+    .command(statsCommand)
     .help()
-    .argv;
+    .parseAsync();
 
-checkCommand(yargs, 0);
-
-function apiKeyDefinedInDotEnv() {
-    return (process.env.FLOTIQ_API_KEY !== undefined && process.env.FLOTIQ_API_KEY !== "");
-}
-
-function optionalParamFlotiqApiKey(yargs) {
-    if (apiKeyDefinedInDotEnv()) {
-        yargs.positional("flotiqApiKey", {
-            describe: "Flotiq Read and write API KEY.",
-            type: "string",
-        });
-    }
-}
-
-function checkCommand(yargs, numRequired) {
-    if (yargs.argv._.length <= numRequired) {
-        yargs.showHelp();
-        process.exit(1);
-    }
-}
-
-async function askQuestions(questions) {
-    const answers = await inquirer.prompt(questions);
-    return await checkAllParameters(answers, questions);
-}
-
-async function checkAllParameters(answer, questions) {
-    const newAnswer = answer;
-    for (let i = 0; i < questions.length; i++) {
-        const paramName = questions[i].name;
-        while (!newAnswer[paramName].length) {
-            if (!questions[i].defaultAnswer) {
-                yargs.showHelp();
-                const param = await inquirer.prompt(questions[i]);
-                newAnswer[paramName] = param[paramName];
-                console.log(newAnswer[paramName]);
-            } else {
-                newAnswer[paramName] = questions[i].defaultAnswer;
-                console.log(newAnswer[paramName]);
-            }
-        }
-    }
-    return newAnswer;
-}
-
-function start(flotiqApiKey, directory, url, framework = null, importData = true) {
-    if (framework) {
-        framework = framework.toLowerCase();
-    } else if (url.includes("nextjs")) {
-        framework = "nextjs";
-    } else {
-        framework = "gatsby";
-    }
-
-    function startSetup(type) {
-        projectSetup.setup(directory, url, type).then(async () => {
-            if (importData) {
-                await importerCommand.importer(flotiqApiKey, directory + "/.flotiq", false);
-            }
-            await projectSetup.init(directory, flotiqApiKey, type);
-            await projectSetup.develop(directory, type);
-        });
-    }
-
-    startSetup(framework);
-}
+checkCommand(yargs, 0, argv);

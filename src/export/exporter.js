@@ -2,31 +2,10 @@
 
 import fs from "fs/promises";
 import path from "path";
-import config from "../src/configuration/config.js";
+import config from "../configuration/config.js";
 import { getFlotiqApi } from "@flotiq/api";
 import logger from "@flotiq/api/logger.js";
-import { camelize } from "../src/util.js";
-
-export const command = "export";
-export const description = "Export flotiq entities to JSON structure";
-export const builder = {
-  target: {
-    description: "Export directory",
-    alias: "directory",
-    type: "string",
-    demand: true,
-  },
-  ctd: {
-    description: "Coma-delimited list of CTD to export",
-    type: "string",
-  },
-  skipContent: {
-    description: "Dump only CTD"
-  },
-  withInternal: {
-    description: "Export internal to ensure publication status"
-  },
-};
+import { camelize } from "../util.js";
 
 async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd, withInternal) {
   const stats = {
@@ -162,51 +141,4 @@ async function handler(argv) {
   )
 }
 
-const commandModule = {
-  command: "export [directory] [flotiqApiKey]",
-  describe: "Export objects from Flotiq to directory",
-  builder: (yargs) => {
-    return yargs
-      .option("directory", {
-        description: "Directory path to import data.",
-        alias: "",
-        type: "string",
-        default: "",
-        demandOption: false,
-      })
-      .option("flotiqApiKey", {
-        description: "Flotiq Read and write API KEY.",
-        alias: "",
-        type: "string",
-        default: false,
-        demandOption: false,
-      })
-      .option("only-definitions", {
-        description: "Export only content type definitions, ignore content objects",
-        alias: "",
-        type: "boolean",
-        default: false,
-        demandOption: false,
-      })
-      .option("with-internal", {
-        description: "Export internal to ensure publication status",
-        alias: "",
-        type: "boolean",
-        default: false,
-        demandOption: false,
-      })
-      .option("ctd", {
-        description: "Coma-delimited list of CTD to export",
-        alias: "",
-        type: "string",
-        default: "",
-        demandOption: false,
-      });
-  },
-  handler,
-  exporter,
-};
-
 export { handler, exporter };
-
-export default commandModule;

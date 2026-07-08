@@ -4,7 +4,7 @@ import path from "path";
 import { jest } from "@jest/globals";
 import { getFlotiqApi } from "@flotiq/api";
 import logger from "@flotiq/api/logger.js";
-import { exporter } from "./../../commands/exporter.js";
+import { exporter } from "../../src/export/exporter.js";
 
 const flotiqApiUrl = "https://dummy-api.flotiq.com";
 const flotiqApiKey = "dummyApiKey";

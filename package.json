@@ -9,7 +9,8 @@
     "flotiq": "bin/flotiq"
   },
   "scripts": {
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "test:cov": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage"
   },
   "keywords": [
     "flotiq",
