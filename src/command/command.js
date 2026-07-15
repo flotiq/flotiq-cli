@@ -15,9 +15,15 @@ import { excelExportCommand, excelImportCommand } from "../excel/command.js";
 import { checkCommand } from "./helpers.js";
 
 const yargs = yargsFactory(hideBin(process.argv));
-const cliVersion = JSON.parse(
-    readFileSync(new URL("../../package.json", import.meta.url), "utf8")
-).version;
+let cliVersion = "unknown";
+try {
+    const pkg = JSON.parse(
+        readFileSync(new URL("../../package.json", import.meta.url), "utf8")
+    );
+    cliVersion = pkg?.version ?? cliVersion;
+} catch {
+    // Keep default version when package.json is unavailable/unreadable.
+}
 
 const argv = await yargs
     .usage("flotiq [command]")
