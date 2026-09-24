@@ -57,13 +57,11 @@ async function mediaImporter (directory, flotiqApi) {
                 }
             }
 
-            const existingMediaFile = existingMediaContentObjects.find(existingFile =>
-                !importedMediaIds.has(existingFile.id) &&
-                existingFile.fileName === file.fileName &&
-                existingFile.size === file.size &&
-                existingFile.mimeType === file.mimeType &&
-                existingFile.extension === file.extension &&
-                existingFile.type === file.type
+            const buffer = await fs.readFile(`${directory}/InternalContentTypeMedia/${file.id}.${file.extension}`)
+            const existingMediaFile = await findExistingMediaFile(
+                file,
+                existingMediaContentObjects,
+                importedMediaIds,
             );
 
             if (existingMediaFile) {
@@ -71,8 +69,6 @@ async function mediaImporter (directory, flotiqApi) {
                 replacements.push([file, existingMediaFile]);
                 continue;
             }
-
-            const buffer = await fs.readFile(`${directory}/InternalContentTypeMedia/${file.id}.${file.extension}`)
 
             const form = new FormData();
 
@@ -121,6 +117,18 @@ async function mediaImporter (directory, flotiqApi) {
             logger.error(e);
         }
     }
+}
+
+async function findExistingMediaFile(file, existingMediaContentObjects, importedMediaIds) {
+    return existingMediaContentObjects.find(existingFile =>
+        !importedMediaIds.has(existingFile.id) &&
+        existingFile.fileName === file.fileName &&
+        existingFile.type === file.type &&
+        existingFile.mimeType === file.mimeType &&
+        existingFile.extension === file.extension &&
+        (!file.width || existingFile.width === file.width) &&
+        (!file.height || existingFile.height === file.height)
+    );
 }
 
 async function checkIsUsedIn(fileId, objects) {

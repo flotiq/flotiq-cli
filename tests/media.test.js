@@ -142,7 +142,7 @@ describe('mediaImporter', () => {
             .onGet(new RegExp('/content/_media\\?')).replyOnce(200, {
                 data: [{
                     id: 'existing-media-id',
-                    size: 16,
+                    size: 999,
                     mimeType: 'image/png',
                     extension: 'png',
                     fileName: 'file0.png',
