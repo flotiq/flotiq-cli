@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import { jest } from "@jest/globals";
 import FlotiqApi from "@flotiq/api";
 import logger from "@flotiq/api/logger.js";
-import { mediaImporter } from "./../src/media.js";
+import { findExistingMediaFile, mediaImporter } from "./../src/media.js";
 
 let mock;
 
@@ -23,6 +23,34 @@ describe('mediaImporter', () => {
         if (mock) {
             mock.reset();
         }
+    });
+
+    it('does not reuse the same target media for matching source records', async () => {
+        const importedMediaIds = new Set();
+        const existingMediaContentObjects = [
+            { id: 'target-media-id-1', fileName: 'file.png', type: 'image', mimeType: 'image/png', extension: 'png' },
+            { id: 'target-media-id-2', fileName: 'file.png', type: 'image', mimeType: 'image/png', extension: 'png' },
+        ];
+        const sourceMediaFile = {
+            fileName: 'file.png',
+            type: 'image',
+            mimeType: 'image/png',
+            extension: 'png',
+        };
+
+        const firstMatch = await findExistingMediaFile(
+            sourceMediaFile,
+            existingMediaContentObjects,
+            importedMediaIds,
+        );
+        const secondMatch = await findExistingMediaFile(
+            sourceMediaFile,
+            existingMediaContentObjects,
+            importedMediaIds,
+        );
+
+        expect(firstMatch.id).toBe('target-media-id-1');
+        expect(secondMatch.id).toBe('target-media-id-2');
     });
 
     it('should retry on 429 error during media upload', async () => {

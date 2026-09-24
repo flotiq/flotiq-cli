@@ -120,7 +120,7 @@ async function mediaImporter (directory, flotiqApi) {
 }
 
 async function findExistingMediaFile(file, existingMediaContentObjects, importedMediaIds) {
-    return existingMediaContentObjects.find(existingFile =>
+    const existingMediaFile = existingMediaContentObjects.find(existingFile =>
         !importedMediaIds.has(existingFile.id) &&
         existingFile.fileName === file.fileName &&
         existingFile.type === file.type &&
@@ -129,6 +129,12 @@ async function findExistingMediaFile(file, existingMediaContentObjects, imported
         (!file.width || existingFile.width === file.width) &&
         (!file.height || existingFile.height === file.height)
     );
+
+    if (existingMediaFile) {
+        importedMediaIds.add(existingMediaFile.id);
+    }
+
+    return existingMediaFile;
 }
 
 async function checkIsUsedIn(fileId, objects) {
@@ -146,7 +152,7 @@ async function checkIsUsedIn(fileId, objects) {
     }
 }
 
-export { mediaImporter };
+export { findExistingMediaFile, mediaImporter };
 
 export default {
     mediaImporter,
