@@ -49,6 +49,7 @@ describe('mediaImporter', () => {
         mock
             .onGet('/internal/contenttype?internal=0&limit=1000').reply(200, { data: [] })
             .onGet('/internal/contenttype?internal=1&limit=1000').reply(200, { data: [] })
+            .onGet(new RegExp('/content/_media\\?')).reply(200, { data: [] })
             .onGet(`${mockApiUrl}/image/0x0/dummy_media_id0.jpg`).reply(404)
             .onPost(`${mockApiUrl}/api/media`).replyOnce(429)
             .onPost(`${mockApiUrl}/api/media`).replyOnce(429)
@@ -96,6 +97,7 @@ describe('mediaImporter', () => {
         mock
             .onGet('/internal/contenttype?internal=0&limit=1000').reply(200, { data: [] })
             .onGet('/internal/contenttype?internal=1&limit=1000').reply(200, { data: [] })
+            .onGet(new RegExp('/content/_media\\?')).reply(200, { data: [] })
             .onGet(new RegExp(`${mockApiUrl}/image/.*`)).reply(404)
             .onPost(`${mockApiUrl}/api/media`).reply(200, {
                 id: 'new-media-id'
@@ -111,4 +113,49 @@ describe('mediaImporter', () => {
         // With writePerSecondLimit=1, throttling applies to all API calls in this flow.
         expect(elapsed).toBeGreaterThanOrEqual(5000);
     }, 12000);
+
+    it('should reuse an existing media file instead of uploading it again', async () => {
+        jest.spyOn(fs, "readFile").mockImplementation(async (filePath) => {
+            if (String(filePath).includes('contentObjectMedia.json')) {
+                return JSON.stringify([
+                    {
+                        id: 'file0',
+                        url: '/image/0x0/dummy_media_id0.jpg',
+                        size: 16,
+                        mimeType: 'image/png',
+                        extension: 'png',
+                        fileName: 'file0.png',
+                        type: 'image',
+                    },
+                ]);
+            }
+            return Buffer.from('dummy-media-data');
+        });
+
+        const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`, mockApiKey, {
+            batchSize: 100,
+        });
+        mock = new AxiosMockAdapter(flotiqApi.middleware);
+        mock
+            .onGet('/internal/contenttype?internal=0&limit=1000').reply(200, { data: [] })
+            .onGet('/internal/contenttype?internal=1&limit=1000').reply(200, { data: [] })
+            .onGet(new RegExp('/content/_media\\?')).replyOnce(200, {
+                data: [{
+                    id: 'existing-media-id',
+                    size: 16,
+                    mimeType: 'image/png',
+                    extension: 'png',
+                    fileName: 'file0.png',
+                    type: 'image',
+                }],
+            })
+            .onGet(new RegExp('/content/_media\\?')).reply(200, { data: [] })
+            .onGet(`${mockApiUrl}/image/0x0/dummy_media_id0.jpg`).reply(404)
+            .onDelete('/content/_media/file0').reply(200);
+
+        await mediaImporter(mockDirectory, flotiqApi);
+
+        expect(mock.history.post).toHaveLength(0);
+        expect(mock.history.delete).toHaveLength(1);
+    });
 });

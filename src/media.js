@@ -19,6 +19,7 @@ async function mediaImporter (directory, flotiqApi) {
     }).map(def => def.name)
 
     const mediaRelationshipContentObjects = (await Promise.all(mediaRelationships.map(r => flotiqApi.fetchContentObjects(r)))).flat()
+    const existingMediaContentObjects = await flotiqApi.fetchContentObjects('_media')
 
     try {
         const contentObjects = await fs
@@ -28,6 +29,7 @@ async function mediaImporter (directory, flotiqApi) {
           .then(f => f.map(JSON.parse))
           .then(f => f.flat())
 
+            const importedMediaIds = new Set(contentObjects.map(mediaFile => mediaFile.id))
         const missingFiles = []
 
         for (const mediaFile of contentObjects) {
@@ -54,6 +56,22 @@ async function mediaImporter (directory, flotiqApi) {
                     continue;
                 }
             }
+
+            const existingMediaFile = existingMediaContentObjects.find(existingFile =>
+                !importedMediaIds.has(existingFile.id) &&
+                existingFile.fileName === file.fileName &&
+                existingFile.size === file.size &&
+                existingFile.mimeType === file.mimeType &&
+                existingFile.extension === file.extension &&
+                existingFile.type === file.type
+            );
+
+            if (existingMediaFile) {
+                logger.info(`Media file ${file.fileName} already exists, reusing ${existingMediaFile.id}`);
+                replacements.push([file, existingMediaFile]);
+                continue;
+            }
+
             const buffer = await fs.readFile(`${directory}/InternalContentTypeMedia/${file.id}.${file.extension}`)
 
             const form = new FormData();
