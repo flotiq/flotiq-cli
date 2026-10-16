@@ -16,7 +16,7 @@ Flotiq is a modern and highly customizable headless CMS that offers a seamless c
 CLI application for starting your next project with Flotiq fast.
 Currently supports the following commands:
 - [launching Flotiq starter projects](https://github.com/flotiq/flotiq-cli#launch-a-flotiq-starter-project)
-- [seeding example data from our Gatsby starters](https://github.com/flotiq/flotiq-cli#import-example-data-for-a-gatsby-starter)
+- [importing data from JSON files into Flotiq](https://github.com/flotiq/flotiq-cli#import-data-from-json-files)
 - [importing data from WordPress into Flotiq](https://github.com/flotiq/flotiq-cli#import-data-from-wordpress-to-flotiq)
 - [importing data from Contentful into Flotiq](https://github.com/flotiq/flotiq-cli#import-data-from-contentful-to-flotiq)
 - [exporting data from your Flotiq account into JSON](https://github.com/flotiq/flotiq-cli#export-data-from-flotiq-to-json-files)
@@ -67,10 +67,10 @@ The command can import data output of the `flotiq export` command.
 `flotiq start [projectName] [flotiqStarterUrl] [flotiqApiKey]`
 
 This command will:
-- clone the Flotiq Gatsby or Nextjs starter,
+- clone the Flotiq Nextjs starter,
 - setup your Flotiq account to include the required Content Type Definitions,
 - import example content into your account (e.g. images, blog posts, product descriptions),
-- run `gatsby develop` to start your Gatsby starter.
+- run `yarn next dev` to start your Nextjs starter.
 
 **Parameters**
 
@@ -80,7 +80,7 @@ This command will:
 
 **Flags**
 
-* `--framework` - framework of the starter i.e. `--framework=nextjs` or `--fw=gatsby`. If no framework parameter is given, the URL will be searched for phrases i.e. Set to `gatsby` by default
+* `--framework` - framework of the starter i.e. `--framework=nextjs` or `--fw=nextjs`. Currently only `nextjs` is supported and it is used by default
 * `--no-import` - skip example data import
 
 #### Import variables
@@ -193,21 +193,6 @@ This command displays your Flotiq API Key's following statistics:
 
 * `flotiqApiKey` - API key to your Flotiq account, if you wish to import data it must be read and write API key (more about Flotiq API keys in [the documentation](https://flotiq.com/docs/API/))
 
-## Gatsby Starters
-
-You can choose one of our starters:
-
-* [Recipe website Gatsby starter-1](https://github.com/flotiq/flotiq-gatsby-recipe-1) - to use this starter use: `https://github.com/flotiq/flotiq-gatsby-recipe-1` as the `flotiqStarterUrl`
-* [Recipe website Gatsby starter-2](https://github.com/flotiq/flotiq-gatsby-recipe-2) - to use this starter use: `https://github.com/flotiq/flotiq-gatsby-recipe-2` as the `flotiqStarterUrl`
-* [Event calendar Gatsby starter-1](https://github.com/flotiq/flotiq-gatsby-event-1) - to use this starter use: `https://github.com/flotiq/flotiq-gatsby-event-1` as the `flotiqStarterUrl`
-* [Event calendar Gatsby starter-2](https://github.com/flotiq/flotiq-gatsby-event-2) - to use this starter use: `https://github.com/flotiq/flotiq-gatsby-event-2` as the `flotiqStarterUrl`
-* [Project portfolio Gatsby starter-1](https://github.com/flotiq/flotiq-gatsby-portfolio-1) - to use this starter use: `https://github.com/flotiq/flotiq-gatsby-portfolio-1` as the `flotiqStarterUrl`
-* [Project portfolio Gatsby starter-2](https://github.com/flotiq/flotiq-gatsby-portfolio-2) - to use this starter use: `https://github.com/flotiq/flotiq-gatsby-portfolio-2` as the `flotiqStarterUrl`
-* [Simple blog Gatsby starter-1](https://github.com/flotiq/flotiq-gatsby-blog-1) - to use this starter use: `https://github.com/flotiq/flotiq-gatsby-blog-1` as the `flotiqStarterUrl`
-* [Simple blog Gatsby starter-2](https://github.com/flotiq/flotiq-gatsby-blog-2) - to use this starter use: `https://github.com/flotiq/flotiq-gatsby-blog-2` as the `flotiqStarterUrl`
-* [Gatsby and Snipcart boilerplate, sourcing products from Flotiq-1](https://github.com/flotiq/flotiq-gatsby-shop-1) - to use this starter use: `https://github.com/flotiq/flotiq-gatsby-shop-1` as the `flotiqStarterUrl`
-* [Gatsby and Snipcart boilerplate, sourcing products from Flotiq-2](https://github.com/flotiq/flotiq-gatsby-shop-2) - to use this starter use: `https://github.com/flotiq/flotiq-gatsby-shop-2` as the `flotiqStarterUrl`
-
 ## NextJs Starters
 
 * [Recipe website NextJs starter-2](https://github.com/flotiq/flotiq-nextjs-recipe-2) - to use this starter use: `https://github.com/flotiq/flotiq-nextjs-recipe-2` as the `flotiqStarterUrl`
@@ -252,7 +237,7 @@ To make your life and ours easier, we have prepared error codes.
 ### #2XX - Start
 
 #### #200
- Gatsby's error, more info is in the output.
+ Starter's error, more info is in the output.
  
 ### #3XX - Import
 

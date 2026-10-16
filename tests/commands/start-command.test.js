@@ -98,7 +98,7 @@ describe("start CLI command", () => {
         inquirerPrompt.mockResolvedValue({
             flotiqApiKey: "prompt-api-key",
             projectDirectory: "prompt-directory",
-            url: "https://github.com/flotiq/flotiq-starter-gatsby",
+            url: "https://github.com/flotiq/flotiq-starter-nextjs",
         });
     });
 
@@ -123,20 +123,20 @@ describe("start CLI command", () => {
     });
 
     it("should skip content import when --no-import is passed", async () => {
-        const starterUrl = "https://github.com/flotiq/flotiq-starter-gatsby";
+        const starterUrl = "https://github.com/flotiq/flotiq-starter-nextjs";
 
         await runCli([
             "start",
-            "demo-gatsby",
+            "demo-next",
             starterUrl,
             "argv-api-key",
-            "gatsby",
+            "nextjs",
             "--no-import",
         ]);
 
-        expect(setup).toHaveBeenCalledWith("demo-gatsby", starterUrl, "gatsby");
-        expect(init).toHaveBeenCalledWith("demo-gatsby", "argv-api-key", "gatsby");
-        expect(develop).toHaveBeenCalledWith("demo-gatsby", "gatsby");
+        expect(setup).toHaveBeenCalledWith("demo-next", starterUrl, "nextjs");
+        expect(init).toHaveBeenCalledWith("demo-next", "argv-api-key", "nextjs");
+        expect(develop).toHaveBeenCalledWith("demo-next", "nextjs");
         expect(importerHandler).not.toHaveBeenCalled();
         expect(getFlotiqApi).not.toHaveBeenCalled();
     });
@@ -147,11 +147,11 @@ describe("start CLI command", () => {
         expect(inquirerPrompt).toHaveBeenCalledTimes(1);
         expect(setup).toHaveBeenCalledWith(
             "prompt-directory",
-            "https://github.com/flotiq/flotiq-starter-gatsby",
-            "gatsby"
+            "https://github.com/flotiq/flotiq-starter-nextjs",
+            "nextjs"
         );
-        expect(init).toHaveBeenCalledWith("prompt-directory", "prompt-api-key", "gatsby");
-        expect(develop).toHaveBeenCalledWith("prompt-directory", "gatsby");
+        expect(init).toHaveBeenCalledWith("prompt-directory", "prompt-api-key", "nextjs");
+        expect(develop).toHaveBeenCalledWith("prompt-directory", "nextjs");
         expect(importerHandler).toHaveBeenCalledWith({
             directory: "prompt-directory/.flotiq",
             flotiqApiKey: "prompt-api-key",
@@ -160,13 +160,13 @@ describe("start CLI command", () => {
 
     it("should use provided api key when 4 positional args are passed", async () => {
         process.env.FLOTIQ_API_KEY = "env-api-key";
-        const starterUrl = "https://github.com/flotiq/flotiq-starter-gatsby";
+        const starterUrl = "https://github.com/flotiq/custom-starter";
 
         await runCli(["start", "demo-positional", starterUrl, "argv-api-key"]);
 
-        expect(setup).toHaveBeenCalledWith("demo-positional", starterUrl, "gatsby");
-        expect(init).toHaveBeenCalledWith("demo-positional", "argv-api-key", "gatsby");
-        expect(develop).toHaveBeenCalledWith("demo-positional", "gatsby");
+        expect(setup).toHaveBeenCalledWith("demo-positional", starterUrl, "nextjs");
+        expect(init).toHaveBeenCalledWith("demo-positional", "argv-api-key", "nextjs");
+        expect(develop).toHaveBeenCalledWith("demo-positional", "nextjs");
         expect(importerHandler).toHaveBeenCalledWith({
             directory: "demo-positional/.flotiq",
             flotiqApiKey: "argv-api-key",
