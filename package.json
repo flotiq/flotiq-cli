@@ -1,6 +1,6 @@
 {
   "name": "flotiq-cli",
-  "version": "2.16.1",
+  "version": "3.0.0",
   "description": "Flotiq CLI",
   "main": "src/command/command.js",
   "type": "module",
@@ -14,7 +14,6 @@
   },
   "keywords": [
     "flotiq",
-    "gatsby",
     "cms",
     "headless",
     "content"
@@ -35,15 +34,11 @@
     "dotenv": "^16.4.5",
     "flotiq-excel-migrator": "^1.1.1",
     "flotiq-wordpress-import": "^1.2.2",
-    "form-data": "^4.0.0",
-    "gatsby-cli": "^5.14.0",
+    "glob": "^7.2.3",
     "inquirer": "^13.4.3",
     "loading-cli": "^1.1.2",
-    "node-fetch": "^2.7.0",
-    "ora": "^5.4.1",
     "traverse": "^0.6.10",
     "unzipper": "^0.12.3",
-    "winston": "^3.17.0",
     "yargs": "^17.7.2"
   },
   "devDependencies": {

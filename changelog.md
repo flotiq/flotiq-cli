@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) (you find TL;DR at the end of this change log),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0]
+### Removed
+* Gatsby support in `flotiq start` - Gatsby starters are archived, `nextjs` is now the only supported (and default) framework
+* `gatsby-cli` dependency, which pulled in packages with blocked build scripts (`lmdb`, `msgpackr-extract`, `unrs-resolver`) under pnpm
+* unused dependencies: `form-data`, `node-fetch`, `ora`, `winston`
+
+### Fixed
+* added missing `glob` dependency - `flotiq export`/`import` failed with `The requested module 'glob' does not provide an export named 'default'` when a newer `glob` was hoisted (e.g. under pnpm)
+
 ## [2.13.0]
 ### Changed
 * Rate limit retries and throttling now happen through interceptors. This way no api calls should fail due to 429 errors and media uploads can happen faster as first uploaded file doesn't trigger throttling.

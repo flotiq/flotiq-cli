@@ -8,15 +8,7 @@ import projectSetup from "./projectSetup.js";
 let startYargs;
 
 function start(flotiqApiKey, directory, url, framework = null, importData = true) {
-    let resolvedFramework = framework;
-
-    if (resolvedFramework) {
-        resolvedFramework = resolvedFramework.toLowerCase();
-    } else if (url.includes("nextjs")) {
-        resolvedFramework = "nextjs";
-    } else {
-        resolvedFramework = "gatsby";
-    }
+    const resolvedFramework = (framework || "nextjs").toLowerCase();
 
     return projectSetup.setup(directory, url, resolvedFramework).then(async () => {
         if (importData) {
@@ -70,12 +62,12 @@ const startCommand = {
         });
         optionalParamFlotiqApiKey(yargs);
         yargs.positional("framework", {
-            describe: "Framework determining if the starter is nextjs or gatsby.",
+            describe: "Framework of the starter (currently only nextjs is supported).",
             type: "string",
         });
         yargs.string("framework");
         yargs.alias("framework", ["fw"]);
-        yargs.describe("framework", " Determines which framework should be used (gatsby, nextjs)");
+        yargs.describe("framework", "Determines which framework should be used (nextjs)");
         yargs.boolean("no-import");
         yargs.alias("no-import", ["n"]);
         yargs.describe("no-import", "skip importing example objects");
