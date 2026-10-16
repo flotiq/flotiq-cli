@@ -1,6 +1,6 @@
 {
   "name": "flotiq-cli",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Flotiq CLI",
   "main": "src/command/command.js",
   "type": "module",
@@ -34,6 +34,7 @@
     "dotenv": "^16.4.5",
     "flotiq-excel-migrator": "^1.1.1",
     "flotiq-wordpress-import": "^1.2.2",
+    "glob": "^7.2.3",
     "inquirer": "^13.4.3",
     "loading-cli": "^1.1.2",
     "traverse": "^0.6.10",
