@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) (you find TL;DR at the end of this change log),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1]
+### Changed
+* Dependencies update #28291
+
 ## [3.0.0]
 ### Removed
 * Gatsby support in `flotiq start` - Gatsby starters are archived, `nextjs` is now the only supported (and default) framework

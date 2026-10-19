@@ -1,6 +1,6 @@
 {
   "name": "flotiq-cli",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Flotiq CLI",
   "main": "src/command/command.js",
   "type": "module",
@@ -28,23 +28,23 @@
   "dependencies": {
     "@contentful/rich-text-html-renderer": "^16.6.10",
     "@flotiq/api": "^1.1.1",
-    "axios": "^1.15.2",
+    "axios": "^1.20.0",
     "cli-table3": "^0.6.5",
-    "contentful-export": "^7.19.155",
-    "dotenv": "^16.4.5",
+    "contentful-export": "^7.22.5",
+    "dotenv": "^16.6.1",
     "flotiq-excel-migrator": "^1.1.1",
     "flotiq-wordpress-import": "^1.2.2",
     "glob": "^7.2.3",
     "inquirer": "^13.4.3",
     "loading-cli": "^1.1.2",
-    "traverse": "^0.6.10",
-    "unzipper": "^0.12.3",
-    "yargs": "^17.7.2"
+    "traverse": "^0.6.14",
+    "unzipper": "^0.12.5",
+    "yargs": "^17.7.3"
   },
   "devDependencies": {
     "axios-mock-adapter": "^2.1.0",
     "jest": "^29.7.0",
-    "jest-when": "^3.6.0"
+    "jest-when": "^3.7.0"
   },
   "resolutions": {
     "@flotiq/api": "^1.1.1"
