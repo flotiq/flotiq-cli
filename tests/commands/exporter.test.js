@@ -86,4 +86,47 @@ describe("exporter", () => {
             await fs.rm(tmpDir, { recursive: true, force: true });
         }
     });
+
+    it("should continue exporting when a media file cannot be downloaded", async () => {
+        const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "flotiq-export-"));
+        const directory = path.join(tmpDir, "export");
+        await fs.mkdir(directory, { recursive: true });
+
+        const mockContentTypeDefs = [
+            { name: "_media", label: "Media", internal: true },
+        ];
+        const mockMediaObjects = [
+            { id: "media1", url: "/media/test.jpg", extension: "jpg", internal: {} },
+            { id: "media2", url: "/media/test-2.jpg", extension: "jpg", internal: {} },
+        ];
+
+        const loggerWarnSpy = jest.spyOn(logger, "warn").mockImplementation(() => {});
+        const flotiqApi = getFlotiqApi(flotiqApiUrl, flotiqApiKey, { batchSizeRead: 1000 });
+        flotiqApi.fetchContentTypeDefs = jest.fn().mockResolvedValue(mockContentTypeDefs);
+        flotiqApi.fetchContentObjects = jest.fn().mockResolvedValue(mockMediaObjects);
+        flotiqApi.fetchMediaFile = jest.fn()
+            .mockRejectedValueOnce(new Error("stream has been aborted"))
+            .mockResolvedValueOnce(Buffer.from("dummy-media-data"));
+
+        try {
+            const result = await exporter(directory, flotiqApiUrl, flotiqApiKey, false, null, false);
+
+            expect(result).toEqual({
+                exportedCtdCount: 1,
+                exportedContentObjectsCount: 2,
+            });
+            expect(loggerWarnSpy).toHaveBeenCalledWith(
+                "Unable to download media media1: stream has been aborted; saving a placeholder instead"
+            );
+            const placeholder = await fs.readFile(
+                path.join(directory, "InternalContentTypeMedia", "media1.jpg")
+            );
+            expect(placeholder.length).toBeGreaterThan(0);
+            await expect(
+                fs.readFile(path.join(directory, "InternalContentTypeMedia", "media2.jpg"))
+            ).resolves.toEqual(Buffer.from("dummy-media-data"));
+        } finally {
+            await fs.rm(tmpDir, { recursive: true, force: true });
+        }
+    });
 });
