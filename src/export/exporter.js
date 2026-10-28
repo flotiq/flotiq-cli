@@ -130,14 +130,15 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd,
             `${mediaFile.id}.${mediaFile.extension}`
           );
 
+          let mediaBuffer;
           try {
-            const mediaBuffer = await flotiqApi.fetchMediaFile(mediaFile.url);
-            await fs.writeFile(outputPath, mediaBuffer);
+            mediaBuffer = await flotiqApi.fetchMediaFile(mediaFile.url);
           } catch (error) {
             const reason = error instanceof Error ? `: ${error.message}` : "";
             logger.warn(`Unable to download media ${mediaFile.id}${reason}; saving a placeholder instead`);
-            await fs.writeFile(outputPath, placeholderImage);
+            mediaBuffer = placeholderImage;
           }
+          await fs.writeFile(outputPath, mediaBuffer);
         }
       }
     }
