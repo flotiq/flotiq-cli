@@ -111,4 +111,53 @@ describe('mediaImporter', () => {
         // With writePerSecondLimit=1, throttling applies to all API calls in this flow.
         expect(elapsed).toBeGreaterThanOrEqual(5000);
     }, 12000);
+
+    it('should continue importing media when a local file is missing', async () => {
+        jest.spyOn(fs, "readFile").mockImplementation(async (filePath) => {
+            if (String(filePath).includes('contentObjectMedia.json')) {
+                return JSON.stringify([
+                    {
+                        id: 'file0',
+                        url: '/image/0x0/dummy_media_id0.jpg',
+                        mimeType: 'image/png',
+                        extension: 'png',
+                        fileName: 'file0.png',
+                        type: 'image',
+                    },
+                    {
+                        id: 'file1',
+                        url: '/image/0x0/dummy_media_id1.jpg',
+                        mimeType: 'image/png',
+                        extension: 'png',
+                        fileName: 'file1.png',
+                        type: 'image',
+                    },
+                ]);
+            }
+            if (String(filePath).endsWith('file0.png')) {
+                throw new Error('ENOENT: no such file or directory');
+            }
+            return Buffer.from('dummy-media-data');
+        });
+
+        const flotiqApi = new FlotiqApi(`${mockApiUrl}/api/v1`, mockApiKey, {
+            batchSize: 100,
+        });
+        mock = new AxiosMockAdapter(flotiqApi.middleware);
+        mock
+            .onGet('/internal/contenttype?internal=0&limit=1000').reply(200, { data: [] })
+            .onGet('/internal/contenttype?internal=1&limit=1000').reply(200, { data: [] })
+            .onGet(new RegExp(`${mockApiUrl}/image/.*`)).reply(404)
+            .onPost(`${mockApiUrl}/api/media`).reply(200, {
+                id: 'new-media-id',
+            })
+            .onDelete(new RegExp('/content/_media/.*')).reply(200);
+
+        await expect(mediaImporter(mockDirectory, flotiqApi)).resolves.toHaveLength(1);
+
+        expect(mock.history.post).toHaveLength(1);
+        expect(logger.warn).toHaveBeenCalledWith(
+            'Unable to read media file file0; skipping upload'
+        );
+    });
 });

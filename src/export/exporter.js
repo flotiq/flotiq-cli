@@ -7,23 +7,6 @@ import { getFlotiqApi } from "@flotiq/api";
 import logger from "@flotiq/api/logger.js";
 import { camelize } from "../util.js";
 
-const placeholderImage = Buffer.from(
-  `iVBORw0KGgoAAAANSUhEUgAAAKAAAAAyCAMAAADsvyBXAAAAYFBMVEWAgIDCwsL////39/fb29udnZ2U
-lJSPj4+amprIyMjq6ur6+vqLi4vy8vKQkJDFxcW+vr7l5eXs7OzNzc2ysrK0tLShoaHS0tK5ubmurq6k
-pKTX19fc3NyEhISqqqri4uJOigj6AAACUElEQVRYw+2V0bKjIAyGMaioaIsWsVo9ff+3XAJixdJ6dmav
-dvivYgjwkQQhJCoqKioqKioqKirqXykBFE0zY+evAQZQOLOsOK2SegvXal7hF7i6KF5dGfFWEmb5NmHb
-xzp7tbsbOwMUUvZXCuoAKICX1lIchrtIockxJOmNRozYA06cD/f7wPl0AEykFA8wbmFnSzmuA7K/ccpO
-AM1SjLcHwG4e6GKGaJNbzsoP8TJ44d3FfHT84gPmqzvHj2Kb7ewfm/8zQDKDv7sCOcGI1hUm6xrl8hnw
-Bpn1ZlD6gJajgCEMuMDjV4CPA+DAF0Jnk8omEP4G2FTOXdEQIHnyMGDxuwwuTeftXvMBc4dVg9QLz1hd
-M8YWtNUFlektakzQejRYQoAlMP2hmNGCA6rWK02mJb4CZjouS0F6gD1emhzEsQTbLR53tgZkULqQUh8r
-AIin3W6xfN3otiAngEb87tevbTR2Xem0Ej574XIyYmj3PyiJRXod40MGb9otoN9mC5BKqapZyBkgxhWL
-32CFO6qyPfXWd3vb9GDXOXfVBHuwa0I9qE46MLwjlulHY6sJOyvBgpiyP9lnwO2uY0cGACd0By5JCt9b
-MAy4uLI+eE1qyhXaij+/ZLBe/5aXjtYBwKJBdwAwh5l8lb+jfSby0f4B8dy9zgmFVIgZWrZ7SXp2eOp0
-lHlJaLZfyT4Y9wcYt9jNdrC6WH8BaNU/uWvdRj8whCX6LW77hexvrnp7ixN8ixPmrWQvq3OL3WwHWNPu
-7J5ERUVFRUVFRUVFRf1P+gP9pyJRcD05MAAAAABJRU5ErkJggg==`,
-  "base64"
-);
-
 async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd, withInternal) {
   const stats = {
     exportedCtdCount: 0,
@@ -102,6 +85,24 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd,
 
       logger.info(`Saving content for ${contentTypeDefinition.label}`);
 
+      if (contentTypeDefinition.name === '_media') {
+        for (const mediaFile of ContentObjects) {
+          let mediaBuffer;
+          try {
+            mediaBuffer = await flotiqApi.fetchMediaFile(mediaFile.url);
+          } catch (error) {
+            const reason = error instanceof Error ? `: ${error.message}` : "";
+            logger.warn(`Unable to download media ${mediaFile.id}${reason}; skipping file`);
+            continue;
+          }
+
+          await fs.writeFile(
+            path.join(ctdPath, `${mediaFile.id}.${mediaFile.extension}`),
+            mediaBuffer
+          );
+        }
+      }
+
       await fs.writeFile(
         path.join(
           ctdPath,
@@ -121,26 +122,7 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd,
           .sort((a, b) => a.id < b.id ? -1 : 1)
           .map(JSON.stringify).join("\n")
       );
-          stats.exportedContentObjectsCount += ContentObjects.length;
-
-      if (contentTypeDefinition.name === '_media') {
-        for (const mediaFile of ContentObjects) {
-          const outputPath = path.join(
-            ctdPath,
-            `${mediaFile.id}.${mediaFile.extension}`
-          );
-
-          let mediaBuffer;
-          try {
-            mediaBuffer = await flotiqApi.fetchMediaFile(mediaFile.url);
-          } catch (error) {
-            const reason = error instanceof Error ? `: ${error.message}` : "";
-            logger.warn(`Unable to download media ${mediaFile.id}${reason}; saving a placeholder instead`);
-            mediaBuffer = placeholderImage;
-          }
-          await fs.writeFile(outputPath, mediaBuffer);
-        }
-      }
+      stats.exportedContentObjectsCount += ContentObjects.length;
     }
   }
   return stats;

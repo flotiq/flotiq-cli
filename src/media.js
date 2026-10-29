@@ -54,7 +54,13 @@ async function mediaImporter (directory, flotiqApi) {
                     continue;
                 }
             }
-            const buffer = await fs.readFile(`${directory}/InternalContentTypeMedia/${file.id}.${file.extension}`)
+            let buffer;
+            try {
+                buffer = await fs.readFile(`${directory}/InternalContentTypeMedia/${file.id}.${file.extension}`)
+            } catch (e) {
+                logger.warn(`Unable to read media file ${file.id}; skipping upload`)
+                continue;
+            }
 
             const form = new FormData();
 
