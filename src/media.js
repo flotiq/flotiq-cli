@@ -54,7 +54,13 @@ async function mediaImporter (directory, flotiqApi) {
                     continue;
                 }
             }
-            const buffer = await fs.readFile(`${directory}/InternalContentTypeMedia/${file.id}.${file.extension}`)
+            let buffer;
+            try {
+                buffer = await fs.readFile(`${directory}/InternalContentTypeMedia/${file.id}.${file.extension}`)
+            } catch (e) {
+                logger.warn(`Unable to read media file ${file.id}; skipping upload`)
+                continue;
+            }
 
             const form = new FormData();
 
@@ -87,9 +93,9 @@ async function mediaImporter (directory, flotiqApi) {
         }
 
 
-        logger.info(`Will delete ${missingFiles.length} broken media file(s)`)
+        logger.info(`Will delete ${replacements.length} replaced media file(s)`)
 
-        for (const file of missingFiles) {
+        for (const [file] of replacements) {
             await flotiqApi.middleware.delete(`/content/_media/${file.id}`).catch(() => {
                 logger.error('File deletion error: ', file.id)
             })
