@@ -156,6 +156,16 @@ describe('mediaImporter', () => {
         await expect(mediaImporter(mockDirectory, flotiqApi)).resolves.toHaveLength(1);
 
         expect(mock.history.post).toHaveLength(1);
+        expect(mock.history.delete).toEqual([
+            expect.objectContaining({
+                url: '/content/_media/file1',
+            }),
+        ]);
+        expect(mock.history.delete).not.toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                url: '/content/_media/file0',
+            }),
+        ]));
         expect(logger.warn).toHaveBeenCalledWith(
             'Unable to read media file file0; skipping upload'
         );
