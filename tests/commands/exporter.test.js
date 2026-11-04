@@ -86,4 +86,106 @@ describe("exporter", () => {
             await fs.rm(tmpDir, { recursive: true, force: true });
         }
     });
+
+    it("should continue exporting when a media file cannot be downloaded", async () => {
+        const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "flotiq-export-"));
+        const directory = path.join(tmpDir, "export");
+        await fs.mkdir(directory, { recursive: true });
+
+        const mockContentTypeDefs = [
+            { name: "_media", label: "Media", internal: true },
+        ];
+        const mockMediaObjects = [
+            {
+                id: "media1",
+                url: "/media/test.jpg",
+                extension: "jpg",
+                fileName: "test.jpg",
+                mimeType: "image/jpeg",
+                type: "image",
+                internal: {},
+            },
+            {
+                id: "media2",
+                url: "/media/document.pdf",
+                extension: "pdf",
+                fileName: "document.pdf",
+                mimeType: "application/pdf",
+                type: "file",
+                internal: {},
+            },
+            {
+                id: "media3",
+                url: "/media/test-2.jpg",
+                extension: "jpg",
+                fileName: "test-2.jpg",
+                mimeType: "image/jpeg",
+                type: "image",
+                internal: {},
+            },
+        ];
+
+        const loggerWarnSpy = jest.spyOn(logger, "warn").mockImplementation(() => {});
+        const flotiqApi = getFlotiqApi(flotiqApiUrl, flotiqApiKey, { batchSizeRead: 1000 });
+        flotiqApi.fetchContentTypeDefs = jest.fn().mockResolvedValue(mockContentTypeDefs);
+        flotiqApi.fetchContentObjects = jest.fn().mockResolvedValue(mockMediaObjects);
+        flotiqApi.fetchMediaFile = jest.fn()
+            .mockRejectedValueOnce(new Error("stream has been aborted"))
+            .mockRejectedValueOnce(new Error("file not found"))
+            .mockResolvedValueOnce(Buffer.from("dummy-media-data"));
+
+        try {
+            const result = await exporter(directory, flotiqApiUrl, flotiqApiKey, false, null, false);
+
+            expect(result).toEqual({
+                exportedCtdCount: 1,
+                exportedContentObjectsCount: 3,
+            });
+            expect(loggerWarnSpy).toHaveBeenCalledWith(
+                "Unable to download media media1: stream has been aborted; skipping file"
+            );
+            expect(loggerWarnSpy).toHaveBeenCalledWith(
+                "Unable to download media media2: file not found; skipping file"
+            );
+            await expect(
+                fs.stat(path.join(directory, "InternalContentTypeMedia", "media1.jpg"))
+            ).rejects.toHaveProperty("code", "ENOENT");
+            await expect(
+                fs.stat(path.join(directory, "InternalContentTypeMedia", "media2.pdf"))
+            ).rejects.toHaveProperty("code", "ENOENT");
+            await expect(
+                fs.readFile(path.join(directory, "InternalContentTypeMedia", "media3.jpg"))
+            ).resolves.toEqual(Buffer.from("dummy-media-data"));
+
+            const exportedMedia = (await fs.readFile(
+                path.join(directory, "InternalContentTypeMedia", "contentObjectMedia.json"),
+                "utf8"
+            )).trim().split("\n").map(JSON.parse);
+            expect(exportedMedia).toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    id: "media1",
+                    extension: "jpg",
+                    fileName: "test.jpg",
+                    mimeType: "image/jpeg",
+                    type: "image",
+                }),
+                expect.objectContaining({
+                    id: "media2",
+                    extension: "pdf",
+                    fileName: "document.pdf",
+                    mimeType: "application/pdf",
+                    type: "file",
+                }),
+                expect.objectContaining({
+                    id: "media3",
+                    extension: "jpg",
+                    fileName: "test-2.jpg",
+                    mimeType: "image/jpeg",
+                    type: "image",
+                }),
+            ]));
+        } finally {
+            await fs.rm(tmpDir, { recursive: true, force: true });
+        }
+    });
 });

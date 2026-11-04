@@ -85,6 +85,24 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd,
 
       logger.info(`Saving content for ${contentTypeDefinition.label}`);
 
+      if (contentTypeDefinition.name === '_media') {
+        for (const mediaFile of ContentObjects) {
+          let mediaBuffer;
+          try {
+            mediaBuffer = await flotiqApi.fetchMediaFile(mediaFile.url);
+          } catch (error) {
+            const reason = error instanceof Error ? `: ${error.message}` : "";
+            logger.warn(`Unable to download media ${mediaFile.id}${reason}; skipping file`);
+            continue;
+          }
+
+          await fs.writeFile(
+            path.join(ctdPath, `${mediaFile.id}.${mediaFile.extension}`),
+            mediaBuffer
+          );
+        }
+      }
+
       await fs.writeFile(
         path.join(
           ctdPath,
@@ -104,19 +122,7 @@ async function exporter(directory, flotiqApiUrl, flotiqApiKey, skipContent, ctd,
           .sort((a, b) => a.id < b.id ? -1 : 1)
           .map(JSON.stringify).join("\n")
       );
-          stats.exportedContentObjectsCount += ContentObjects.length;
-
-      if (contentTypeDefinition.name === '_media') {
-        for (const mediaFile of ContentObjects) {
-          const outputPath = path.join(
-            ctdPath,
-            `${mediaFile.id}.${mediaFile.extension}`
-          );
-
-          const mediaBuffer = await flotiqApi.fetchMediaFile(mediaFile.url);
-          await fs.writeFile(outputPath, mediaBuffer);
-        }
-      }
+      stats.exportedContentObjectsCount += ContentObjects.length;
     }
   }
   return stats;
